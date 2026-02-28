@@ -21,8 +21,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       'highlight': 'Like a Pro',
       'subtitle':
           'Smart schedules and instant\nidentification for your urban\njungle.',
-      'image':
-          'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=3174&auto=format&fit=crop',
+      'image': 'assets/images/onboarding_1.png',
       'badge': 'AI-POWERED CARE',
       'features': [
         {'icon': Icons.document_scanner_outlined, 'label': 'AI Scan'},
@@ -35,8 +34,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       'highlight': 'Seconds',
       'subtitle':
           'Just take a photo to learn its\nname, species, and ultimate\ncare requirements.',
-      'image':
-          'https://images.unsplash.com/photo-1459411552884-841db9b3ce2a?q=80&w=3174&auto=format&fit=crop',
+      'image': 'assets/images/onboarding_2.png',
       'badge': 'BOTANICAL EXPERT',
       'features': [
         {'icon': Icons.camera_alt_outlined, 'label': 'Snap Photo'},
@@ -49,8 +47,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       'highlight': 'Again',
       'subtitle':
           'Get perfectly timed reminders\nbased on your plant\'s exact\nneeds and environment.',
-      'image':
-          'https://images.unsplash.com/photo-1466692476877-339af85feaf9?q=80&w=3174&auto=format&fit=crop',
+      'image': 'assets/images/onboarding_3.png',
       'badge': 'SMART SCHEDULES',
       'features': [
         {'icon': Icons.notifications_active_outlined, 'label': 'Reminders'},
@@ -300,7 +297,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return Stack(
       children: [
         // Background Image
-        Positioned.fill(child: Image.network(data['image'], fit: BoxFit.cover)),
+        Positioned.fill(child: Image.asset(data['image'], fit: BoxFit.cover)),
 
         // Gradient Overlay
         Positioned.fill(
