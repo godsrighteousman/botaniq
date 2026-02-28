@@ -36,7 +36,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       'subtitle':
           'Just take a photo to learn its\nname, species, and ultimate\ncare requirements.',
       'image':
-          'https://images.unsplash.com/photo-1416879574488-82af4fb3abff?q=80&w=3174&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1459411552884-841db9b3ce2a?q=80&w=3174&auto=format&fit=crop',
       'badge': 'BOTANICAL EXPERT',
       'features': [
         {'icon': Icons.camera_alt_outlined, 'label': 'Snap Photo'},
@@ -50,7 +50,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       'subtitle':
           'Get perfectly timed reminders\nbased on your plant\'s exact\nneeds and environment.',
       'image':
-          'https://images.unsplash.com/photo-1463320726281-696a485928c7?q=80&w=3174&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1466692476877-339af85feaf9?q=80&w=3174&auto=format&fit=crop',
       'badge': 'SMART SCHEDULES',
       'features': [
         {'icon': Icons.notifications_active_outlined, 'label': 'Reminders'},
