@@ -1,0 +1,841 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'photo_instruction_page.dart';
+import 'schedule_page.dart';
+import 'search_plant_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../discover/presentation/pages/discover_page.dart';
+import '../../../garden/presentation/pages/garden_page.dart';
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final Color _accentGreen = const Color(0xFF86D5A6);
+  final Color _lightBg = const Color(0xFFF9FAF9);
+  final Color _cardBg = Colors.white;
+  final Color _textSecondary = const Color(0xFF8A8A8E);
+
+  bool _wateringEnabled = true;
+  bool _fertilizingEnabled = false;
+  int _currentIndex = 0;
+  bool _hasPlants = true;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _lightBg,
+      body: _buildBody(),
+      floatingActionButton: _buildFAB(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildBody() {
+    switch (_currentIndex) {
+      case 0:
+        return _buildHomeTab();
+      case 1:
+        return const GardenPage();
+      case 2:
+        return const DiscoverPage();
+      case 3:
+        return const ProfilePage();
+      default:
+        return _buildHomeTab();
+    }
+  }
+
+  Widget _buildHomeTab() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildHeader(),
+              const SizedBox(height: 32),
+              _buildWeatherCard(),
+              const SizedBox(height: 24),
+              _hasPlants ? _buildMyPlantsSection() : _buildEmptyStateCard(),
+              const SizedBox(height: 32),
+              _buildQuickAddActions(),
+              const SizedBox(height: 32),
+              _buildSmartCareSection(),
+              const SizedBox(height: 100), // padding for bottom nav
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Good morning,',
+              style: GoogleFonts.inter(
+                color: _textSecondary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'My Garden',
+              style: GoogleFonts.outfit(
+                color: const Color(0xFF2C3E35),
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            _buildActionIcon(
+              Icons.calendar_today_rounded,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SchedulePage()),
+                );
+              },
+            ),
+            const SizedBox(width: 12),
+            _buildActionIcon(Icons.history_edu_outlined, onTap: () {}),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionIcon(IconData icon, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: _cardBg,
+          shape: BoxShape.circle,
+
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFCBD5E1).withOpacity(0.02 * 4),
+              blurRadius: 16,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: const Color(0xFF3B4D43), size: 20),
+      ),
+    );
+  }
+
+  Widget _buildWeatherCard() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(30),
+
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFCBD5E1).withOpacity(0.02 * 4),
+            blurRadius: 30,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF3D4),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.wb_sunny_rounded,
+                  color: Color(0xFFFFB347),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'San Francisco',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF2C3E35),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Sunny, perfect for watering',
+                    style: GoogleFonts.inter(
+                      color: _textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Text(
+            '72°',
+            style: GoogleFonts.outfit(
+              color: const Color(0xFF2C3E35),
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyStateCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _accentGreen.withOpacity(0.15),
+            _accentGreen.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(38),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: _accentGreen.withOpacity(0.15),
+                      blurRadius: 40,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.local_florist_rounded,
+                    color: _accentGreen.withOpacity(0.8),
+                    size: 40,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: -4,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: _accentGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.add, color: Colors.white, size: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Your garden is empty',
+            style: GoogleFonts.outfit(
+              color: const Color(0xFF2C3E35),
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Start building your green sanctuary\nby adding your first plant.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF6E6E73),
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PhotoInstructionPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _accentGreen,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+              ),
+              child: Text(
+                'Add First Plant',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMyPlantsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'My Plants',
+              style: GoogleFonts.outfit(
+                color: const Color(0xFF2C3E35),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                setState(() => _currentIndex = 1);
+              },
+              child: Text(
+                'View All',
+                style: GoogleFonts.inter(
+                  color: _accentGreen,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 240,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            clipBehavior: Clip.none,
+            children: [
+              _buildHomePlantCard('Monstera', 'Swiss Cheese', 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=400', 'Water in 2 days', Colors.blue),
+              const SizedBox(width: 16),
+              _buildHomePlantCard('Ficus', 'Rubber Plant', 'https://images.unsplash.com/photo-1597055905001-c888d3f6d7ab?auto=format&fit=crop&q=80&w=400', 'Water today', Colors.redAccent),
+              const SizedBox(width: 16),
+              _buildHomePlantCard('Sansevieria', 'Snake Plant', 'https://images.unsplash.com/photo-1593482892290-f54927ae1b7e?auto=format&fit=crop&q=80&w=400', 'Good', _accentGreen),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHomePlantCard(String name, String species, String imageUrl, String status, Color statusColor) {
+    return Container(
+      width: 160,
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+              child: Image.network(
+                imageUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.outfit(
+                    color: const Color(0xFF2C3E35),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  species,
+                  style: GoogleFonts.inter(
+                    color: _textSecondary,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.water_drop_rounded, color: statusColor, size: 12),
+                      const SizedBox(width: 4),
+                      Text(
+                        status,
+                        style: GoogleFonts.inter(
+                          color: statusColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmartCareSection() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Smart Care Reminders',
+              style: GoogleFonts.outfit(
+                color: const Color(0xFF2C3E35),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const Icon(
+              Icons.tune_rounded,
+              color: const Color(0xFF6B7D73),
+              size: 22,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildReminderCard(
+                icon: Icons.water_drop_rounded,
+                iconColor: const Color(0xFF4A90E2),
+                title: 'Watering',
+                subtitle: 'Soil tracking',
+                value: _wateringEnabled,
+                onChanged: (val) {
+                  setState(() {
+                    _wateringEnabled = val;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildReminderCard(
+                icon: Icons.eco_rounded,
+                iconColor: const Color(0xFFE2A04A),
+                title: 'Fertilizing',
+                subtitle: 'Nutrient alerts',
+                value: _fertilizingEnabled,
+                onChanged: (val) {
+                  setState(() {
+                    _fertilizingEnabled = val;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReminderCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(30),
+
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFCBD5E1).withOpacity(0.02 * 4),
+            blurRadius: 30,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
+              SizedBox(
+                height: 32,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Switch(
+                    value: value,
+                    onChanged: onChanged,
+                    activeColor: Colors.white,
+                    activeTrackColor: _accentGreen,
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color(0xFFE5E5EA),
+                    splashRadius: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF2C3E35),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: GoogleFonts.inter(color: _textSecondary, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickAddActions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Add to your garden',
+          style: GoogleFonts.outfit(
+            color: const Color(0xFF2C3E35),
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildPremiumQuickActionCard(
+                title: 'Scan Plant',
+                subtitle: 'Use camera',
+                icon: Icons.document_scanner_rounded,
+                backgroundGradient: [
+                  const Color(0xFF4FA976),
+                  const Color(0xFF86D5A6),
+                ],
+                iconColor: const Color(0xFF4FA976),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PhotoInstructionPage()),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildPremiumQuickActionCard(
+                title: 'Manually Search',
+                subtitle: 'Find in catalog',
+                icon: Icons.search_rounded,
+                backgroundGradient: [
+                  const Color(0xFF2C3E35),
+                  const Color(0xFF435A4D),
+                ],
+                iconColor: const Color(0xFF2C3E35),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SearchPlantPage()),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPremiumQuickActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required List<Color> backgroundGradient,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 150,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: backgroundGradient,
+          ),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: backgroundGradient.first.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -16,
+              bottom: -16,
+              child: Icon(
+                icon,
+                size: 90,
+                color: Colors.white.withOpacity(0.15),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: iconColor, size: 24),
+                  ),
+                  const Spacer(),
+                  Text(
+                    title,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFAB() {
+    return Semantics(
+      button: true,
+      label: 'Add Plant',
+      child: Container(
+        height: 60,
+        width: 60,
+        margin: const EdgeInsets.only(top: 30),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+          boxShadow: [
+            BoxShadow(
+              color: _accentGreen.withOpacity(0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PhotoInstructionPage()),
+            );
+          },
+          backgroundColor: _accentGreen,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
+          ),
+          child: const Icon(
+            Icons.document_scanner_rounded,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _cardBg,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+            blurRadius: 40,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: BottomAppBar(
+        color: Colors.transparent,
+        elevation: 0,
+        height: 70,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildNavItem(Icons.home_filled, 'Home', 0),
+            _buildNavItem(Icons.local_florist_outlined, 'Garden', 1),
+            const SizedBox(width: 48), // Space for FAB
+            _buildNavItem(Icons.explore_outlined, 'Discover', 2),
+            _buildNavItem(Icons.person_outline, 'Profile', 3),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    bool isSelected = _currentIndex == index;
+    Color color = isSelected ? _accentGreen : _textSecondary.withOpacity(0.6);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 60,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: color,
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+}

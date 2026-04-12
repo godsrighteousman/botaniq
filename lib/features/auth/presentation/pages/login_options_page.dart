@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'sign_up_page.dart';
+import 'login_page.dart';
 
 class LoginOptionsPage extends StatelessWidget {
   const LoginOptionsPage({Key? key}) : super(key: key);
@@ -40,21 +42,43 @@ class LoginOptionsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Back Button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () {
-                        // Navigation context handling could be placed here if needed.
-                      },
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white,
-                        size: 20,
+                  // Top Bar: Back & Skip
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
+                      TextButton(
+                        onPressed: () {
+                          // Handle skip
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Skip',
+                          style: GoogleFonts.inter(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 48),
 
@@ -101,68 +125,93 @@ class LoginOptionsPage extends StatelessWidget {
                   const Spacer(),
 
                   // Auth Buttons
-                  _AuthButton(
-                    onPressed: () {},
-                    icon: Icons.apple,
-                    label: 'Continue with Apple',
-                    backgroundColor: Colors.white,
-                    textColor: Colors.black,
-                    iconColor: Colors.black,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 60,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            AppColors.primary,
+                            Color(0xFF4FA976),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Kayıt Ol',
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
 
-                  _AuthButton(
-                    onPressed: () {},
-                    icon: Icons.g_mobiledata, // Placeholder for Google icon
-                    iconSize: 32,
-                    label: 'Continue with Google',
-                    backgroundColor: Colors.white.withOpacity(0.1),
-                    textColor: Colors.white,
-                    iconColor: Colors.white,
-                    borderColor: Colors.white.withOpacity(0.2),
-                  ),
-                  const SizedBox(height: 16),
-
-                  _AuthButton(
-                    onPressed: () {},
-                    icon: Icons.email_outlined,
-                    label: 'Continue with Email',
-                    backgroundColor: AppColors.primary,
-                    textColor: Colors.white,
-                    iconColor: Colors.white,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Giriş Yap',
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 48),
 
-                  // Footer Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Already have an account? ',
-                        style: GoogleFonts.inter(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // Navigate to Login Form
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          'Log In',
-                          style: GoogleFonts.inter(
-                            color: AppColors.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      _SocialIcon(icon: Icons.apple),
+                      const SizedBox(width: 24),
+                      _SocialIcon(icon: Icons.g_mobiledata, iconSize: 36),
+                      const SizedBox(width: 24),
+                      _SocialIcon(icon: Icons.facebook),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -176,65 +225,30 @@ class LoginOptionsPage extends StatelessWidget {
   }
 }
 
-class _AuthButton extends StatelessWidget {
-  final VoidCallback onPressed;
+class _SocialIcon extends StatelessWidget {
   final IconData icon;
-  final String label;
-  final Color backgroundColor;
-  final Color textColor;
-  final Color iconColor;
-  final Color? borderColor;
   final double iconSize;
 
-  const _AuthButton({
-    required this.onPressed,
+  const _SocialIcon({
     required this.icon,
-    required this.label,
-    required this.backgroundColor,
-    required this.textColor,
-    required this.iconColor,
-    this.borderColor,
     this.iconSize = 24,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      width: 56,
       height: 56,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-            side: borderColor != null
-                ? BorderSide(color: borderColor!, width: 1)
-                : BorderSide.none,
-          ),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+          width: 1,
         ),
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Icon(icon, color: iconColor, size: iconSize),
-              ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                label,
-                style: GoogleFonts.inter(
-                  color: textColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
+      ),
+      child: Center(
+        child: Icon(icon, color: Colors.white, size: iconSize),
       ),
     );
   }

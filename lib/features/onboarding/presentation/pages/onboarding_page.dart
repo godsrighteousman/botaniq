@@ -115,6 +115,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 children: [
                   Row(
                     children: [
+                      IconButton(
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        padding: const EdgeInsets.only(right: 12),
+                        constraints: const BoxConstraints(),
+                      ),
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(
@@ -140,16 +154,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginOptionsPage(),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Icon(
-                      Icons.help_outline,
-                      color: Colors.white,
-                      size: 20,
+                    child: Text(
+                      'Skip',
+                      style: GoogleFonts.inter(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
