@@ -8,6 +8,7 @@ import 'search_plant_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../discover/presentation/pages/discover_page.dart';
 import '../../../garden/presentation/pages/garden_page.dart';
+import '../../../healthy/presentation/pages/healthy_page.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -43,7 +44,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const GardenPage();
       case 2:
-        return const DiscoverPage();
+        return const HealthyPage();
       case 3:
         return const ProfilePage();
       default:
@@ -797,7 +798,7 @@ class _HomePageState extends State<HomePage> {
             _buildNavItem(Icons.home_filled, 'Home', 0),
             _buildNavItem(Icons.local_florist_outlined, 'Garden', 1),
             const SizedBox(width: 48), // Space for FAB
-            _buildNavItem(Icons.explore_outlined, 'Discover', 2),
+            _buildNavItem(Icons.medical_services_outlined, 'Clinic', 2),
             _buildNavItem(Icons.person_outline, 'Profile', 3),
           ],
         ),

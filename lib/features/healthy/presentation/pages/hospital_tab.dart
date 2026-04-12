@@ -102,6 +102,15 @@ class HospitalTab extends StatelessWidget {
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(Icons.local_florist, color: Color(0xFF8B9E93), size: 32),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),

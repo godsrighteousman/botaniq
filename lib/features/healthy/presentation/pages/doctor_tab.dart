@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'ai_chat_page.dart';
 
 class DoctorTab extends StatelessWidget {
   const DoctorTab({super.key});
@@ -44,7 +45,9 @@ class DoctorTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           image: const DecorationImage(
             // Modern, earthy background aesthetic
-            image: NetworkImage('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=800'),
+            image: NetworkImage(
+              'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=800',
+            ),
             fit: BoxFit.cover,
           ),
           boxShadow: [
@@ -83,7 +86,10 @@ class DoctorTab extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16),
@@ -92,7 +98,11 @@ class DoctorTab extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.psychology_rounded, color: Colors.white, size: 20),
+                    const Icon(
+                      Icons.psychology_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Danışmanlığı Başlat',
@@ -116,8 +126,10 @@ class DoctorTab extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
         return Container(
+          height: MediaQuery.of(context).size.height * 0.6,
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -139,7 +151,8 @@ class DoctorTab extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Danışmanlığa Nasıl Başlayalım?',
+                'Hangi Bitkiniz İçin Danışacaksınız?',
+                textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
                   color: const Color(0xFF2C3E35),
                   fontSize: 22,
@@ -148,7 +161,7 @@ class DoctorTab extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Bitkinizin sorununu tespit etmek için en kolay yolu seçin.',
+                'Bahçenizdeki bitkilerden birini seçerek anında uzmana bağlanın.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF6E6E73),
@@ -156,29 +169,33 @@ class DoctorTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              _buildBottomSheetOption(
-                context,
-                icon: Icons.camera_alt_rounded,
-                title: 'Kamerayı Kullan',
-                subtitle: 'Yapay zeka analiz etsin',
-                color: _primaryGreen,
-                onTap: () {
-                  Navigator.pop(context);
-                  // Rota: Scanner -> AI Chat
-                },
+              Expanded(
+                child: ListView(
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _buildPlantPatientOption(
+                      context,
+                      name: 'Monstera Deliciosa',
+                      imageUrl:
+                          'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=200',
+                    ),
+                    const SizedBox(height: 16),
+                    _buildPlantPatientOption(
+                      context,
+                      name: 'Sansevieria (Snake Plant)',
+                      imageUrl:
+                          'https://images.unsplash.com/photo-1593482892290-f54927ae1b7e?auto=format&fit=crop&q=80&w=200',
+                    ),
+                    const SizedBox(height: 16),
+                    _buildPlantPatientOption(
+                      context,
+                      name: 'Fiddle Leaf Fig',
+                      imageUrl:
+                          'https://images.unsplash.com/photo-1597055905001-c888d3f6d7ab?auto=format&fit=crop&q=80&w=200',
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              _buildBottomSheetOption(
-                context,
-                icon: Icons.search_rounded,
-                title: 'Manuel Arama',
-                subtitle: 'Listeden bitkini seç',
-                color: const Color(0xFF435A4D),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 32),
             ],
           ),
         );
@@ -186,24 +203,28 @@ class DoctorTab extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomSheetOption(BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color color,
-    required VoidCallback onTap,
+  Widget _buildPlantPatientOption(
+    BuildContext context, {
+    required String name,
+    required String imageUrl,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        Navigator.pop(context); // close bottom sheet
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AiChatPage(plantName: name)),
+        );
+      },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: const Color(0xFFE2E8F0)),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.05),
+              color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -211,38 +232,47 @@ class DoctorTab extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                imageUrl,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.local_florist, color: Color(0xFF8B9E93), size: 24),
+                ),
               ),
-              child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF2C3E35),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      color: const Color(0xFF8B9E93),
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
+              child: Text(
+                name,
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFF2C3E35),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: const Color(0xFF8B9E93), size: 24),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _primaryGreen.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chat_bubble_outline_rounded,
+                color: _primaryGreen,
+                size: 20,
+              ),
+            ),
           ],
         ),
       ),

@@ -62,6 +62,12 @@ class DiscoverHealthTab extends StatelessWidget {
               height: 160,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 160,
+                width: double.infinity,
+                color: const Color(0xFFF1F5F9),
+                child: const Icon(Icons.image_not_supported_outlined, color: Color(0xFF8B9E93), size: 40),
+              ),
             ),
           ),
           Padding(
