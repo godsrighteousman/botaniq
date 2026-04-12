@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'ai_chat_page.dart';
+import 'light_meter_page.dart';
 
 class DoctorTab extends StatelessWidget {
   const DoctorTab({super.key});
@@ -27,7 +28,7 @@ class DoctorTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildQuickToolsGrid(),
+          _buildQuickToolsGrid(context),
           const SizedBox(height: 100), // padding
         ],
       ),
@@ -246,7 +247,11 @@ class DoctorTab extends StatelessWidget {
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.local_florist, color: Color(0xFF8B9E93), size: 24),
+                  child: const Icon(
+                    Icons.local_florist,
+                    color: Color(0xFF8B9E93),
+                    size: 24,
+                  ),
                 ),
               ),
             ),
@@ -279,7 +284,7 @@ class DoctorTab extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickToolsGrid() {
+  Widget _buildQuickToolsGrid(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 16,
@@ -299,6 +304,12 @@ class DoctorTab extends StatelessWidget {
           icon: Icons.wb_sunny_rounded,
           color: const Color(0xFFE2A04A),
           subtitle: 'Sensör simülasyonu',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LightMeterPage()),
+            );
+          },
         ),
         _buildToolCard(
           title: 'Toprak pH',
@@ -315,51 +326,55 @@ class DoctorTab extends StatelessWidget {
     required IconData icon,
     required Color color,
     required String subtitle,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
-            child: Icon(icon, color: color, size: 28),
-          ),
-          const Spacer(),
-          Text(
-            title,
-            style: GoogleFonts.outfit(
-              color: const Color(0xFF2C3E35),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: color, size: 28),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: GoogleFonts.inter(
-              color: const Color(0xFF8B9E93),
-              fontSize: 12,
+            const Spacer(),
+            Text(
+              title,
+              style: GoogleFonts.outfit(
+                color: const Color(0xFF2C3E35),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: GoogleFonts.inter(
+                color: const Color(0xFF8B9E93),
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
