@@ -320,7 +320,7 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                     : const Icon(
                         Icons.check,
                         size: 14,
-                        color: const Color(0xFFD1D1D6),
+                        color: Color(0xFFD1D1D6),
                       ),
               ),
             ),

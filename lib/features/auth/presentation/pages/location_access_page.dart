@@ -31,7 +31,7 @@ class LocationAccessPage extends StatelessWidget {
                   },
                   icon: const Icon(
                     Icons.arrow_back_ios_new,
-                    color: const Color(0xFF2C3E35),
+                    color: Color(0xFF2C3E35),
                     size: 20,
                   ),
                   padding: EdgeInsets.zero,

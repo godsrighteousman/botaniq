@@ -216,7 +216,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: _accentGreen,
             inactiveThumbColor: Colors.white,
             inactiveTrackColor: const Color(0xFFE5E5EA),

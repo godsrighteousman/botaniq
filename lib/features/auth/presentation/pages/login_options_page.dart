@@ -6,7 +6,7 @@ import 'sign_up_page.dart';
 import 'login_page.dart';
 
 class LoginOptionsPage extends StatelessWidget {
-  const LoginOptionsPage({Key? key}) : super(key: key);
+  const LoginOptionsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -138,10 +138,7 @@ class LoginOptionsPage extends StatelessWidget {
                       height: 60,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [
-                            AppColors.primary,
-                            Color(0xFF4FA976),
-                          ],
+                          colors: [AppColors.primary, Color(0xFF4FA976)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -229,10 +226,7 @@ class _SocialIcon extends StatelessWidget {
   final IconData icon;
   final double iconSize;
 
-  const _SocialIcon({
-    required this.icon,
-    this.iconSize = 24,
-  });
+  const _SocialIcon({required this.icon, this.iconSize = 24});
 
   @override
   Widget build(BuildContext context) {
@@ -242,10 +236,7 @@ class _SocialIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white.withOpacity(0.15),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
       ),
       child: Center(
         child: Icon(icon, color: Colors.white, size: iconSize),

@@ -4,7 +4,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'core/theme/app_colors.dart';
 
-void main() {
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://fikozptvdfzfdruukoqs.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpa296cHR2ZGZ6ZmRydXVrb3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMDc3NzEsImV4cCI6MjA5OTg4Mzc3MX0.QcFIb7d1utIEe5_cB-XBXTHl4F0XJCrujrpsy0QzdUQ',
+  );
+
   runApp(const BotaniqApp());
 }
 

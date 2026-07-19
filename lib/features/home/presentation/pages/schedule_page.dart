@@ -407,7 +407,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      ..._tasks.map((task) => _buildTaskCard(task)).toList(),
+                      ..._tasks.map((task) => _buildTaskCard(task)),
 
                       // Empty state visually when no tasks or different date
                       if (_tasks.isEmpty)

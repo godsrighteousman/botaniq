@@ -1,7 +1,6 @@
 import 'package:botaniq/features/garden/presentation/pages/plant_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../garden/presentation/pages/plant_detail_page.dart';
 
 class SearchPlantPage extends StatefulWidget {
   const SearchPlantPage({super.key});

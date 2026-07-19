@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'settings_page.dart';
 import 'notifications_settings_page.dart';
 import 'terms_page.dart';
+import 'edit_profile_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -21,6 +23,45 @@ class _ProfilePageState extends State<ProfilePage> {
   final Color _dangerColor = const Color(0xFFE96565);
 
   int _selectedTabIndex = 0; // 0: Overview, 1: Settings
+
+  String _fullName = 'Botanist';
+  String _email = '';
+  String _avatarUrl = 'https://i.pravatar.cc/150?img=68';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      _email = user.email ?? '';
+      try {
+        final data = await Supabase.instance.client
+            .from('users')
+            .select('full_name, avatar_url')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (data != null && mounted) {
+          setState(() {
+            if (data['full_name'] != null &&
+                data['full_name'].toString().isNotEmpty) {
+              _fullName = data['full_name'];
+            } else {
+              // Fallback to user metadata if exists
+              _fullName = user.userMetadata?['full_name'] ?? 'Botanist';
+            }
+            if (data['avatar_url'] != null) _avatarUrl = data['avatar_url'];
+          });
+        }
+      } catch (_) {}
+    }
+    if (mounted) setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,79 +88,91 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 32),
 
               // User Info Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: _cardBg,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
-                      blurRadius: 30,
-                      offset: const Offset(0, 10),
+              GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditProfilePage(),
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: _accentGreen.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                        image: const DecorationImage(
-                          image: NetworkImage(
-                            'https://i.pravatar.cc/150?img=68',
+                  );
+                  if (result == true) {
+                    _fetchUserData();
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: _cardBg,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
+                        blurRadius: 30,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: _accentGreen.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: NetworkImage(_avatarUrl),
+                            fit: BoxFit.cover,
                           ),
-                          fit: BoxFit.cover,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Faruk Ertas',
-                            style: GoogleFonts.outfit(
-                              color: _primaryText,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'faruk@example.com',
-                            style: GoogleFonts.inter(
-                              color: _textSecondary,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _accentGreen.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              'Premium Member',
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF4FA976),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _fullName,
+                              style: GoogleFonts.outfit(
+                                color: _primaryText,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              _email,
+                              style: GoogleFonts.inter(
+                                color: _textSecondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _accentGreen.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                'Edit Profile',
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF4FA976),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      Icon(Icons.chevron_right_rounded, color: _textSecondary),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
@@ -139,15 +192,21 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => setState(() => _selectedTabIndex = 0),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _selectedTabIndex == 0 ? _accentGreen : Colors.transparent,
+                            color: _selectedTabIndex == 0
+                                ? _accentGreen
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             'Overview',
                             style: GoogleFonts.inter(
-                              color: _selectedTabIndex == 0 ? Colors.white : _textSecondary,
-                              fontWeight: _selectedTabIndex == 0 ? FontWeight.w600 : FontWeight.w500,
+                              color: _selectedTabIndex == 0
+                                  ? Colors.white
+                                  : _textSecondary,
+                              fontWeight: _selectedTabIndex == 0
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
                             ),
                           ),
                         ),
@@ -158,15 +217,21 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => setState(() => _selectedTabIndex = 1),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _selectedTabIndex == 1 ? _accentGreen : Colors.transparent,
+                            color: _selectedTabIndex == 1
+                                ? _accentGreen
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             'Settings',
                             style: GoogleFonts.inter(
-                              color: _selectedTabIndex == 1 ? Colors.white : _textSecondary,
-                              fontWeight: _selectedTabIndex == 1 ? FontWeight.w600 : FontWeight.w500,
+                              color: _selectedTabIndex == 1
+                                  ? Colors.white
+                                  : _textSecondary,
+                              fontWeight: _selectedTabIndex == 1
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
                             ),
                           ),
                         ),
@@ -212,17 +277,31 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: _accentGreen.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(Icons.local_florist_rounded, color: _accentGreen, size: 24),
+                          child: Icon(
+                            Icons.local_florist_rounded,
+                            color: _accentGreen,
+                            size: 24,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
                       '24',
-                      style: GoogleFonts.outfit(color: _primaryText, fontSize: 32, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.outfit(
+                        color: _primaryText,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    Text('Total Plants', style: GoogleFonts.inter(color: _textSecondary, fontSize: 13)),
+                    Text(
+                      'Total Plants',
+                      style: GoogleFonts.inter(
+                        color: _textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -246,17 +325,31 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: const Color(0xFF4FA976).withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.verified_rounded, color: Color(0xFF4FA976), size: 24),
+                          child: const Icon(
+                            Icons.verified_rounded,
+                            color: Color(0xFF4FA976),
+                            size: 24,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
                       '92%',
-                      style: GoogleFonts.outfit(color: _primaryText, fontSize: 32, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.outfit(
+                        color: _primaryText,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    Text('Consistency', style: GoogleFonts.inter(color: _textSecondary, fontSize: 13)),
+                    Text(
+                      'Consistency',
+                      style: GoogleFonts.inter(
+                        color: _textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -275,7 +368,14 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Care Activity', style: GoogleFonts.outfit(color: _primaryText, fontSize: 20, fontWeight: FontWeight.w600)),
+              Text(
+                'Care Activity',
+                style: GoogleFonts.outfit(
+                  color: _primaryText,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -319,7 +419,10 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         const SizedBox(height: 12),
-        Text(day, style: GoogleFonts.inter(color: _textSecondary, fontSize: 12)),
+        Text(
+          day,
+          style: GoogleFonts.inter(color: _textSecondary, fontSize: 12),
+        ),
       ],
     );
   }
@@ -345,9 +448,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
               );
             },
           ),
@@ -393,9 +494,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const TermsPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const TermsPage()),
               );
             },
           ),

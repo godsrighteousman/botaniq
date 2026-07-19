@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'where_are_your_plants_page.dart'; // The next step after signup onboarding
 import 'login_page.dart';
 
@@ -17,8 +18,9 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -37,7 +39,11 @@ class _SignUpPageState extends State<SignUpPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -112,28 +118,88 @@ class _SignUpPageState extends State<SignUpPage> {
                   });
                 },
               ),
-              
+
               const SizedBox(height: 48),
 
               // Sign Up Button
               GestureDetector(
-                onTap: () {
-                  // Move to the onboarding process
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const WhereAreYourPlantsPage(),
-                    ),
-                  );
-                },
+                onTap: _isLoading
+                    ? null
+                    : () async {
+                        FocusScope.of(context).unfocus();
+                        final email = _emailController.text.trim();
+                        final password = _passwordController.text.trim();
+                        final firstName = _firstNameController.text.trim();
+                        final lastName = _lastNameController.text.trim();
+
+                        if (email.isEmpty || password.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please fill all fields.'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        setState(() => _isLoading = true);
+
+                        try {
+                          final AuthResponse res = await Supabase
+                              .instance
+                              .client
+                              .auth
+                              .signUp(
+                                email: email,
+                                password: password,
+                                data: {'full_name': '$firstName $lastName'},
+                              )
+                              .timeout(const Duration(seconds: 10));
+
+                          if (res.user != null) {
+                            // Insert or update profile data
+                            await Supabase.instance.client
+                                .from('users')
+                                .upsert({
+                                  'id': res.user!.id,
+                                  'full_name': '$firstName $lastName',
+                                  'email': email,
+                                });
+
+                            if (mounted) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const WhereAreYourPlantsPage(),
+                                ),
+                              );
+                            }
+                          }
+                        } on AuthException catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text(e.message)));
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Hata Detayı: $e', maxLines: 3),
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isLoading = false);
+                          }
+                        }
+                      },
                 child: Container(
                   height: 60,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [
-                        AppColors.primary,
-                        Color(0xFF4FA976),
-                      ],
+                      colors: [AppColors.primary, Color(0xFF4FA976)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -147,15 +213,24 @@ class _SignUpPageState extends State<SignUpPage> {
                     ],
                   ),
                   child: Center(
-                    child: Text(
-                      'Sign Up',
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'Sign Up',
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -166,7 +241,10 @@ class _SignUpPageState extends State<SignUpPage> {
               Row(
                 children: [
                   Expanded(
-                    child: Divider(color: Colors.white.withOpacity(0.1), thickness: 1),
+                    child: Divider(
+                      color: Colors.white.withOpacity(0.1),
+                      thickness: 1,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -179,7 +257,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   Expanded(
-                    child: Divider(color: Colors.white.withOpacity(0.1), thickness: 1),
+                    child: Divider(
+                      color: Colors.white.withOpacity(0.1),
+                      thickness: 1,
+                    ),
                   ),
                 ],
               ),
@@ -188,22 +269,22 @@ class _SignUpPageState extends State<SignUpPage> {
               // Social Sign Up
               Row(
                 children: [
-                   Expanded(
-                     child: _buildSocialLoginButton(
-                       icon: Icons.g_mobiledata,
-                       iconSize: 32,
-                       label: 'Google',
-                       onTap: () {},
-                     ),
-                   ),
-                   const SizedBox(width: 16),
-                   Expanded(
-                     child: _buildSocialLoginButton(
-                       icon: Icons.apple,
-                       label: 'Apple',
-                       onTap: () {},
-                     ),
-                   ),
+                  Expanded(
+                    child: _buildSocialLoginButton(
+                      icon: Icons.g_mobiledata,
+                      iconSize: 32,
+                      label: 'Google',
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildSocialLoginButton(
+                      icon: Icons.apple,
+                      label: 'Apple',
+                      onTap: () {},
+                    ),
+                  ),
                 ],
               ),
 
@@ -224,7 +305,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
                       );
                     },
                     style: TextButton.styleFrom(
@@ -264,10 +347,7 @@ class _SignUpPageState extends State<SignUpPage> {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
       ),
       child: TextField(
         controller: controller,
@@ -276,16 +356,24 @@ class _SignUpPageState extends State<SignUpPage> {
         style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 16),
+          hintStyle: GoogleFonts.inter(
+            color: AppColors.textSecondary,
+            fontSize: 16,
+          ),
           prefixIcon: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Icon(icon, color: AppColors.textSecondary, size: 22),
           ),
-          prefixIconConstraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 50,
+            minHeight: 50,
+          ),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
-                    obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    obscureText
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
                     color: AppColors.textSecondary,
                     size: 22,
                   ),
@@ -312,10 +400,7 @@ class _SignUpPageState extends State<SignUpPage> {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.15),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
