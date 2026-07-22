@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'add_plant_wizard.dart';
 
-class PlantDetailPage extends StatelessWidget {
+class PlantDetailPage extends StatefulWidget {
   final Map<String, dynamic> plantData;
   final bool isFromGarden;
 
@@ -13,22 +14,165 @@ class PlantDetailPage extends StatelessWidget {
     this.isFromGarden = false,
   });
 
+  @override
+  State<PlantDetailPage> createState() => _PlantDetailPageState();
+}
+
+class _PlantDetailPageState extends State<PlantDetailPage> {
   final Color _accentGreen = const Color(0xFF86D5A6);
   final Color _lightBg = const Color(0xFFF9FAF9);
   final Color _cardBg = Colors.white;
   final Color _primaryText = const Color(0xFF2C3E35);
   final Color _textSecondary = const Color(0xFF8B9E93);
 
+  // Bakım aksiyonu durumları
+  bool _isWatered = false;
+  bool _isFertilized = false;
+  bool _isLoadingWater = false;
+  bool _isLoadingFertilize = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  // ─── Water Now ───────────────────────────────────────────────────────────
+  Future<void> _waterNow() async {
+    final plantId = widget.plantData['id']?.toString();
+    if (plantId == null || _isWatered || _isLoadingWater) return;
+
+    setState(() => _isLoadingWater = true);
+    HapticFeedback.mediumImpact();
+
+    try {
+      final now = DateTime.now();
+
+      // 1. plants.last_watered_at güncelle
+      await Supabase.instance.client
+          .from('plants')
+          .update({'last_watered_at': now.toIso8601String().substring(0, 10)})
+          .eq('id', plantId);
+
+      // 2. En yakın bekleyen sulama görevini tamamlandı yap
+      await Supabase.instance.client
+          .from('care_tasks')
+          .update({'is_completed': true, 'completed_at': now.toIso8601String()})
+          .eq('plant_id', plantId)
+          .eq('task_type', 'water')
+          .eq('is_completed', false)
+          .order('due_date')
+          .limit(1);
+
+      if (mounted) {
+        setState(() {
+          _isWatered = true;
+          _isLoadingWater = false;
+        });
+        HapticFeedback.heavyImpact();
+        _showSuccessSnack('💧 Bitkini suladın! Harika iş!');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingWater = false);
+        _showErrorSnack('Sulama kaydedilemedi: $e');
+      }
+    }
+  }
+
+  // ─── Fertilize ───────────────────────────────────────────────────────────
+  Future<void> _fertilizeNow() async {
+    final plantId = widget.plantData['id']?.toString();
+    if (plantId == null || _isFertilized || _isLoadingFertilize) return;
+
+    setState(() => _isLoadingFertilize = true);
+    HapticFeedback.mediumImpact();
+
+    try {
+      final now = DateTime.now();
+
+      await Supabase.instance.client
+          .from('care_tasks')
+          .update({'is_completed': true, 'completed_at': now.toIso8601String()})
+          .eq('plant_id', plantId)
+          .eq('task_type', 'fertilize')
+          .eq('is_completed', false)
+          .order('due_date')
+          .limit(1);
+
+      if (mounted) {
+        setState(() {
+          _isFertilized = true;
+          _isLoadingFertilize = false;
+        });
+        HapticFeedback.heavyImpact();
+        _showSuccessSnack('🌱 Gübre verildi! Bitkin teşekkür eder!');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingFertilize = false);
+        _showErrorSnack('Gübre kaydedilemedi: $e');
+      }
+    }
+  }
+
+  void _showSuccessSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                msg,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF4FA976),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  void _showErrorSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final String name =
-        plantData['custom_name'] ?? plantData['name'] ?? 'Unknown Plant';
+        widget.plantData['custom_name'] ??
+        widget.plantData['name'] ??
+        'Unknown Plant';
     final String species =
-        plantData['species'] ?? plantData['category'] ?? 'Plant Species';
-    // GardenPage'den 'image_url', SearchPage'den 'image' alanı gelebilir
-    final String imageUrl = (plantData['image_url'] ?? plantData['image'] ?? '')
-        .toString();
-    final String difficulty = plantData['difficulty'] ?? 'Medium';
+        widget.plantData['species'] ??
+        widget.plantData['category'] ??
+        'Plant Species';
+    final String imageUrl =
+        (widget.plantData['image_url'] ?? widget.plantData['image'] ?? '')
+            .toString();
+    final String difficulty = widget.plantData['difficulty'] ?? 'Medium';
 
     return Scaffold(
       backgroundColor: _lightBg,
@@ -56,7 +200,7 @@ class PlantDetailPage extends StatelessWidget {
                   _buildSectionTitle('Care Protocol'),
                   const SizedBox(height: 16),
                   _buildCareRequirements(),
-                  const SizedBox(height: 100), // padding for bottom action bar
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
@@ -102,7 +246,9 @@ class PlantDetailPage extends StatelessWidget {
           ),
           child: IconButton(
             icon: Icon(
-              isFromGarden ? Icons.settings_outlined : Icons.favorite_border,
+              widget.isFromGarden
+                  ? Icons.settings_outlined
+                  : Icons.favorite_border,
               color: const Color(0xFF3B4D43),
               size: 20,
             ),
@@ -114,8 +260,9 @@ class PlantDetailPage extends StatelessWidget {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(imageUrl, fit: BoxFit.cover),
-            // Gradient overlay for better text visibility if needed
+            imageUrl.isNotEmpty
+                ? Image.network(imageUrl, fit: BoxFit.cover)
+                : Container(color: _accentGreen.withOpacity(0.2)),
             Positioned(
               bottom: 0,
               left: 0,
@@ -168,7 +315,7 @@ class PlantDetailPage extends StatelessWidget {
             ],
           ),
         ),
-        if (isFromGarden)
+        if (widget.isFromGarden)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -197,13 +344,15 @@ class PlantDetailPage extends StatelessWidget {
 
   Widget _buildCharacteristicsGrid(BuildContext context, String difficulty) {
     final double itemWidth = (MediaQuery.of(context).size.width - 48 - 16) / 2;
-    final bool isToxicToPets = plantData['is_toxic_to_pets'] == true;
+    final bool isToxicToPets = widget.plantData['is_toxic_to_pets'] == true;
     final String toxicity =
-        plantData['toxicity'] ??
+        widget.plantData['toxicity'] ??
         (isToxicToPets ? 'Toxic to pets' : 'Non-toxic');
-    final String environment = plantData['environment'] ?? 'Indoor';
+    final String environment = widget.plantData['environment'] ?? 'Indoor';
     final String sunlight =
-        plantData['sunlight'] ?? plantData['light_needs'] ?? 'Bright Indirect';
+        widget.plantData['sunlight'] ??
+        widget.plantData['light_needs'] ??
+        'Bright Indirect';
     return Wrap(
       spacing: 16,
       runSpacing: 16,
@@ -255,7 +404,7 @@ class PlantDetailPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+            color: const Color(0xFFCBD5E1).withOpacity(0.16),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -308,7 +457,7 @@ class PlantDetailPage extends StatelessWidget {
 
   Widget _buildAboutSection() {
     final String desc =
-        plantData['description'] ??
+        widget.plantData['description'] ??
         'This plant is known for its beautiful foliage and easy-care nature. '
             'It thrives in bright, indirect light and prefers its soil to dry out '
             'slightly between waterings.';
@@ -324,9 +473,10 @@ class PlantDetailPage extends StatelessWidget {
 
   Widget _buildPlacementSection() {
     final String climate =
-        plantData['ideal_climate'] ?? 'Warm & Humid (18°C - 24°C)';
-    final String humidityStr = plantData['humidity'] ?? 'Moderate to High';
-    final String tempRange = plantData['temperature_range'] ?? '18-24°C';
+        widget.plantData['ideal_climate'] ?? 'Warm & Humid (18°C - 24°C)';
+    final String humidityStr =
+        widget.plantData['humidity'] ?? 'Moderate to High';
+    final String tempRange = widget.plantData['temperature_range'] ?? '18-24°C';
     return Column(
       children: [
         _buildCareTile(
@@ -352,11 +502,11 @@ class PlantDetailPage extends StatelessWidget {
 
   Widget _buildCareRequirements() {
     final String waterProtocol =
-        plantData['watering_protocol'] ??
-        plantData['water_needs'] ??
+        widget.plantData['watering_protocol'] ??
+        widget.plantData['water_needs'] ??
         'Water every 7-10 days. Allow the top inch of soil to dry out between waterings.';
     final String feedProtocol =
-        plantData['feeding_protocol'] ??
+        widget.plantData['feeding_protocol'] ??
         'Fertilize monthly during spring/summer with balanced liquid fertilizer.';
     return Column(
       children: [
@@ -435,6 +585,7 @@ class PlantDetailPage extends StatelessWidget {
     );
   }
 
+  // ─── Bottom Action Bar ────────────────────────────────────────────────────
   Widget _buildBottomActionBar(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -450,137 +601,125 @@ class PlantDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          if (isFromGarden) ...[
-            Expanded(
-              child: _buildActionButton(
-                context,
-                title: 'Water Now',
-                icon: Icons.water_drop,
-                isPrimary: true,
-                onTap: () async {
-                  final plantId = plantData['id']?.toString();
-                  if (plantId == null) return;
-                  final now = DateTime.now();
-                  try {
-                    await Supabase.instance.client
-                        .from('plants')
-                        .update({
-                          'last_watered_at': now.toIso8601String().substring(
-                            0,
-                            10,
+      child: widget.isFromGarden
+          ? Row(
+              children: [
+                // Sulama butonu
+                Expanded(
+                  child: _buildCareButton(
+                    label: _isWatered ? 'Sulandı ✓' : 'Şimdi Sula',
+                    icon: _isWatered
+                        ? Icons.check_circle_rounded
+                        : Icons.water_drop_rounded,
+                    isDone: _isWatered,
+                    isLoading: _isLoadingWater,
+                    doneColor: const Color(0xFF4A90E2),
+                    onTap: _waterNow,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Gübre butonu
+                Expanded(
+                  child: _buildCareButton(
+                    label: _isFertilized ? 'Gübre Verildi ✓' : 'Gübre Ver',
+                    icon: _isFertilized
+                        ? Icons.check_circle_rounded
+                        : Icons.science_rounded,
+                    isDone: _isFertilized,
+                    isLoading: _isLoadingFertilize,
+                    doneColor: const Color(0xFF4FA976),
+                    onTap: _fertilizeNow,
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: _buildCareButton(
+                    label: 'Bahçeme Ekle',
+                    icon: Icons.add_rounded,
+                    isDone: false,
+                    isLoading: false,
+                    doneColor: _accentGreen,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddPlantWizard(
+                            plantData: widget.plantData,
+                            imagePath:
+                                (widget.plantData['image_url'] ??
+                                        widget.plantData['image'] ??
+                                        '')
+                                    .toString(),
                           ),
-                        })
-                        .eq('id', plantId);
-                    // En yakın sulama görevini tamamlandı olarak işaretle
-                    await Supabase.instance.client
-                        .from('care_tasks')
-                        .update({
-                          'is_completed': true,
-                          'completed_at': now.toIso8601String(),
-                        })
-                        .eq('plant_id', plantId)
-                        .eq('task_type', 'water')
-                        .eq('is_completed', false)
-                        .order('due_date')
-                        .limit(1);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('✓ Plant watered! Great job!'),
                         ),
                       );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
-                    }
-                  }
-                },
-              ),
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            _buildIconActionButton(Icons.camera_alt_outlined),
-          ] else ...[
-            Expanded(
-              child: _buildActionButton(
-                context,
-                title: 'Add to My Garden',
-                icon: Icons.add,
-                isPrimary: true,
-                onTap: () {
-                  // Wizard'a bitki verilerini aktar
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddPlantWizard(
-                        plantData: plantData,
-                        imagePath:
-                            (plantData['image_url'] ?? plantData['image'] ?? '')
-                                .toString(),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 
-  Widget _buildActionButton(
-    BuildContext context, {
-    required String title,
+  Widget _buildCareButton({
+    required String label,
     required IconData icon,
-    required bool isPrimary,
+    required bool isDone,
+    required bool isLoading,
+    required Color doneColor,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          color: isPrimary ? _primaryText : _lightBg,
-          borderRadius: BorderRadius.circular(28),
-        ),
-        alignment: Alignment.center,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isPrimary ? Colors.white : _primaryText,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                color: isPrimary ? Colors.white : _primaryText,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIconActionButton(IconData icon) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
       height: 56,
-      width: 56,
       decoration: BoxDecoration(
-        color: _lightBg,
+        color: isDone ? doneColor.withOpacity(0.12) : _primaryText,
         borderRadius: BorderRadius.circular(28),
+        border: isDone ? Border.all(color: doneColor, width: 2) : null,
       ),
-      child: Icon(icon, color: _primaryText),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(28),
+          onTap: isDone || isLoading ? null : onTap,
+          child: Center(
+            child: isLoading
+                ? SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        isDone ? doneColor : Colors.white,
+                      ),
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        icon,
+                        color: isDone ? doneColor : Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        label,
+                        style: GoogleFonts.inter(
+                          color: isDone ? doneColor : Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
     );
   }
 }
