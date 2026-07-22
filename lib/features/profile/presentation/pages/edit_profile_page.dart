@@ -15,10 +15,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController(); // read-only reference
   final _locationController = TextEditingController();
-  
+
   bool _wateringReminders = true;
   bool _fertilizerReminders = true;
-  
+
   bool _isLoading = true;
   bool _isSaving = false;
 
@@ -61,9 +61,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Profil okunamadi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Profil okunamadi: $e')));
       }
     } finally {
       if (mounted) {
@@ -77,7 +77,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (user == null) return;
 
     setState(() => _isSaving = true);
-    
+
     try {
       await Supabase.instance.client.from('users').upsert({
         'id': user.id,
@@ -87,7 +87,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'watering_reminders': _wateringReminders,
         'fertilizer_reminders': _fertilizerReminders,
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profil basariyla güncellendi!')),
@@ -96,9 +96,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Kaydetme hatasi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Kaydetme hatasi: $e')));
       }
     } finally {
       if (mounted) {
@@ -161,7 +161,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         color: _accentGreen.withOpacity(0.2),
                         shape: BoxShape.circle,
                         image: const DecorationImage(
-                          image: NetworkImage('https://i.pravatar.cc/150?img=68'),
+                          image: NetworkImage(
+                            'https://i.pravatar.cc/150?img=68',
+                          ),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -186,24 +188,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               _buildInputLabel('Full Name'),
-              _buildTextField(_fullNameController, 'Enter your full name', Icons.person_outline_rounded),
-              
+              _buildTextField(
+                _fullNameController,
+                'Enter your full name',
+                Icons.person_outline_rounded,
+              ),
+
               const SizedBox(height: 20),
-              
+
               _buildInputLabel('Email Address (Read Only)'),
               _buildTextField(
-                _emailController, 
-                'Enter your email', 
-                Icons.email_outlined, 
+                _emailController,
+                'Enter your email',
+                Icons.email_outlined,
                 readOnly: true,
               ),
 
               const SizedBox(height: 20),
 
               _buildInputLabel('Location'),
-              _buildTextField(_locationController, 'City, Country', Icons.location_on_outlined),
+              _buildTextField(
+                _locationController,
+                'City, Country',
+                Icons.location_on_outlined,
+              ),
 
               const SizedBox(height: 32),
 
@@ -216,7 +226,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               Container(
                 decoration: BoxDecoration(
                   color: _cardBg,
@@ -225,17 +235,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: Column(
                   children: [
                     _buildSwitchTile(
-                      'Watering Reminders', 
-                      'Get notified when it\'s time to water', 
-                      _wateringReminders, 
-                      (val) => setState(() => _wateringReminders = val)
+                      'Watering Reminders',
+                      'Get notified when it\'s time to water',
+                      _wateringReminders,
+                      (val) => setState(() => _wateringReminders = val),
                     ),
                     Divider(height: 1, color: _lightBg, indent: 64),
                     _buildSwitchTile(
-                      'Fertilizer Reminders', 
-                      'Seasonal feeding alerts for your plants', 
-                      _fertilizerReminders, 
-                      (val) => setState(() => _fertilizerReminders = val)
+                      'Fertilizer Reminders',
+                      'Seasonal feeding alerts for your plants',
+                      _fertilizerReminders,
+                      (val) => setState(() => _fertilizerReminders = val),
                     ),
                   ],
                 ),
@@ -291,8 +301,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildTextField(
-    TextEditingController controller, 
-    String hint, 
+    TextEditingController controller,
+    String hint,
     IconData icon, {
     bool readOnly = false,
   }) {
@@ -311,7 +321,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.inter(color: _textSecondary.withValues(alpha: 0.6)),
+          hintStyle: GoogleFonts.inter(
+            color: _textSecondary.withValues(alpha: 0.6),
+          ),
           prefixIcon: Icon(icon, color: _accentGreen, size: 20),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -320,18 +332,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildSwitchTile(String title, String subtitle, bool value, ValueChanged<bool> onChanged) {
+  Widget _buildSwitchTile(
+    String title,
+    String subtitle,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: _lightBg,
-              shape: BoxShape.circle,
+            decoration: BoxDecoration(color: _lightBg, shape: BoxShape.circle),
+            child: Icon(
+              Icons.notifications_active_rounded,
+              color: _accentGreen,
+              size: 20,
             ),
-            child: Icon(Icons.notifications_active_rounded, color: _accentGreen, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -349,10 +367,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: GoogleFonts.inter(
-                    color: _textSecondary,
-                    fontSize: 12,
-                  ),
+                  style: GoogleFonts.inter(color: _textSecondary, fontSize: 12),
                 ),
               ],
             ),
@@ -360,7 +375,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: _accentGreen,
             inactiveTrackColor: const Color(0xFFE2E8E4),
           ),

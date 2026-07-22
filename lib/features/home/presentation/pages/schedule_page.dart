@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -18,44 +19,63 @@ class _SchedulePageState extends State<SchedulePage> {
   late DateTime _selectedDate;
   final List<DateTime> _weekDays = [];
 
-  // Mock Tasks Data
-  final List<Map<String, dynamic>> _tasks = [
-    {
-      'id': '1',
-      'plantName': 'Monstera Deliciosa',
-      'taskType': 'Watering',
-      'amount': '250ml',
-      'instruction':
-          'Water thoroughly until water drains out of the bottom hole. Avoid getting water on the leaves.',
-      'image':
-          'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=400',
-      'isCompleted': false,
-    },
-    {
-      'id': '2',
-      'plantName': 'Fiddle Leaf Fig',
-      'taskType': 'Fertilize',
-      'amount': 'Liquid Fertilizer',
-      'instruction':
-          'Use a balanced liquid fertilizer diluted to half strength. Apply to moist soil.',
-      'image':
-          'https://images.unsplash.com/photo-1601985705806-5b9a71f6004f?auto=format&fit=crop&q=80&w=400',
-      'isCompleted': false,
-    },
-  ];
+  // Görev listesi Supabase'den yüklenecek
+  List<Map<String, dynamic>> _tasks = [];
 
   @override
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-
-    // Generate 7 days (including today)
     for (int i = 0; i < 7; i++) {
       _weekDays.add(DateTime.now().add(Duration(days: i)));
     }
+    _fetchTasksForDate(_selectedDate);
   }
 
-  void _markTaskDone(String id) {
+  Future<void> _fetchTasksForDate(DateTime date) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    try {
+      final result = await Supabase.instance.client
+          .from('care_tasks')
+          .select('*, plants(custom_name, name, image_url)')
+          .eq('user_id', user.id)
+          .gte('due_date', '${dateStr}T00:00:00')
+          .lt('due_date', '${dateStr}T23:59:59')
+          .order('due_date');
+      if (mounted) {
+        setState(() {
+          _tasks = List<Map<String, dynamic>>.from(result).map((t) {
+            final plant = t['plants'] as Map<String, dynamic>? ?? {};
+            return {
+              'id': t['id'],
+              'plantName': plant['custom_name'] ?? plant['name'] ?? 'My Plant',
+              'taskType': _capitalize(t['task_type'] as String? ?? 'care'),
+              'amount': t['amount'] ?? '',
+              'instruction': t['instruction'] ?? 'Take care of your plant.',
+              'image': plant['image_url'] ?? '',
+              'isCompleted': t['is_completed'] ?? false,
+            };
+          }).toList();
+        });
+      }
+    } catch (_) {}
+  }
+
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
+  void _markTaskDone(String id) async {
+    try {
+      await Supabase.instance.client
+          .from('care_tasks')
+          .update({
+            'is_completed': true,
+            'completed_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', id);
+    } catch (_) {}
     setState(() {
       final taskIndex = _tasks.indexWhere((task) => task['id'] == id);
       if (taskIndex != -1) {
@@ -323,6 +343,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       setState(() {
                         _selectedDate = date;
                       });
+                      _fetchTasksForDate(date); // Gerçek görevleri yükle
                     },
                     child: Container(
                       width: 60,

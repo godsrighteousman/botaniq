@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
@@ -78,16 +81,27 @@ class _PlantScannerPageState extends State<PlantScannerPage>
 
       // Fotoğrafı çekiyoruz
       final XFile photo = await _cameraController!.takePicture();
-      final bytes = await photo.readAsBytes();
-      final base64Image = base64Encode(bytes);
+      final base64Image = await _resizeAndEncodeImage(photo.path);
 
       // OpenAI servisine gönder
       debugPrint("Fotoğraf çekildi. OpenAI'a gönderiliyor... Lütfen bekleyin.");
-      final result = await OpenAIService.identifyPlant(base64Image, isMushroom: _isMushroomMode);
+      final result = await OpenAIService.identifyPlant(
+        base64Image,
+        isMushroom: _isMushroomMode,
+      );
 
-      if (mounted && result != null) {
-        // İşlem başarılı, dialog göster
-        _showResultDialog(result, photo.path);
+      if (mounted) {
+        if (result != null) {
+          // İşlem başarılı, dialog göster
+          _showResultDialog(result, photo.path);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tarama başarısız oldu. Lütfen tekrar deneyin.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
       }
 
       // Animasyonu ve durumu sıfırla
@@ -99,11 +113,91 @@ class _PlantScannerPageState extends State<PlantScannerPage>
       }
     } catch (e) {
       debugPrint("Fotoğraf çekme hatası: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Hata oluştu: ${e.toString()}'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
       setState(() {
         _isIdentifying = false;
       });
       _animationController.stop();
     }
+  }
+
+  Future<String> _resizeAndEncodeImage(String imagePath) async {
+    try {
+      final File imageFile = File(imagePath);
+      final Uint8List originalBytes = await imageFile.readAsBytes();
+
+      // Decode the image first to find its original size
+      final ui.Codec nativeCodec = await ui.instantiateImageCodec(
+        originalBytes,
+      );
+      final ui.FrameInfo frameInfo = await nativeCodec.getNextFrame();
+      final ui.Image originalImage = frameInfo.image;
+
+      const int maxDimension = 512;
+      int originalWidth = originalImage.width;
+      int originalHeight = originalImage.height;
+      int targetWidth;
+      int targetHeight;
+
+      if (originalWidth > originalHeight) {
+        targetWidth = maxDimension;
+        targetHeight = (originalHeight * maxDimension / originalWidth).round();
+      } else {
+        targetHeight = maxDimension;
+        targetWidth = (originalWidth * maxDimension / originalHeight).round();
+      }
+
+      // Draw the image scaled down using Canvas
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder);
+      final ui.Paint paint = ui.Paint()
+        ..filterQuality = ui.FilterQuality.medium;
+
+      canvas.drawImageRect(
+        originalImage,
+        ui.Rect.fromLTWH(
+          0,
+          0,
+          originalWidth.toDouble(),
+          originalHeight.toDouble(),
+        ),
+        ui.Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
+        paint,
+      );
+
+      final ui.Picture picture = recorder.endRecording();
+      final ui.Image resizedImage = await picture.toImage(
+        targetWidth,
+        targetHeight,
+      );
+
+      final ByteData? byteData = await resizedImage.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      if (byteData != null) {
+        final compressedBytes = byteData.buffer.asUint8List();
+        debugPrint(
+          "Görsel optimize edildi (token tasarrufu). Boyut: ${originalBytes.lengthInBytes} -> ${compressedBytes.lengthInBytes} byte.",
+        );
+        return base64Encode(compressedBytes);
+      }
+    } catch (e) {
+      debugPrint(
+        "Görsel küçültme hatası: $e. Sıkıştırılmamış görsel gönderiliyor.",
+      );
+    }
+    try {
+      final bytes = await File(imagePath).readAsBytes();
+      return base64Encode(bytes);
+    } catch (_) {}
+    return '';
   }
 
   @override
@@ -262,17 +356,28 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                   GestureDetector(
                     onTap: () => setState(() => _isMushroomMode = false),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: !_isMushroomMode ? _accentGreen : Colors.black.withOpacity(0.6),
+                        color: !_isMushroomMode
+                            ? _accentGreen
+                            : Colors.black.withOpacity(0.6),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: !_isMushroomMode ? _accentGreen : Colors.white.withOpacity(0.2),
+                          color: !_isMushroomMode
+                              ? _accentGreen
+                              : Colors.white.withOpacity(0.2),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.local_florist, color: Colors.white, size: 20),
+                          const Icon(
+                            Icons.local_florist,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Bitki',
@@ -289,17 +394,28 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                   GestureDetector(
                     onTap: () => setState(() => _isMushroomMode = true),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: _isMushroomMode ? _accentGreen : Colors.black.withOpacity(0.6),
+                        color: _isMushroomMode
+                            ? _accentGreen
+                            : Colors.black.withOpacity(0.6),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: _isMushroomMode ? _accentGreen : Colors.white.withOpacity(0.2),
+                          color: _isMushroomMode
+                              ? _accentGreen
+                              : Colors.white.withOpacity(0.2),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.forest, color: Colors.white, size: 20),
+                          const Icon(
+                            Icons.forest,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Mantar',
@@ -350,7 +466,9 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                           ),
                           const SizedBox(width: 16),
                           Text(
-                            _isMushroomMode ? 'Mantar Tanımlanıyor...' : 'Bitki Tanımlanıyor...',
+                            _isMushroomMode
+                                ? 'Mantar Tanımlanıyor...'
+                                : 'Bitki Tanımlanıyor...',
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 16,
@@ -432,7 +550,8 @@ class _PlantScannerPageState extends State<PlantScannerPage>
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-            data['name'] ?? (_isMushroomMode ? 'Bilinmeyen Mantar' : 'Bilinmeyen Bitki'),
+            data['name'] ??
+                (_isMushroomMode ? 'Bilinmeyen Mantar' : 'Bilinmeyen Bitki'),
             style: GoogleFonts.outfit(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -458,7 +577,11 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Icon(_isMushroomMode ? Icons.location_on : Icons.water_drop, color: _isMushroomMode ? Colors.orange : Colors.blue, size: 20),
+                    Icon(
+                      _isMushroomMode ? Icons.location_on : Icons.water_drop,
+                      color: _isMushroomMode ? Colors.orange : Colors.blue,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -471,7 +594,11 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(_isMushroomMode ? Icons.warning_rounded : Icons.wb_sunny, color: _isMushroomMode ? Colors.red : Colors.orange, size: 20),
+                    Icon(
+                      _isMushroomMode ? Icons.warning_rounded : Icons.wb_sunny,
+                      color: _isMushroomMode ? Colors.red : Colors.orange,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -502,10 +629,8 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddPlantWizard(
-                      plantData: data,
-                      imagePath: imagePath,
-                    ),
+                    builder: (context) =>
+                        AddPlantWizard(plantData: data, imagePath: imagePath),
                   ),
                 );
               },

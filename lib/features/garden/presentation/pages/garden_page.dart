@@ -1,15 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'plant_detail_page.dart';
+import '../../../../core/services/schedule_service.dart';
+import '../../../home/presentation/pages/photo_instruction_page.dart';
 
-class GardenPage extends StatelessWidget {
+class GardenPage extends StatefulWidget {
   const GardenPage({super.key});
 
+  @override
+  State<GardenPage> createState() => _GardenPageState();
+}
+
+class _GardenPageState extends State<GardenPage> {
   final Color _accentGreen = const Color(0xFF86D5A6);
   final Color _lightBg = const Color(0xFFF9FAF9);
   final Color _cardBg = Colors.white;
   final Color _primaryText = const Color(0xFF2C3E35);
   final Color _textSecondary = const Color(0xFF8A8A8E);
+
+  List<Map<String, dynamic>> _plants = [];
+  bool _isLoading = true;
+  String _selectedFilter = 'All Plants';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPlants();
+  }
+
+  Future<void> _fetchPlants() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      final data = await Supabase.instance.client
+          .from('plants')
+          .select()
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false);
+      if (mounted) {
+        setState(() {
+          _plants = List<Map<String, dynamic>>.from(data);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  List<Map<String, dynamic>> get _filteredPlants {
+    if (_selectedFilter == 'Needs Water') {
+      return _plants.where((p) {
+        final last = p['last_watered_at'];
+        final interval = (p['watering_interval_days'] as int?) ?? 7;
+        if (last == null) return true;
+        final lastDate = DateTime.tryParse(last);
+        if (lastDate == null) return true;
+        final next = lastDate.add(Duration(days: interval));
+        return next.isBefore(DateTime.now()) ||
+            next.difference(DateTime.now()).inDays <= 1;
+      }).toList();
+    }
+    if (_selectedFilter == 'Indoor') {
+      return _plants
+          .where(
+            (p) =>
+                (p['light_condition'] ?? '').toString().toLowerCase().contains(
+                  'indirect',
+                ) ||
+                (p['room'] ?? '') != 'Balcony',
+          )
+          .toList();
+    }
+    return _plants;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +84,12 @@ class GardenPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 20.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -33,58 +102,116 @@ class GardenPage extends StatelessWidget {
                       letterSpacing: -0.5,
                     ),
                   ),
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: _cardBg,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 2),
+                  GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PhotoInstructionPage(),
                         ),
-                      ],
+                      );
+                      _fetchPlants();
+                    },
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: _accentGreen,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _accentGreen.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
-                    child: Icon(Icons.add, color: _primaryText, size: 24),
                   ),
                 ],
               ),
             ),
-            
-            // Filters
+
+            // Filter Chips
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Row(
                 children: [
-                  _buildFilterChip('All Plants', true),
+                  _buildFilterChip(
+                    'All Plants',
+                    _selectedFilter == 'All Plants',
+                  ),
                   const SizedBox(width: 12),
-                  _buildFilterChip('Needs Water', false),
+                  _buildFilterChip(
+                    'Needs Water',
+                    _selectedFilter == 'Needs Water',
+                  ),
                   const SizedBox(width: 12),
-                  _buildFilterChip('Indoor', false),
+                  _buildFilterChip('Indoor', _selectedFilter == 'Indoor'),
                 ],
               ),
             ),
+
             const SizedBox(height: 24),
 
-            // Grid of Plants
+            // Plant Grid
             Expanded(
-              child: GridView.count(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0).copyWith(bottom: 120),
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.75,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _buildPlantCard(context, 'Monstera', 'Swiss Cheese', 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=400', 'Water in 2 days', Colors.blue),
-                  _buildPlantCard(context, 'Ficus', 'Rubber Plant', 'https://images.unsplash.com/photo-1597055905001-c888d3f6d7ab?auto=format&fit=crop&q=80&w=400', 'Water today', Colors.redAccent),
-                  _buildPlantCard(context, 'Sansevieria', 'Snake Plant', 'https://images.unsplash.com/photo-1593482892290-f54927ae1b7e?auto=format&fit=crop&q=80&w=400', 'Good for 2 weeks', _accentGreen),
-                  _buildPlantCard(context, 'Aloe Vera', 'Succulent', 'https://images.unsplash.com/photo-1596547609652-9fc5d8d428ce?auto=format&fit=crop&q=80&w=400', 'Good for 3 weeks', _accentGreen),
-                  _buildPlantCard(context, 'Pothos', 'Devil\'s Ivy', 'https://images.unsplash.com/photo-1604762512526-b7ce049b5768?auto=format&fit=crop&q=80&w=400', 'Water tomorrow', Colors.orange),
-                ],
-              ),
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF86D5A6),
+                      ),
+                    )
+                  : _filteredPlants.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_florist_outlined,
+                              size: 56,
+                              color: _accentGreen.withOpacity(0.5),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _selectedFilter == 'All Plants'
+                                  ? 'No plants yet.\nTap + to add your first plant!'
+                                  : 'No plants in this category.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                color: _textSecondary,
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                      ).copyWith(bottom: 120),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.75,
+                          ),
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: _filteredPlants.length,
+                      itemBuilder: (context, index) {
+                        return _buildPlantCard(context, _filteredPlants[index]);
+                      },
+                    ),
             ),
           ],
         ),
@@ -93,124 +220,167 @@ class GardenPage extends StatelessWidget {
   }
 
   Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? _accentGreen : _cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected ? _accentGreen : const Color(0xFFE2E8F0),
+    return GestureDetector(
+      onTap: () => setState(() => _selectedFilter = label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? _accentGreen : _cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? _accentGreen : const Color(0xFFE2E8F0),
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          color: isSelected ? Colors.white : _textSecondary,
-          fontSize: 14,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            color: isSelected ? Colors.white : _textSecondary,
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPlantCard(BuildContext context, String name, String species, String imageUrl, String status, Color statusColor) {
+  Widget _buildPlantCard(BuildContext context, Map<String, dynamic> plant) {
+    final name = plant['custom_name'] ?? plant['name'] ?? 'My Plant';
+    final species = plant['species'] ?? '';
+    final imageUrl = (plant['image_url'] ?? '') as String;
+
+    // Sulama durumu hesapla
+    String status = 'Not watered yet';
+    Color statusColor = Colors.orange;
+    final lastWatered = plant['last_watered_at'];
+    final interval = (plant['watering_interval_days'] as int?) ?? 7;
+    if (lastWatered != null) {
+      final lastDate = DateTime.tryParse(lastWatered.toString());
+      if (lastDate != null) {
+        final label = ScheduleService.getNextWateringLabel(lastDate, interval);
+        status = label;
+        if (label.contains('Overdue') || label.contains('today')) {
+          statusColor = Colors.redAccent;
+        } else if (label.contains('tomorrow')) {
+          statusColor = Colors.orange;
+        } else {
+          statusColor = _accentGreen;
+        }
+      }
+    }
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PlantDetailPage(
-              plantData: {
-                'name': name,
-                'species': species,
-                'image': imageUrl,
-                'status': status,
-              },
-              isFromGarden: true,
-            ),
+            builder: (context) =>
+                PlantDetailPage(plantData: plant, isFromGarden: true),
           ),
         );
       },
       child: Container(
-      decoration: BoxDecoration(
-        color: _cardBg,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-              child: Image.network(
-                imageUrl,
-                width: double.infinity,
-                fit: BoxFit.cover,
+        decoration: BoxDecoration(
+          color: _cardBg,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFCBD5E1).withOpacity(0.16),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const _PlantPlaceholder(),
+                      )
+                    : const _PlantPlaceholder(),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: GoogleFonts.outfit(
-                    color: _primaryText,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  species,
-                  style: GoogleFonts.inter(
-                    color: _textSecondary,
-                    fontSize: 12,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        shape: BoxShape.circle,
-                      ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: GoogleFonts.outfit(
+                      color: _primaryText,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        status,
-                        style: GoogleFonts.inter(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    species,
+                    style: GoogleFonts.inter(
+                      color: _textSecondary,
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
                           color: statusColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                          shape: BoxShape.circle,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          status,
+                          style: GoogleFonts.inter(
+                            color: statusColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
+  }
+}
+
+class _PlantPlaceholder extends StatelessWidget {
+  const _PlantPlaceholder();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFFE8F5EE),
+      child: const Icon(
+        Icons.local_florist_outlined,
+        color: Color(0xFF86D5A6),
+        size: 48,
+      ),
+    );
   }
 }

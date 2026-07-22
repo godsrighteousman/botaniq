@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
 import 'core/theme/app_colors.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,7 +37,9 @@ class BotaniqApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ).apply(bodyColor: Colors.white, displayColor: Colors.white),
       ),
-      home: const OnboardingPage(),
+      home: Supabase.instance.client.auth.currentSession != null
+          ? const HomePage()
+          : const OnboardingPage(),
     );
   }
 }

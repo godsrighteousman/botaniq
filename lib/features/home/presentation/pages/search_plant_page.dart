@@ -1,6 +1,7 @@
-import 'package:botaniq/features/garden/presentation/pages/plant_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../features/garden/presentation/pages/plant_detail_page.dart';
 
 class SearchPlantPage extends StatefulWidget {
   const SearchPlantPage({super.key});
@@ -17,6 +18,8 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
   final Color _primaryText = const Color(0xFF2C3E35);
 
   final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> _searchResults = [];
+  bool _isLoading = false;
   int _selectedCategoryIndex = 0;
 
   final List<String> _categories = [
@@ -27,38 +30,63 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
     'Flowering',
   ];
 
-  final List<Map<String, dynamic>> _samplePlants = [
-    {
-      'name': 'Monstera Deliciosa',
-      'category': 'Indoor • Easy Care',
-      'image': 'https://picsum.photos/seed/monstera/600/600',
-      'difficulty': 'Easy',
-    },
-    {
-      'name': 'Snake Plant',
-      'category': 'Low Light • Purifier',
-      'image': 'https://picsum.photos/seed/snake/600/600',
-      'difficulty': 'Easy',
-    },
-    {
-      'name': 'Fiddle Leaf Fig',
-      'category': 'Tree • Bright Light',
-      'image': 'https://picsum.photos/seed/fiddle/600/600',
-      'difficulty': 'Hard',
-    },
-    {
-      'name': 'Aloe Vera',
-      'category': 'Succulent • Medicine',
-      'image': 'https://picsum.photos/seed/aloe/600/600',
-      'difficulty': 'Medium',
-    },
-    {
-      'name': 'Peace Lily',
-      'category': 'Indoor • Flowering',
-      'image': 'https://picsum.photos/seed/lily/600/600',
-      'difficulty': 'Medium',
-    },
-  ];
+  void _searchPlants(String query) async {
+    // Boş sorgu ve tüm kategoriler seçiliyse boş göster
+    if (query.trim().isEmpty && _selectedCategoryIndex == 0) {
+      setState(() {
+        _searchResults = [];
+        _isLoading = false;
+      });
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      var supaQuery = Supabase.instance.client.from('plant_catalog').select();
+
+      // Kategori filtresi (0 = Tümü)
+      if (_selectedCategoryIndex != 0) {
+        final cat = _categories[_selectedCategoryIndex];
+        if (cat == 'Indoor' || cat == 'Outdoor') {
+          supaQuery = supaQuery.eq('environment', cat);
+        } else if (cat == 'Succulents') {
+          supaQuery = supaQuery
+              .ilike('species', '%cactus%')
+              .or('species.ilike.%aloe%,species.ilike.%succulent%');
+        } else if (cat == 'Flowering') {
+          supaQuery = supaQuery.ilike('description', '%flower%');
+        }
+      }
+
+      // Metin filtresi
+      if (query.trim().isNotEmpty) {
+        supaQuery = supaQuery.or('name.ilike.%$query%,species.ilike.%$query%');
+      }
+
+      final data = await supaQuery.limit(20);
+
+      if (mounted) {
+        setState(() {
+          _searchResults = List<Map<String, dynamic>>.from(data);
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _searchResults = [];
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +204,7 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
             ),
             child: TextField(
               controller: _searchController,
+              onChanged: _searchPlants,
               style: GoogleFonts.inter(color: _primaryText, fontSize: 16),
               decoration: InputDecoration(
                 hintText: 'Search plants...',
@@ -233,6 +262,7 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
               setState(() {
                 _selectedCategoryIndex = index;
               });
+              _searchPlants(_searchController.text);
             },
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -263,12 +293,55 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
   }
 
   Widget _buildPlantList() {
+    if (_isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: CircularProgressIndicator(color: Color(0xFF86D5A6)),
+        ),
+      );
+    }
+
+    if (_searchResults.isEmpty && _searchController.text.isNotEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Text(
+            'Sonuç bulunamadı.',
+            style: GoogleFonts.inter(color: _textSecondary),
+          ),
+        ),
+      );
+    }
+
+    if (_searchController.text.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(48.0),
+          child: Column(
+            children: [
+              Icon(
+                Icons.search_rounded,
+                size: 48,
+                color: _accentGreen.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Aramak için bitki adını yazın',
+                style: GoogleFonts.inter(color: _textSecondary, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       physics: const BouncingScrollPhysics(),
-      itemCount: _samplePlants.length,
+      itemCount: _searchResults.length,
       itemBuilder: (context, index) {
-        return _buildModernPlantCard(_samplePlants[index], index);
+        return _buildModernPlantCard(_searchResults[index], index);
       },
     );
   }
@@ -290,7 +363,6 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // Background Card
             Positioned(
               right: 0,
               left: 40,
@@ -309,7 +381,7 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
                   ],
                 ),
                 padding: const EdgeInsets.only(
-                  left: 100, // space for image
+                  left: 100,
                   right: 20,
                   top: 20,
                   bottom: 20,
@@ -319,7 +391,7 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      plant['name'],
+                      plant['species'] ?? 'Unknown',
                       style: GoogleFonts.outfit(
                         color: _primaryText,
                         fontSize: 18,
@@ -331,7 +403,7 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      plant['category'],
+                      plant['environment'] ?? 'Indoor',
                       style: GoogleFonts.inter(
                         color: _textSecondary,
                         fontSize: 13,
@@ -352,7 +424,7 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            plant['difficulty'],
+                            plant['difficulty'] ?? 'Easy',
                             style: GoogleFonts.inter(
                               color: const Color(0xFF4FA976),
                               fontSize: 12,
@@ -367,7 +439,6 @@ class _SearchPlantPageState extends State<SearchPlantPage> {
               ),
             ),
 
-            // Image overlap
             Positioned(
               left: 0,
               top: 0,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -17,6 +18,40 @@ class _SettingsPageState extends State<SettingsPage> {
 
   bool _isDarkMode = false;
   bool _useMetricSystem = true;
+  late TextEditingController _apiKeyController;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiKeyController = TextEditingController();
+    _loadApiKey();
+  }
+
+  Future<void> _loadApiKey() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _apiKeyController.text = prefs.getString('openai_api_key') ?? '';
+      });
+    } catch (e) {
+      debugPrint("API Key yükleme hatası: $e");
+    }
+  }
+
+  Future<void> _saveApiKey(String value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('openai_api_key', value.trim());
+    } catch (e) {
+      debugPrint("API Key kaydetme hatası: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _apiKeyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +192,122 @@ class _SettingsPageState extends State<SettingsPage> {
                         icon: Icons.payment_rounded,
                         title: 'Subscription Management',
                         label: 'Premium',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'API Ayarları (Yapay Zeka)',
+                  style: GoogleFonts.inter(
+                    color: _textSecondary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: _cardBg,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: _lightBg,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.key,
+                              color: _accentGreen,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              'OpenAI API Key',
+                              style: GoogleFonts.inter(
+                                color: _primaryText,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _apiKeyController,
+                        obscureText: true,
+                        style: GoogleFonts.inter(
+                          color: _primaryText,
+                          fontSize: 14,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'sk-proj-... veya sk-...',
+                          hintStyle: GoogleFonts.inter(
+                            color: _textSecondary.withOpacity(0.5),
+                          ),
+                          filled: true,
+                          fillColor: _lightBg,
+                          prefixIcon: const Icon(
+                            Icons.vpn_key_outlined,
+                            size: 18,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          suffixIcon: IconButton(
+                            icon: const Icon(
+                              Icons.save_rounded,
+                              color: Colors.green,
+                            ),
+                            onPressed: () {
+                              _saveApiKey(_apiKeyController.text);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'OpenAI API Key başarıyla kaydedildi.',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        onChanged: _saveApiKey,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Hesabınızdan API istekleri yapabilmek için kendi OpenAI API Key\'inizi girin. API Key şifreli olarak cihazınızda yerel saklanır.',
+                        style: GoogleFonts.inter(
+                          color: _textSecondary,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

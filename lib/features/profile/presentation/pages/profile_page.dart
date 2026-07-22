@@ -6,6 +6,7 @@ import 'notifications_settings_page.dart';
 import 'terms_page.dart';
 import 'edit_profile_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../onboarding/presentation/pages/onboarding_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -41,7 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
       _email = user.email ?? '';
       try {
         final data = await Supabase.instance.client
-            .from('users')
+            .from('profiles')
             .select('full_name, avatar_url')
             .eq('id', user.id)
             .maybeSingle();
@@ -637,9 +638,15 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              // Logic to go to login page
+            onPressed: () async {
+              Navigator.pop(context);
+              await Supabase.instance.client.auth.signOut();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const OnboardingPage()),
+                  (_) => false,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: _primaryText,

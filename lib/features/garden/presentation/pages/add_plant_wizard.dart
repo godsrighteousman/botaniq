@@ -1,5 +1,9 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/services/schedule_service.dart';
 
 class AddPlantWizard extends StatefulWidget {
   final Map<String, dynamic> plantData;
@@ -23,7 +27,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   final Color _lightBg = const Color(0xFFF9FAF9);
   final Color _textPrimary = const Color(0xFF2C3E35);
   final Color _textSecondary = const Color(0xFF8B9E93);
-  
+
   // States for answers
   String? _selectedRoom;
   String? _selectedLight;
@@ -32,9 +36,23 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   String? _selectedRepotted;
   String? _selectedPot;
   String? _selectedWatered;
+  bool _isSaving = false;
 
-  final List<String> _distances = ['0 - 1 m', '1 - 2 m', '2 - 3 m', '3 - 5 m', 'More than 5 m'];
-  final List<String> _hours = ['1 hour', '2 hours', '3 hours', '4 hours', '5 hours', '6+ hours'];
+  final List<String> _distances = [
+    '0 - 1 m',
+    '1 - 2 m',
+    '2 - 3 m',
+    '3 - 5 m',
+    'More than 5 m',
+  ];
+  final List<String> _hours = [
+    '1 hour',
+    '2 hours',
+    '3 hours',
+    '4 hours',
+    '5 hours',
+    '6+ hours',
+  ];
 
   @override
   void initState() {
@@ -50,8 +68,204 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Done - navigate back to home screen (pop everything until home)
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      _savePlantToSupabase();
+    }
+  }
+
+  /// Bitkiyi Supabase'e kaydeder:
+  /// 1) Fotoğrafı Storage'a yükler
+  /// 2) plants tablosuna insert eder
+  /// 3) ScheduleService ile ilk görevleri oluşturur
+  Future<void> _savePlantToSupabase() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      // 0. Kullanıcı kaydını garantile (önce users, sonra profiles tablosunu dene)
+      try {
+        await Supabase.instance.client.from('users').upsert({
+          'id': user.id,
+          'email': user.email ?? '',
+          'full_name': user.userMetadata?['full_name'] ?? '',
+        }, onConflict: 'id');
+        debugPrint('Users upsert başarılı.');
+      } catch (usersErr) {
+        debugPrint('Users upsert hatası, profiles deneniyor: $usersErr');
+        try {
+          await Supabase.instance.client.from('profiles').upsert({
+            'id': user.id,
+            'email': user.email ?? '',
+            'full_name': user.userMetadata?['full_name'] ?? '',
+            'updated_at': DateTime.now().toIso8601String(),
+          }, onConflict: 'id');
+        } catch (profileErr) {
+          debugPrint('Profiles upsert de atlandı: $profileErr');
+        }
+      }
+
+      // 1. Fotoğrafı Storage'a yükle
+      String imageUrl = widget.plantData['image'] ?? '';
+      if (widget.imagePath.isNotEmpty) {
+        try {
+          final bytes = await File(widget.imagePath).readAsBytes();
+          final fileName =
+              '${user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          await Supabase.instance.client.storage
+              .from('plant-images')
+              .uploadBinary(fileName, bytes);
+          imageUrl = Supabase.instance.client.storage
+              .from('plant-images')
+              .getPublicUrl(fileName);
+        } catch (storageErr) {
+          debugPrint('Storage yükleme hatası: $storageErr');
+          imageUrl = '';
+        }
+      }
+
+      // 2. Son sulama tarihini hesapla
+      DateTime? lastWateredAt;
+      final now = DateTime.now();
+      if (_selectedWatered == 'Today') {
+        lastWateredAt = now;
+      } else if (_selectedWatered == 'Yesterday') {
+        lastWateredAt = now.subtract(const Duration(days: 1));
+      } else if (_selectedWatered == 'A few days ago') {
+        lastWateredAt = now.subtract(const Duration(days: 3));
+      } else if (_selectedWatered == 'A week ago') {
+        lastWateredAt = now.subtract(const Duration(days: 7));
+      } else if (_selectedWatered == 'More than a week ago') {
+        lastWateredAt = now.subtract(const Duration(days: 10));
+      }
+
+      // 3. plants tablosuna insert
+      final Map<String, dynamic> insertPayload = {
+        'user_id': user.id,
+        'custom_name': widget.plantData['name'] ?? 'My Plant',
+        'species': widget.plantData['species'] ?? '',
+        'image_url': imageUrl,
+        'health_status': 'Healthy',
+        'watering_interval_days': 7,
+      };
+
+      if (_selectedRoom != null) insertPayload['room'] = _selectedRoom;
+      if (_selectedLight != null)
+        insertPayload['light_condition'] = _selectedLight;
+      if (_selectedDistance != null)
+        insertPayload['distance_to_window'] = _selectedDistance;
+      if (_selectedHours != null)
+        insertPayload['sunlight_hours'] = _selectedHours;
+      if (_selectedRepotted != null)
+        insertPayload['last_repotted'] = _selectedRepotted;
+      if (_selectedPot != null) insertPayload['pot_type'] = _selectedPot;
+      if (lastWateredAt != null) {
+        insertPayload['last_watered_at'] = lastWateredAt
+            .toIso8601String()
+            .substring(0, 10);
+      }
+
+      debugPrint('Tam insert payload: $insertPayload');
+      Map<String, dynamic> result;
+      try {
+        // Önce tam payload (tüm wizard alanları) ile dene
+        result = await Supabase.instance.client
+            .from('plants')
+            .insert(insertPayload)
+            .select()
+            .single();
+      } catch (schemaErr) {
+        debugPrint('Tam payload başarısız (şema eksik olabilir): $schemaErr');
+        debugPrint('Temel payload ile tekrar deneniyor...');
+        // Hata olursa sadece zorunlu alanlarla kaydet
+        final Map<String, dynamic> basicPayload = {
+          'user_id': user.id,
+          'custom_name': widget.plantData['name'] ?? 'My Plant',
+          'species': widget.plantData['species'] ?? '',
+          'image_url': imageUrl,
+          'health_status': 'Healthy',
+        };
+        result = await Supabase.instance.client
+            .from('plants')
+            .insert(basicPayload)
+            .select()
+            .single();
+        debugPrint('Temel payload ile kayıt başarılı.');
+      }
+
+      final plantId = result['id'] as String;
+      debugPrint('Plants insert başarılı: id=$plantId');
+
+      // 4. Bakım takvimini oluştur
+      try {
+        await ScheduleService.createInitialSchedules(
+          plantId: plantId,
+          userId: user.id,
+          wateringIntervalDays: 7,
+          lastWateredDate: lastWateredAt,
+        );
+        debugPrint('Bakım takvimi oluşturuldu.');
+      } catch (scheduleErr) {
+        debugPrint(
+          'Schedule oluşturma hatası (görmezden gelindi): $scheduleErr',
+        );
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '${widget.plantData['name'] ?? 'Bitki'} bahçene eklendi! 🌿',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF86D5A6),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e, stack) {
+      debugPrint('Kaydetme hatası: $e\n$stack');
+      if (mounted) {
+        String errorMsg = e.toString();
+        if (errorMsg.contains('42703') || errorMsg.contains('column')) {
+          errorMsg =
+              '⚠️ Veritabanı şeması eksik. Supabase\'de fix_plants_schema.sql dosyasını çalıştırın.';
+        } else if (errorMsg.contains('23503') ||
+            errorMsg.contains('foreign key')) {
+          errorMsg =
+              '⚠️ Kullanıcı profili bulunamadı. Çıkış yapıp tekrar giriş deneyin.';
+        } else if (errorMsg.contains('42501') ||
+            errorMsg.contains('permission denied')) {
+          errorMsg =
+              '⚠️ İzin hatası. Supabase RLS politikalarını kontrol edin.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 8),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -77,10 +291,14 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+            onPressed: () =>
+                Navigator.of(context).popUntil((route) => route.isFirst),
             child: Text(
               'Skip',
-              style: GoogleFonts.inter(color: _textSecondary, fontWeight: FontWeight.w600),
+              style: GoogleFonts.inter(
+                color: _textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -127,13 +345,27 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   Widget _buildBottomButton() {
     bool canProceed = false;
     switch (_currentPage) {
-      case 0: canProceed = _selectedRoom != null; break;
-      case 1: canProceed = _selectedLight != null; break;
-      case 2: canProceed = _selectedDistance != null; break;
-      case 3: canProceed = _selectedHours != null; break;
-      case 4: canProceed = _selectedRepotted != null; break;
-      case 5: canProceed = _selectedPot != null; break;
-      case 6: canProceed = _selectedWatered != null; break;
+      case 0:
+        canProceed = _selectedRoom != null;
+        break;
+      case 1:
+        canProceed = _selectedLight != null;
+        break;
+      case 2:
+        canProceed = _selectedDistance != null;
+        break;
+      case 3:
+        canProceed = _selectedHours != null;
+        break;
+      case 4:
+        canProceed = _selectedRepotted != null;
+        break;
+      case 5:
+        canProceed = _selectedPot != null;
+        break;
+      case 6:
+        canProceed = _selectedWatered != null;
+        break;
     }
 
     return SafeArea(
@@ -142,7 +374,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         child: SizedBox(
           height: 56,
           child: ElevatedButton(
-            onPressed: canProceed ? _nextPage : null,
+            onPressed: (canProceed && !_isSaving) ? _nextPage : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _accentGreen,
               disabledBackgroundColor: Colors.grey[300],
@@ -151,14 +383,23 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
               ),
               elevation: 0,
             ),
-            child: Text(
-              _currentPage == 6 ? 'Save & Add to Garden' : 'Continue',
-              style: GoogleFonts.inter(
-                color: canProceed ? Colors.white : Colors.grey[600],
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    _currentPage == 6 ? 'Save & Add to Garden' : 'Continue',
+                    style: GoogleFonts.inter(
+                      color: canProceed ? Colors.white : Colors.grey[600],
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -185,10 +426,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: GoogleFonts.inter(
-              color: _textSecondary,
-              fontSize: 15,
-            ),
+            style: GoogleFonts.inter(color: _textSecondary, fontSize: 15),
           ),
           const SizedBox(height: 32),
           Expanded(child: child),
@@ -234,10 +472,26 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
 
   Widget _buildLightSelection() {
     final lights = [
-      {'name': 'Direct Sun', 'desc': 'Unfiltered sunlight straight on the plant', 'icon': Icons.wb_sunny_outlined},
-      {'name': 'Bright Indirect', 'desc': 'Close to an east or west window', 'icon': Icons.wb_twilight_outlined},
-      {'name': 'Medium Light', 'desc': 'A few feet away from a window', 'icon': Icons.wb_cloudy_outlined},
-      {'name': 'Low Light', 'desc': 'Far from windows or artificial light', 'icon': Icons.nights_stay_outlined},
+      {
+        'name': 'Direct Sun',
+        'desc': 'Unfiltered sunlight straight on the plant',
+        'icon': Icons.wb_sunny_outlined,
+      },
+      {
+        'name': 'Bright Indirect',
+        'desc': 'Close to an east or west window',
+        'icon': Icons.wb_twilight_outlined,
+      },
+      {
+        'name': 'Medium Light',
+        'desc': 'A few feet away from a window',
+        'icon': Icons.wb_cloudy_outlined,
+      },
+      {
+        'name': 'Low Light',
+        'desc': 'Far from windows or artificial light',
+        'icon': Icons.nights_stay_outlined,
+      },
     ];
 
     return _buildPageContainer(
@@ -256,7 +510,8 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
               subtitle: light['desc'] as String,
               icon: light['icon'] as IconData,
               isSelected: isSelected,
-              onTap: () => setState(() => _selectedLight = light['name'] as String),
+              onTap: () =>
+                  setState(() => _selectedLight = light['name'] as String),
             ),
           );
         },
@@ -284,9 +539,14 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                 return Center(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: isSelected ? _accentGreen.withOpacity(0.1) : Colors.transparent,
+                      color: isSelected
+                          ? _accentGreen.withOpacity(0.1)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -294,7 +554,9 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                       style: GoogleFonts.outfit(
                         color: isSelected ? _accentGreen : Colors.grey[400],
                         fontSize: isSelected ? 24 : 20,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -328,9 +590,14 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                 return Center(
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: isSelected ? _accentGreen.withOpacity(0.1) : Colors.transparent,
+                      color: isSelected
+                          ? _accentGreen.withOpacity(0.1)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -338,7 +605,9 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                       style: GoogleFonts.outfit(
                         color: isSelected ? _accentGreen : Colors.grey[400],
                         fontSize: isSelected ? 24 : 20,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -407,7 +676,8 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
             title: list[index]['name'] as String,
             icon: list[index]['icon'] as IconData,
             isSelected: isSelected,
-            onTap: () => setState(() => _selectedPot = list[index]['name'] as String),
+            onTap: () =>
+                setState(() => _selectedPot = list[index]['name'] as String),
           );
         },
       ),
@@ -447,7 +717,12 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
 
   // --- UI WIDGET COMPONENTS ---
 
-  Widget _buildChoiceCard({required String title, required IconData icon, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildChoiceCard({
+    required String title,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -471,7 +746,11 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: isSelected ? _accentGreen : _textSecondary, size: 36),
+            Icon(
+              icon,
+              color: isSelected ? _accentGreen : _textSecondary,
+              size: 36,
+            ),
             const SizedBox(height: 12),
             Text(
               title,
@@ -488,7 +767,13 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
     );
   }
 
-  Widget _buildListChoiceCard({required String title, required String subtitle, required IconData icon, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildListChoiceCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -518,7 +803,11 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                 color: isSelected ? _accentGreen : Colors.grey[100],
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: isSelected ? Colors.white : _textSecondary, size: 24),
+              child: Icon(
+                icon,
+                color: isSelected ? Colors.white : _textSecondary,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -550,7 +839,11 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
     );
   }
 
-  Widget _buildTextChoiceCard({required String title, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildTextChoiceCard({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(

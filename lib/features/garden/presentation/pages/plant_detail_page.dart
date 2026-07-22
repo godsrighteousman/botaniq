@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'add_plant_wizard.dart';
 
 class PlantDetailPage extends StatelessWidget {
   final Map<String, dynamic> plantData;
@@ -19,12 +21,15 @@ class PlantDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate some mock data based on input if necessary
-    final String name = plantData['name'] ?? 'Unknown Plant';
-    final String species = plantData['species'] ?? plantData['category'] ?? 'Plant Species';
-    final String imageUrl = plantData['image'] ?? 'https://picsum.photos/seed/plant/600/600';
+    final String name =
+        plantData['custom_name'] ?? plantData['name'] ?? 'Unknown Plant';
+    final String species =
+        plantData['species'] ?? plantData['category'] ?? 'Plant Species';
+    // GardenPage'den 'image_url', SearchPage'den 'image' alanı gelebilir
+    final String imageUrl = (plantData['image_url'] ?? plantData['image'] ?? '')
+        .toString();
     final String difficulty = plantData['difficulty'] ?? 'Medium';
-    
+
     return Scaffold(
       backgroundColor: _lightBg,
       body: CustomScrollView(
@@ -55,7 +60,7 @@ class PlantDetailPage extends StatelessWidget {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -63,7 +68,11 @@ class PlantDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, String imageUrl, String name) {
+  Widget _buildSliverAppBar(
+    BuildContext context,
+    String imageUrl,
+    String name,
+  ) {
     return SliverAppBar(
       expandedHeight: 320.0,
       pinned: true,
@@ -105,10 +114,7 @@ class PlantDetailPage extends StatelessWidget {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-            ),
+            Image.network(imageUrl, fit: BoxFit.cover),
             // Gradient overlay for better text visibility if needed
             Positioned(
               bottom: 0,
@@ -120,10 +126,7 @@ class PlantDetailPage extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.3),
-                      Colors.transparent,
-                    ],
+                    colors: [Colors.black.withOpacity(0.3), Colors.transparent],
                   ),
                 ),
               ),
@@ -194,19 +197,56 @@ class PlantDetailPage extends StatelessWidget {
 
   Widget _buildCharacteristicsGrid(BuildContext context, String difficulty) {
     final double itemWidth = (MediaQuery.of(context).size.width - 48 - 16) / 2;
+    final bool isToxicToPets = plantData['is_toxic_to_pets'] == true;
+    final String toxicity =
+        plantData['toxicity'] ??
+        (isToxicToPets ? 'Toxic to pets' : 'Non-toxic');
+    final String environment = plantData['environment'] ?? 'Indoor';
+    final String sunlight =
+        plantData['sunlight'] ?? plantData['light_needs'] ?? 'Bright Indirect';
     return Wrap(
       spacing: 16,
       runSpacing: 16,
       children: [
-        _buildCharacteristicBadge(itemWidth, Icons.speed_rounded, 'Difficulty', difficulty, _accentGreen),
-        _buildCharacteristicBadge(itemWidth, Icons.pets_rounded, 'Toxicity', 'Toxic to pets', Colors.redAccent),
-        _buildCharacteristicBadge(itemWidth, Icons.home_work_outlined, 'Environment', 'Indoor', Colors.purpleAccent),
-        _buildCharacteristicBadge(itemWidth, Icons.wb_sunny_outlined, 'Sunlight', 'Bright Indirect', Colors.orangeAccent),
+        _buildCharacteristicBadge(
+          itemWidth,
+          Icons.speed_rounded,
+          'Difficulty',
+          difficulty,
+          _accentGreen,
+        ),
+        _buildCharacteristicBadge(
+          itemWidth,
+          Icons.pets_rounded,
+          'Toxicity',
+          toxicity,
+          isToxicToPets ? Colors.redAccent : Colors.teal,
+        ),
+        _buildCharacteristicBadge(
+          itemWidth,
+          Icons.home_work_outlined,
+          'Environment',
+          environment,
+          Colors.purpleAccent,
+        ),
+        _buildCharacteristicBadge(
+          itemWidth,
+          Icons.wb_sunny_outlined,
+          'Sunlight',
+          sunlight,
+          Colors.orangeAccent,
+        ),
       ],
     );
   }
 
-  Widget _buildCharacteristicBadge(double width, IconData icon, String label, String value, Color color) {
+  Widget _buildCharacteristicBadge(
+    double width,
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Container(
       width: width,
       padding: const EdgeInsets.all(16),
@@ -267,8 +307,13 @@ class PlantDetailPage extends StatelessWidget {
   }
 
   Widget _buildAboutSection() {
+    final String desc =
+        plantData['description'] ??
+        'This plant is known for its beautiful foliage and easy-care nature. '
+            'It thrives in bright, indirect light and prefers its soil to dry out '
+            'slightly between waterings.';
     return Text(
-      'This plant is known for its beautiful foliage and easy-care nature. It thrives in bright, indirect light and prefers its soil to dry out slightly between waterings. Perfect for adding a touch of tropical elegance to any indoor space.',
+      desc,
       style: GoogleFonts.inter(
         color: _textSecondary,
         fontSize: 15,
@@ -278,48 +323,60 @@ class PlantDetailPage extends StatelessWidget {
   }
 
   Widget _buildPlacementSection() {
+    final String climate =
+        plantData['ideal_climate'] ?? 'Warm & Humid (18°C - 24°C)';
+    final String humidityStr = plantData['humidity'] ?? 'Moderate to High';
+    final String tempRange = plantData['temperature_range'] ?? '18-24°C';
     return Column(
       children: [
         _buildCareTile(
           icon: Icons.thermostat_rounded,
           title: 'Ideal Climate',
-          subtitle: 'Warm & Humid (18°C - 24°C)',
+          subtitle: climate,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
-          icon: Icons.calendar_month_rounded,
-          title: 'Planting Season',
-          subtitle: 'Best planted in Spring or early Summer to settle its roots.',
+          icon: Icons.water_outlined,
+          title: 'Humidity',
+          subtitle: humidityStr,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.landscape_rounded,
-          title: 'Best Placement',
-          subtitle: 'Usually kept indoors. Place near an east or west-facing window out of direct harsh drafts.',
+          title: 'Temperature Range',
+          subtitle: tempRange,
         ),
       ],
     );
   }
 
   Widget _buildCareRequirements() {
+    final String waterProtocol =
+        plantData['watering_protocol'] ??
+        plantData['water_needs'] ??
+        'Water every 7-10 days. Allow the top inch of soil to dry out between waterings.';
+    final String feedProtocol =
+        plantData['feeding_protocol'] ??
+        'Fertilize monthly during spring/summer with balanced liquid fertilizer.';
     return Column(
       children: [
         _buildCareTile(
           icon: Icons.water_drop_rounded,
           title: 'Watering Protocol',
-          subtitle: 'Every 7-10 days. Always allow the top inch of soil to dry out before watering again. Do not overwater.',
+          subtitle: waterProtocol,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.science_rounded,
           title: 'Feeding Protocol',
-          subtitle: 'Fertilize every 2 weeks during the active growing season (Spring & Summer).',
+          subtitle: feedProtocol,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.content_cut_rounded,
           title: 'Pruning & Cleaning',
-          subtitle: 'Wipe leaves with a damp cloth monthly. Prune dead or yellowing leaves to encourage growth.',
+          subtitle:
+              'Wipe leaves monthly. Prune dead or yellowing leaves to encourage growth.',
         ),
       ],
     );
@@ -387,7 +444,7 @@ class PlantDetailPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.08 * 4),
+            color: const Color(0xFFCBD5E1).withOpacity(0.32),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -402,10 +459,46 @@ class PlantDetailPage extends StatelessWidget {
                 title: 'Water Now',
                 icon: Icons.water_drop,
                 isPrimary: true,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Plant watered!')),
-                  );
+                onTap: () async {
+                  final plantId = plantData['id']?.toString();
+                  if (plantId == null) return;
+                  final now = DateTime.now();
+                  try {
+                    await Supabase.instance.client
+                        .from('plants')
+                        .update({
+                          'last_watered_at': now.toIso8601String().substring(
+                            0,
+                            10,
+                          ),
+                        })
+                        .eq('id', plantId);
+                    // En yakın sulama görevini tamamlandı olarak işaretle
+                    await Supabase.instance.client
+                        .from('care_tasks')
+                        .update({
+                          'is_completed': true,
+                          'completed_at': now.toIso8601String(),
+                        })
+                        .eq('plant_id', plantId)
+                        .eq('task_type', 'water')
+                        .eq('is_completed', false)
+                        .order('due_date')
+                        .limit(1);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('✓ Plant watered! Great job!'),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  }
                 },
               ),
             ),
@@ -419,10 +512,18 @@ class PlantDetailPage extends StatelessWidget {
                 icon: Icons.add,
                 isPrimary: true,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Added to Garden!')),
+                  // Wizard'a bitki verilerini aktar
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddPlantWizard(
+                        plantData: plantData,
+                        imagePath:
+                            (plantData['image_url'] ?? plantData['image'] ?? '')
+                                .toString(),
+                      ),
+                    ),
                   );
-                  Navigator.pop(context);
                 },
               ),
             ),
@@ -432,7 +533,13 @@ class PlantDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton(BuildContext context, {required String title, required IconData icon, required bool isPrimary, required VoidCallback onTap}) {
+  Widget _buildActionButton(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required bool isPrimary,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

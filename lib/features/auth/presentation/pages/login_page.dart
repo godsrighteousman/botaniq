@@ -410,10 +410,11 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Google Girişi Hata: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -450,10 +451,11 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Apple Girişi Hata: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
