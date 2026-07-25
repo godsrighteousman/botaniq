@@ -93,4 +93,52 @@ class OpenAIService {
       rethrow;
     }
   }
+  /// Bitki ismi verildiğinde detaylı bakım bilgilerini getirir
+  static Future<Map<String, dynamic>?> getPlantDetailsByName(String plantName) async {
+    String apiKey = _defaultApiKey;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedKey = prefs.getString('openai_api_key');
+      if (savedKey != null && savedKey.trim().isNotEmpty && savedKey.trim().startsWith('sk-')) {
+        apiKey = savedKey.trim();
+      }
+    } catch (e) {
+      debugPrint("SharedPreferences okuma hatası: $e");
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(_apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          "model": "gpt-4o-mini",
+          "messages": [
+            {
+              "role": "system",
+              "content": "Sen uzman bir botanikçisin ve bitki detayları sağlayan bir API'sin. Sadece JSON formatında cevap vermelisin."
+            },
+            {
+              "role": "user",
+              "content": "Bana '$plantName' adlı bitki/çiçek (örneğin türü de içerebilir) hakkında detaylı bilgi ver. Şunları içersin: description, ideal_climate, humidity, temperature_range, watering_protocol, feeding_protocol, toxicity, difficulty, environment, sunlight. Lütfen yanıtını sadece bir JSON objesi olarak dön ve markdown kullanma. Çıktı dili Türkçe olsun."
+            }
+          ],
+          "max_tokens": 800,
+          "temperature": 0.3,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        final content = data['choices'][0]['message']['content'];
+        final cleanContent = content.toString().replaceAll('```json', '').replaceAll('```', '').trim();
+        return jsonDecode(cleanContent);
+      }
+    } catch (e) {
+      debugPrint("OpenAI AI Plant Details fetch error: $e");
+    }
+    return null;
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'add_plant_wizard.dart';
+import '../../../../core/services/openai_service.dart';
 
 class PlantDetailPage extends StatefulWidget {
   final Map<String, dynamic> plantData;
@@ -30,10 +31,45 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   bool _isFertilized = false;
   bool _isLoadingWater = false;
   bool _isLoadingFertilize = false;
+  late Map<String, dynamic> _localPlantData;
+  bool _isLoadingDetails = false;
 
   @override
   void initState() {
     super.initState();
+    _localPlantData = Map<String, dynamic>.from(widget.plantData);
+    _checkAndFetchDetails();
+  }
+
+  Future<void> _checkAndFetchDetails() async {
+    // Sadece eğer bitki hakkında detaylı açıklama vs. yoksa OpenAI'den çekelim
+    if (_localPlantData['description'] == null) {
+      if (!mounted) return;
+      setState(() => _isLoadingDetails = true);
+      final name =
+          _localPlantData['name'] ??
+          _localPlantData['custom_name'] ??
+          _localPlantData['species'] ??
+          'Unknown Plant';
+      final details = await OpenAIService.getPlantDetailsByName(name);
+
+      if (details != null && mounted) {
+        setState(() {
+          _localPlantData.addAll(details);
+          _isLoadingDetails = false;
+        });
+
+        // Eğer veritabanına kaydetmek istersek (opsiyonel) - şimdilik sadece UI'da tutuyoruz
+        /*
+        final id = _localPlantData['id']?.toString();
+        if (id != null) {
+          // Tabloda uygun kolonlar olmadığı sürece save edilemez.
+        }
+        */
+      } else if (mounted) {
+        setState(() => _isLoadingDetails = false);
+      }
+    }
   }
 
   @override
@@ -43,7 +79,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
 
   // ─── Water Now ───────────────────────────────────────────────────────────
   Future<void> _waterNow() async {
-    final plantId = widget.plantData['id']?.toString();
+    final plantId = _localPlantData['id']?.toString();
     if (plantId == null || _isWatered || _isLoadingWater) return;
 
     setState(() => _isLoadingWater = true);
@@ -58,15 +94,37 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           .update({'last_watered_at': now.toIso8601String().substring(0, 10)})
           .eq('id', plantId);
 
-      // 2. En yakın bekleyen sulama görevini tamamlandı yap
-      await Supabase.instance.client
+      // 2. En yakın bekleyen sulama görevini tamamlandı yap veya yeni kayıt oluştur
+      final pendingTasks = await Supabase.instance.client
           .from('care_tasks')
-          .update({'is_completed': true, 'completed_at': now.toIso8601String()})
+          .select('id')
           .eq('plant_id', plantId)
           .eq('task_type', 'water')
           .eq('is_completed', false)
           .order('due_date')
           .limit(1);
+
+      if (pendingTasks.isNotEmpty) {
+        await Supabase.instance.client
+            .from('care_tasks')
+            .update({
+              'is_completed': true,
+              'completed_at': now.toIso8601String(),
+            })
+            .eq('id', pendingTasks.first['id']);
+      } else {
+        final userId = Supabase.instance.client.auth.currentUser?.id;
+        if (userId != null) {
+          await Supabase.instance.client.from('care_tasks').insert({
+            'plant_id': plantId,
+            'user_id': userId,
+            'task_type': 'water',
+            'due_date': now.toIso8601String(),
+            'is_completed': true,
+            'completed_at': now.toIso8601String(),
+          });
+        }
+      }
 
       if (mounted) {
         setState(() {
@@ -86,7 +144,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
 
   // ─── Fertilize ───────────────────────────────────────────────────────────
   Future<void> _fertilizeNow() async {
-    final plantId = widget.plantData['id']?.toString();
+    final plantId = _localPlantData['id']?.toString();
     if (plantId == null || _isFertilized || _isLoadingFertilize) return;
 
     setState(() => _isLoadingFertilize = true);
@@ -95,14 +153,36 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     try {
       final now = DateTime.now();
 
-      await Supabase.instance.client
+      final pendingTasks = await Supabase.instance.client
           .from('care_tasks')
-          .update({'is_completed': true, 'completed_at': now.toIso8601String()})
+          .select('id')
           .eq('plant_id', plantId)
           .eq('task_type', 'fertilize')
           .eq('is_completed', false)
           .order('due_date')
           .limit(1);
+
+      if (pendingTasks.isNotEmpty) {
+        await Supabase.instance.client
+            .from('care_tasks')
+            .update({
+              'is_completed': true,
+              'completed_at': now.toIso8601String(),
+            })
+            .eq('id', pendingTasks.first['id']);
+      } else {
+        final userId = Supabase.instance.client.auth.currentUser?.id;
+        if (userId != null) {
+          await Supabase.instance.client.from('care_tasks').insert({
+            'plant_id': plantId,
+            'user_id': userId,
+            'task_type': 'fertilize',
+            'due_date': now.toIso8601String(),
+            'is_completed': true,
+            'completed_at': now.toIso8601String(),
+          });
+        }
+      }
 
       if (mounted) {
         setState(() {
@@ -162,17 +242,17 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   @override
   Widget build(BuildContext context) {
     final String name =
-        widget.plantData['custom_name'] ??
-        widget.plantData['name'] ??
+        _localPlantData['custom_name'] ??
+        _localPlantData['name'] ??
         'Unknown Plant';
     final String species =
-        widget.plantData['species'] ??
-        widget.plantData['category'] ??
+        _localPlantData['species'] ??
+        _localPlantData['category'] ??
         'Plant Species';
     final String imageUrl =
-        (widget.plantData['image_url'] ?? widget.plantData['image'] ?? '')
+        (_localPlantData['image_url'] ?? _localPlantData['image'] ?? '')
             .toString();
-    final String difficulty = widget.plantData['difficulty'] ?? 'Medium';
+    final String difficulty = _localPlantData['difficulty'] ?? 'Medium';
 
     return Scaffold(
       backgroundColor: _lightBg,
@@ -189,17 +269,23 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                   const SizedBox(height: 24),
                   _buildCharacteristicsGrid(context, difficulty),
                   const SizedBox(height: 32),
-                  _buildSectionTitle('About'),
+                  _buildSectionTitle('Hakkında'),
                   const SizedBox(height: 12),
                   _buildAboutSection(),
                   const SizedBox(height: 32),
-                  _buildSectionTitle('Placement & Environment'),
+                  _buildSectionTitle('Konum & Ortam'),
                   const SizedBox(height: 16),
                   _buildPlacementSection(),
                   const SizedBox(height: 32),
-                  _buildSectionTitle('Care Protocol'),
+                  _buildSectionTitle('Bakım Protokolü'),
                   const SizedBox(height: 16),
                   _buildCareRequirements(),
+                  if (widget.isFromGarden) ...[
+                    const SizedBox(height: 32),
+                    _buildSectionTitle('Son 10 Günlük Bakım Geçmişi'),
+                    const SizedBox(height: 16),
+                    _buildCareHistorySection(),
+                  ],
                   const SizedBox(height: 120),
                 ],
               ),
@@ -344,14 +430,14 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
 
   Widget _buildCharacteristicsGrid(BuildContext context, String difficulty) {
     final double itemWidth = (MediaQuery.of(context).size.width - 48 - 16) / 2;
-    final bool isToxicToPets = widget.plantData['is_toxic_to_pets'] == true;
+    final bool isToxicToPets = _localPlantData['is_toxic_to_pets'] == true;
     final String toxicity =
-        widget.plantData['toxicity'] ??
+        _localPlantData['toxicity'] ??
         (isToxicToPets ? 'Toxic to pets' : 'Non-toxic');
-    final String environment = widget.plantData['environment'] ?? 'Indoor';
+    final String environment = _localPlantData['environment'] ?? 'Indoor';
     final String sunlight =
-        widget.plantData['sunlight'] ??
-        widget.plantData['light_needs'] ??
+        _localPlantData['sunlight'] ??
+        _localPlantData['light_needs'] ??
         'Bright Indirect';
     return Wrap(
       spacing: 16,
@@ -360,28 +446,28 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
         _buildCharacteristicBadge(
           itemWidth,
           Icons.speed_rounded,
-          'Difficulty',
+          'Zorluk Seviyesi',
           difficulty,
           _accentGreen,
         ),
         _buildCharacteristicBadge(
           itemWidth,
           Icons.pets_rounded,
-          'Toxicity',
+          'Toksisite',
           toxicity,
           isToxicToPets ? Colors.redAccent : Colors.teal,
         ),
         _buildCharacteristicBadge(
           itemWidth,
           Icons.home_work_outlined,
-          'Environment',
+          'Yetişme Ortamı',
           environment,
           Colors.purpleAccent,
         ),
         _buildCharacteristicBadge(
           itemWidth,
           Icons.wb_sunny_outlined,
-          'Sunlight',
+          'Işık İhtiyacı',
           sunlight,
           Colors.orangeAccent,
         ),
@@ -456,8 +542,11 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildAboutSection() {
+    if (_isLoadingDetails) {
+      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+    }
     final String desc =
-        widget.plantData['description'] ??
+        _localPlantData['description'] ??
         'This plant is known for its beautiful foliage and easy-care nature. '
             'It thrives in bright, indirect light and prefers its soil to dry out '
             'slightly between waterings.';
@@ -472,28 +561,31 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildPlacementSection() {
+    if (_isLoadingDetails) {
+      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+    }
     final String climate =
-        widget.plantData['ideal_climate'] ?? 'Warm & Humid (18°C - 24°C)';
+        _localPlantData['ideal_climate'] ?? 'Warm & Humid (18°C - 24°C)';
     final String humidityStr =
-        widget.plantData['humidity'] ?? 'Moderate to High';
-    final String tempRange = widget.plantData['temperature_range'] ?? '18-24°C';
+        _localPlantData['humidity'] ?? 'Moderate to High';
+    final String tempRange = _localPlantData['temperature_range'] ?? '18-24°C';
     return Column(
       children: [
         _buildCareTile(
           icon: Icons.thermostat_rounded,
-          title: 'Ideal Climate',
+          title: 'İdeal İklim',
           subtitle: climate,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.water_outlined,
-          title: 'Humidity',
+          title: 'Nem Oranı',
           subtitle: humidityStr,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.landscape_rounded,
-          title: 'Temperature Range',
+          title: 'Sıcaklık Aralığı',
           subtitle: tempRange,
         ),
       ],
@@ -501,12 +593,15 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildCareRequirements() {
+    if (_isLoadingDetails) {
+      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+    }
     final String waterProtocol =
-        widget.plantData['watering_protocol'] ??
-        widget.plantData['water_needs'] ??
+        _localPlantData['watering_protocol'] ??
+        _localPlantData['water_needs'] ??
         'Water every 7-10 days. Allow the top inch of soil to dry out between waterings.';
     final String feedProtocol =
-        widget.plantData['feeding_protocol'] ??
+        _localPlantData['feeding_protocol'] ??
         'Fertilize monthly during spring/summer with balanced liquid fertilizer.';
     return Column(
       children: [
@@ -586,6 +681,135 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   // ─── Bottom Action Bar ────────────────────────────────────────────────────
+  Widget _buildCareHistorySection() {
+    if (!widget.isFromGarden) return const SizedBox.shrink();
+    final plantId = _localPlantData['id']?.toString();
+    if (plantId == null) return const SizedBox.shrink();
+
+    final tenDaysAgo = DateTime.now().subtract(const Duration(days: 10));
+
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: Supabase.instance.client
+          .from('care_tasks')
+          .select()
+          .eq('plant_id', plantId)
+          .eq('is_completed', true)
+          .gte('completed_at', tenDaysAgo.toIso8601String())
+          .order('completed_at', ascending: false)
+          .then((data) => List<Map<String, dynamic>>.from(data)),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Text(
+            'Error loading history: ${snapshot.error}',
+            style: TextStyle(color: Colors.red),
+          );
+        }
+
+        final history = snapshot.data ?? [];
+
+        if (history.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.history_rounded, color: _textSecondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Son 10 güne ait bakım geçmişi bulunmuyor.',
+                    style: GoogleFonts.inter(color: _textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: _cardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            children: history.map((task) {
+              final taskType = task['task_type'] as String?;
+              final completedAt = task['completed_at'] != null
+                  ? DateTime.parse(task['completed_at'])
+                  : null;
+              final isWater = taskType == 'water';
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isWater
+                            ? const Color(0xFF4A90E2).withOpacity(0.1)
+                            : const Color(0xFF4FA976).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isWater
+                            ? Icons.water_drop_rounded
+                            : Icons.science_rounded,
+                        color: isWater
+                            ? const Color(0xFF4A90E2)
+                            : const Color(0xFF4FA976),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isWater ? 'Sulama' : 'Gübreleme',
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
+                              color: _primaryText,
+                            ),
+                          ),
+                          if (completedAt != null)
+                            Text(
+                              '${completedAt.day}/${completedAt.month}/${completedAt.year} ${completedAt.hour.toString().padLeft(2, '0')}:${completedAt.minute.toString().padLeft(2, '0')}',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: _textSecondary,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: isWater
+                          ? const Color(0xFF4A90E2)
+                          : const Color(0xFF4FA976),
+                      size: 16,
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildBottomActionBar(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -649,8 +873,8 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                           builder: (context) => AddPlantWizard(
                             plantData: widget.plantData,
                             imagePath:
-                                (widget.plantData['image_url'] ??
-                                        widget.plantData['image'] ??
+                                (_localPlantData['image_url'] ??
+                                        _localPlantData['image'] ??
                                         '')
                                     .toString(),
                           ),
