@@ -23,12 +23,26 @@ class _ProfilePageState extends State<ProfilePage> {
   final Color _textSecondary = const Color(0xFF8B9E93);
   final Color _dangerColor = const Color(0xFFE96565);
 
-  int _selectedTabIndex = 0; // 0: Overview, 1: Settings
+  int _selectedTabIndex = 0; // 0: Genel Bakış, 1: Ayarlar
 
-  String _fullName = 'Botanist';
+  String _fullName = 'Bahçıvan';
   String _email = '';
   String _avatarUrl = 'https://i.pravatar.cc/150?img=68';
   bool _isLoading = true;
+
+  // Dinamik istatistikler ve haftalık aktivite
+  int _totalPlantsCount = 0;
+  int _completedTasksCount = 0;
+  List<double> _weeklyActivity = List.filled(7, 0.0);
+  List<String> _activityDays = [
+    'Pzt',
+    'Sal',
+    'Çar',
+    'Per',
+    'Cum',
+    'Cmt',
+    'Paz',
+  ];
 
   @override
   void initState() {
@@ -41,215 +55,355 @@ class _ProfilePageState extends State<ProfilePage> {
     if (user != null) {
       _email = user.email ?? '';
       try {
-        final data = await Supabase.instance.client
-            .from('profiles')
-            .select('full_name, avatar_url')
+        // En öncelikli olarak 'users' tablosunu kontrol et (çünkü EditProfilePage burayı güncelliyor)
+        final usersData = await Supabase.instance.client
+            .from('users')
+            .select()
             .eq('id', user.id)
             .maybeSingle();
 
-        if (data != null && mounted) {
+        if (usersData != null && mounted) {
           setState(() {
-            if (data['full_name'] != null &&
-                data['full_name'].toString().isNotEmpty) {
-              _fullName = data['full_name'];
+            if (usersData['full_name'] != null &&
+                usersData['full_name'].toString().isNotEmpty) {
+              _fullName = usersData['full_name'];
             } else {
-              // Fallback to user metadata if exists
-              _fullName = user.userMetadata?['full_name'] ?? 'Botanist';
+              _fullName = user.userMetadata?['full_name'] ?? 'Bahçıvan';
             }
-            if (data['avatar_url'] != null) _avatarUrl = data['avatar_url'];
+            if (usersData['avatar_url'] != null) {
+              _avatarUrl = usersData['avatar_url'];
+            }
+          });
+        } else {
+          // profiles tablosuna geri çekil
+          final profilesData = await Supabase.instance.client
+              .from('profiles')
+              .select('full_name, avatar_url')
+              .eq('id', user.id)
+              .maybeSingle();
+          if (profilesData != null && mounted) {
+            setState(() {
+              if (profilesData['full_name'] != null &&
+                  profilesData['full_name'].toString().isNotEmpty) {
+                _fullName = profilesData['full_name'];
+              } else {
+                _fullName = user.userMetadata?['full_name'] ?? 'Bahçıvan';
+              }
+              if (profilesData['avatar_url'] != null) {
+                _avatarUrl = profilesData['avatar_url'];
+              }
+            });
+          }
+        }
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _fullName = user.userMetadata?['full_name'] ?? 'Bahçıvan';
           });
         }
-      } catch (_) {}
+      }
+
+      await _fetchStatistics(user.id);
     }
     if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _fetchStatistics(String userId) async {
+    try {
+      // 1. Bitki Sayısı Sorgusu
+      final plantsRes = await Supabase.instance.client
+          .from('plants')
+          .select('id')
+          .eq('user_id', userId);
+
+      // 2. Tamamlanan Görev Sayısı Sorgusu
+      final completedTasksRes = await Supabase.instance.client
+          .from('care_tasks')
+          .select('id, completed_at')
+          .eq('user_id', userId)
+          .eq('is_completed', true);
+
+      if (mounted) {
+        setState(() {
+          _totalPlantsCount = (plantsRes as List).length;
+          _completedTasksCount = (completedTasksRes as List).length;
+
+          // Son 7 günün haftalık gün etiketlerini hesaplayalım
+          final now = DateTime.now();
+          final startOfWeek = DateTime(
+            now.year,
+            now.month,
+            now.day,
+          ).subtract(const Duration(days: 6));
+          final dailyCounts = List.filled(7, 0);
+
+          _activityDays.clear();
+          final turkishWeekDays = [
+            'Pzt',
+            'Sal',
+            'Çar',
+            'Per',
+            'Cum',
+            'Cmt',
+            'Paz',
+          ];
+          for (int i = 0; i < 7; i++) {
+            final day = startOfWeek.add(Duration(days: i));
+            _activityDays.add(turkishWeekDays[day.weekday - 1]);
+          }
+
+          // Görevleri günlere dağıt
+          for (final task in completedTasksRes) {
+            final compAtStr = task['completed_at'] as String?;
+            if (compAtStr != null) {
+              final compDate = DateTime.parse(compAtStr).toLocal();
+              final diff = compDate.difference(startOfWeek).inDays;
+              if (diff >= 0 && diff < 7) {
+                dailyCounts[diff]++;
+              }
+            }
+          }
+
+          int maxCount = 1;
+          for (final count in dailyCounts) {
+            if (count > maxCount) maxCount = count;
+          }
+
+          _weeklyActivity = dailyCounts.map((c) => c / maxCount).toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('İstatistik getirme hatası: $e');
+    }
+  }
+
+  String get _gardenerTitle {
+    if (_totalPlantsCount == 0) return 'Yeni Bahçıvan 🌱';
+    if (_totalPlantsCount <= 2) return 'Filiz Dostu 🌿';
+    if (_totalPlantsCount <= 5) return 'Yaprak Sever ☘️';
+    if (_totalPlantsCount <= 10) return 'Yetenekli Bahçıvan 🏡';
+    return 'Yeşil Başparmak Ustası 👑';
+  }
+
+  String get _nextLevelText {
+    if (_totalPlantsCount == 0)
+      return 'İlk bitkini ekle ve bahçıvanlık macerana başla!';
+    if (_totalPlantsCount <= 2)
+      return 'Yaprak Sever olmaya ${3 - _totalPlantsCount} bitki kaldı.';
+    if (_totalPlantsCount <= 5)
+      return 'Yetenekli Bahçıvan olmaya ${6 - _totalPlantsCount} bitki kaldı.';
+    if (_totalPlantsCount <= 10)
+      return 'Yeşil Başparmak Ustası olmaya ${11 - _totalPlantsCount} bitki kaldı.';
+    return 'Bahçenizin zirvesindesiniz, tebrikler!';
+  }
+
+  double get _levelProgress {
+    if (_totalPlantsCount == 0) return 0.0;
+    if (_totalPlantsCount <= 2) return _totalPlantsCount / 3;
+    if (_totalPlantsCount <= 5) return _totalPlantsCount / 6;
+    if (_totalPlantsCount <= 10) return _totalPlantsCount / 11;
+    return 1.0;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _lightBg,
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              // Header
-              Text(
-                'Profile',
-                style: GoogleFonts.outfit(
-                  color: _primaryText,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // User Info Card
-              GestureDetector(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditProfilePage(),
-                    ),
-                  );
-                  if (result == true) {
-                    _fetchUserData();
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: _cardBg,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Row(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _fetchUserData,
+              color: const Color(0xFF4FA976),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: _accentGreen.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: NetworkImage(_avatarUrl),
-                            fit: BoxFit.cover,
+                      const SizedBox(height: 36),
+                      // Header
+                      Text(
+                        'Profilim',
+                        style: GoogleFonts.outfit(
+                          color: _primaryText,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // User Info Card
+                      GestureDetector(
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EditProfilePage(),
+                            ),
+                          );
+                          if (result == true) {
+                            _fetchUserData();
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: _cardBg,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(
+                                  0xFFCBD5E1,
+                                ).withOpacity(0.16),
+                                blurRadius: 30,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: _accentGreen.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    image: NetworkImage(_avatarUrl),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _fullName,
+                                      style: GoogleFonts.outfit(
+                                        color: _primaryText,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _email,
+                                      style: GoogleFonts.inter(
+                                        color: _textSecondary,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _accentGreen.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        'Profili Düzenle',
+                                        style: GoogleFonts.inter(
+                                          color: const Color(0xFF4FA976),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                color: _textSecondary,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 24),
+
+                      // Custom Tab Bar
+                      Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _cardBg,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: Row(
                           children: [
-                            Text(
-                              _fullName,
-                              style: GoogleFonts.outfit(
-                                color: _primaryText,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectedTabIndex = 0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _selectedTabIndex == 0
+                                        ? const Color(0xFF4FA976)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Genel Bakış',
+                                    style: GoogleFonts.inter(
+                                      color: _selectedTabIndex == 0
+                                          ? Colors.white
+                                          : _textSecondary,
+                                      fontWeight: _selectedTabIndex == 0
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _email,
-                              style: GoogleFonts.inter(
-                                color: _textSecondary,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _accentGreen.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                'Edit Profile',
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF4FA976),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _selectedTabIndex = 1),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: _selectedTabIndex == 1
+                                        ? const Color(0xFF4FA976)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Ayarlar',
+                                    style: GoogleFonts.inter(
+                                      color: _selectedTabIndex == 1
+                                          ? Colors.white
+                                          : _textSecondary,
+                                      fontWeight: _selectedTabIndex == 1
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Icon(Icons.chevron_right_rounded, color: _textSecondary),
+                      const SizedBox(height: 24),
+
+                      // Tab Contents
+                      if (_selectedTabIndex == 0) _buildOverviewTab(),
+                      if (_selectedTabIndex == 1) _buildSettingsTab(),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
-
-              // Custom Tab Bar
-              Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _cardBg,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                padding: const EdgeInsets.all(4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedTabIndex = 0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: _selectedTabIndex == 0
-                                ? _accentGreen
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Overview',
-                            style: GoogleFonts.inter(
-                              color: _selectedTabIndex == 0
-                                  ? Colors.white
-                                  : _textSecondary,
-                              fontWeight: _selectedTabIndex == 0
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedTabIndex = 1),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: _selectedTabIndex == 1
-                                ? _accentGreen
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'Settings',
-                            style: GoogleFonts.inter(
-                              color: _selectedTabIndex == 1
-                                  ? Colors.white
-                                  : _textSecondary,
-                              fontWeight: _selectedTabIndex == 1
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Tab Contents
-              if (_selectedTabIndex == 0) _buildOverviewTab(),
-              if (_selectedTabIndex == 1) _buildSettingsTab(),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -257,7 +411,94 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Grid for Total Plants & Consistency
+        // Gamified Gardener Title Level Card
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFE2F4EB), Color(0xFFCBEBDC)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFCBD5E1).withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Bahçıvan Seviyen',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF2C3E35).withOpacity(0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2C3E35),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'LVL ${_totalPlantsCount > 10 ? 4 : (_totalPlantsCount > 5 ? 3 : (_totalPlantsCount > 2 ? 2 : 1))}',
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _gardenerTitle,
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFF2C3E35),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: _levelProgress,
+                  backgroundColor: Colors.white.withOpacity(0.5),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Color(0xFF4FA976),
+                  ),
+                  minHeight: 8,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _nextLevelText,
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF2C3E35).withOpacity(0.7),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // Grid for Total Plants & Completed Tasks
         Row(
           children: [
             Expanded(
@@ -266,6 +507,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 decoration: BoxDecoration(
                   color: _cardBg,
                   borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFCBD5E1).withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,9 +526,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: _accentGreen.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.local_florist_rounded,
-                            color: _accentGreen,
+                            color: Color(0xFF4FA976),
                             size: 24,
                           ),
                         ),
@@ -288,7 +536,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '24',
+                      _totalPlantsCount.toString(),
                       style: GoogleFonts.outfit(
                         color: _primaryText,
                         fontSize: 32,
@@ -297,7 +545,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Total Plants',
+                      'Toplam Bitki',
                       style: GoogleFonts.inter(
                         color: _textSecondary,
                         fontSize: 13,
@@ -314,6 +562,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 decoration: BoxDecoration(
                   color: _cardBg,
                   borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFCBD5E1).withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +582,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.verified_rounded,
+                            Icons.check_circle_rounded,
                             color: Color(0xFF4FA976),
                             size: 24,
                           ),
@@ -336,7 +591,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '92%',
+                      _completedTasksCount.toString(),
                       style: GoogleFonts.outfit(
                         color: _primaryText,
                         fontSize: 32,
@@ -345,7 +600,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Consistency',
+                      'Tamamlanan Bakım',
                       style: GoogleFonts.inter(
                         color: _textSecondary,
                         fontSize: 13,
@@ -357,7 +612,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
         // Care Activity
         Container(
@@ -365,12 +620,19 @@ class _ProfilePageState extends State<ProfilePage> {
           decoration: BoxDecoration(
             color: _cardBg,
             borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFCBD5E1).withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Care Activity',
+                'Haftalık Bakım Aktivitesi',
                 style: GoogleFonts.outfit(
                   color: _primaryText,
                   fontSize: 20,
@@ -381,15 +643,12 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  _buildActivityBar('Mon', 0.6),
-                  _buildActivityBar('Tue', 0.8),
-                  _buildActivityBar('Wed', 0.4),
-                  _buildActivityBar('Thu', 1.0),
-                  _buildActivityBar('Fri', 0.7),
-                  _buildActivityBar('Sat', 0.3),
-                  _buildActivityBar('Sun', 0.9),
-                ],
+                children: List.generate(7, (index) {
+                  return _buildActivityBar(
+                    _activityDays[index],
+                    _weeklyActivity[index],
+                  );
+                }),
               ),
             ],
           ),
@@ -400,6 +659,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildActivityBar(String day, double percentage) {
+    final double displayHeight = percentage > 0 ? (120 * percentage) : 6.0;
+
     return Column(
       children: [
         Container(
@@ -411,10 +672,12 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           alignment: Alignment.bottomCenter,
           child: Container(
-            height: 120 * percentage,
+            height: displayHeight,
             width: 12,
             decoration: BoxDecoration(
-              color: _accentGreen,
+              color: percentage > 0
+                  ? const Color(0xFF4FA976)
+                  : const Color(0xFFE2E8F0),
               borderRadius: BorderRadius.circular(6),
             ),
           ),
@@ -433,7 +696,7 @@ class _ProfilePageState extends State<ProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'General',
+          'Genel',
           style: GoogleFonts.inter(
             color: _textSecondary,
             fontSize: 14,
@@ -445,7 +708,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildMenuSection([
           _buildMenuItem(
             icon: Icons.settings_rounded,
-            title: 'Settings',
+            title: 'Uygulama Ayarları',
             onTap: () {
               Navigator.push(
                 context,
@@ -454,13 +717,8 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ),
           _buildMenuItem(
-            icon: Icons.language_rounded,
-            title: 'App Language',
-            onTap: () {},
-          ),
-          _buildMenuItem(
             icon: Icons.notifications_none_rounded,
-            title: 'Notifications',
+            title: 'Bildirim Tercihleri',
             onTap: () {
               Navigator.push(
                 context,
@@ -474,7 +732,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
         const SizedBox(height: 24),
         Text(
-          'Support & Legal',
+          'Destek & Yasal',
           style: GoogleFonts.inter(
             color: _textSecondary,
             fontSize: 14,
@@ -486,12 +744,12 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildMenuSection([
           _buildMenuItem(
             icon: Icons.help_outline_rounded,
-            title: 'Help Center',
+            title: 'Yardım Merkezi',
             onTap: () {},
           ),
           _buildMenuItem(
             icon: Icons.description_outlined,
-            title: 'Terms & Policies',
+            title: 'Kullanım Koşulları & Politikalar',
             onTap: () {
               Navigator.push(
                 context,
@@ -507,14 +765,14 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildMenuSection([
           _buildMenuItem(
             icon: Icons.logout_rounded,
-            title: 'Sign Out',
+            title: 'Çıkış Yap',
             textColor: _primaryText,
             iconColor: _textSecondary,
             onTap: () => _showSignOutDialog(context),
           ),
           _buildMenuItem(
             icon: Icons.delete_outline_rounded,
-            title: 'Delete Account',
+            title: 'Hesabı Sil',
             textColor: _dangerColor,
             iconColor: _dangerColor,
             isDestructive: true,
@@ -534,7 +792,7 @@ class _ProfilePageState extends State<ProfilePage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.02 * 4),
+            color: const Color(0xFFCBD5E1).withOpacity(0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -583,7 +841,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: isDestructive ? _dangerColor.withOpacity(0.1) : _lightBg,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor ?? _accentGreen, size: 20),
+              child: Icon(
+                icon,
+                color: iconColor ?? const Color(0xFF4FA976),
+                size: 20,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -616,21 +878,21 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: _cardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
-          'Sign Out',
+          'Çıkış Yap',
           style: GoogleFonts.outfit(
             color: _primaryText,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
-          'Are you sure you want to sign out?',
+          'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
           style: GoogleFonts.inter(color: _textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              'İptal',
               style: GoogleFonts.inter(
                 color: _textSecondary,
                 fontWeight: FontWeight.w600,
@@ -656,7 +918,7 @@ class _ProfilePageState extends State<ProfilePage> {
               elevation: 0,
             ),
             child: Text(
-              'Sign Out',
+              'Çıkış Yap',
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -675,21 +937,21 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: _cardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
-          'Delete Account',
+          'Hesabı Sil',
           style: GoogleFonts.outfit(
             color: _dangerColor,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
-          'This action cannot be undone. All your garden data, photos, and settings will be permanently removed. Are you absolutely sure?',
+          'Bu işlem geri alınamaz. Tüm bahçe verileriniz, fotoğraflarınız ve geçmişiniz kalıcı olarak silinecektir. Devam etmek istiyor musunuz?',
           style: GoogleFonts.inter(color: _textSecondary, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              'İptal',
               style: GoogleFonts.inter(
                 color: _textSecondary,
                 fontWeight: FontWeight.w600,
@@ -699,7 +961,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
-              // Perform delete
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: _dangerColor,
@@ -709,7 +970,7 @@ class _ProfilePageState extends State<ProfilePage> {
               elevation: 0,
             ),
             child: Text(
-              'Delete',
+              'Sil',
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
