@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter/foundation.dart';
 
 class WeatherData {
   final String cityName;
-  final double temperature;
-  final String condition;
-  final String tip;
+  final double temperature; // in Celsius
+  final String condition; // English keyword for icon mapping
+  final String tip; // Turkish description/tip
 
   WeatherData({
     required this.cityName,
@@ -16,73 +18,193 @@ class WeatherData {
 
   factory WeatherData.defaultData(String city) {
     return WeatherData(
-      cityName: city.isEmpty ? 'San Francisco' : city,
-      temperature: 72.0,
+      cityName: city.isEmpty ? 'İstanbul' : city,
+      temperature: 22.0,
       condition: 'Sunny',
-      tip: 'Sunny, perfect for watering',
+      tip: 'Güneşli, bitkilerinizi sulamak için harika bir gün!',
     );
   }
 }
 
 class WeatherService {
-  static Future<WeatherData> getWeather(String city) async {
-    final cleanCity = city.trim();
-    if (cleanCity.isEmpty) {
-      return WeatherData.defaultData('San Francisco');
+  static Future<WeatherData> getWeather(String preferredCity) async {
+    double? lat;
+    double? lon;
+    String resolvedCityName = preferredCity.trim();
+
+    // 1. Try to get device GPS Location
+    try {
+      final hasGps = await _checkLocationPermission();
+      if (hasGps) {
+        final position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.low,
+            timeLimit: Duration(seconds: 4),
+          ),
+        );
+        lat = position.latitude;
+        lon = position.longitude;
+
+        // Try to reverse geocode GPS using Nominatim to get city name
+        try {
+          final reverseUrl = Uri.parse(
+            'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json&accept-language=tr',
+          );
+          final response = await http
+              .get(reverseUrl, headers: {'User-Agent': 'BotaniqApp'})
+              .timeout(const Duration(seconds: 3));
+          if (response.statusCode == 200) {
+            final data = jsonDecode(response.body);
+            final address = data['address'];
+            if (address != null) {
+              resolvedCityName =
+                  address['city'] ??
+                  address['town'] ??
+                  address['village'] ??
+                  address['province'] ??
+                  'Mevcut Konum';
+            } else {
+              resolvedCityName = 'Mevcut Konum';
+            }
+          } else {
+            resolvedCityName = 'Mevcut Konum';
+          }
+        } catch (_) {
+          resolvedCityName = 'Mevcut Konum';
+        }
+      }
+    } catch (e) {
+      debugPrint('GPS fetch failed or timed out: $e');
     }
 
+    // 2. If GPS failed, try preferredCity if populated
+    if ((lat == null || lon == null) && resolvedCityName.isNotEmpty) {
+      try {
+        final geoData = await _geocodeCity(resolvedCityName);
+        if (geoData != null) {
+          lat = geoData['latitude'];
+          lon = geoData['longitude'];
+          resolvedCityName = geoData['city'];
+        }
+      } catch (e) {
+        debugPrint('Geocoding failed for $resolvedCityName: $e');
+      }
+    }
+
+    // 3. If still null, try IP-based location geocoding
+    if (lat == null || lon == null) {
+      try {
+        final ipData = await _getIPBasedLocation();
+        if (ipData != null) {
+          lat = ipData['latitude'];
+          lon = ipData['longitude'];
+          resolvedCityName = ipData['city'];
+        }
+      } catch (e) {
+        debugPrint('IP check fallback failed: $e');
+      }
+    }
+
+    // 4. Absolute fallback to Istanbul
+    if (lat == null || lon == null) {
+      lat = 41.0136;
+      lon = 28.955;
+      resolvedCityName = resolvedCityName.isEmpty
+          ? 'İstanbul'
+          : resolvedCityName;
+    }
+
+    // Fetch current weather coordinates
     try {
-      // 1. Geocode city name to lat/long using open-meteo geocoding api (no keys required)
-      final geoUrl = Uri.parse(
-        'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(cleanCity)}&count=1&language=en&format=json',
-      );
-      final geoResponse = await http.get(geoUrl);
-      if (geoResponse.statusCode != 200) {
-        return WeatherData.defaultData(cleanCity);
-      }
-
-      final geoData = jsonDecode(geoResponse.body);
-      final results = geoData['results'];
-      if (results == null || results.isEmpty) {
-        return WeatherData.defaultData(cleanCity);
-      }
-
-      final double lat = results[0]['latitude'];
-      final double lon = results[0]['longitude'];
-      final String resolvedCity = results[0]['name'] ?? cleanCity;
-
-      // 2. Fetch current weather
       final weatherUrl = Uri.parse(
         'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current_weather=true',
       );
-      final weatherResponse = await http.get(weatherUrl);
-      if (weatherResponse.statusCode != 200) {
-        return WeatherData.defaultData(resolvedCity);
+      final response = await http
+          .get(weatherUrl)
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        final weatherData = jsonDecode(response.body);
+        final current = weatherData['current_weather'];
+        if (current != null) {
+          final double tempCelsius = current['temperature']?.toDouble() ?? 22.0;
+          final int code = current['weathercode']?.toInt() ?? 0;
+          final String condition = _getConditionFromCode(code);
+          final String tip = _getTipFromCondition(condition);
+
+          return WeatherData(
+            cityName: resolvedCityName,
+            temperature: tempCelsius,
+            condition: condition,
+            tip: tip,
+          );
+        }
       }
-
-      final weatherData = jsonDecode(weatherResponse.body);
-      final current = weatherData['current_weather'];
-      if (current == null) {
-        return WeatherData.defaultData(resolvedCity);
-      }
-
-      final double tempCelsius = current['temperature']?.toDouble() ?? 22.0;
-      // Convert to Fahrenheit for premium UI match (72° in mock data was likely Fahrenheit)
-      final double tempFahrenheit = (tempCelsius * 9 / 5) + 32;
-
-      final int code = current['weathercode']?.toInt() ?? 0;
-      final String condition = _getConditionFromCode(code);
-      final String tip = _getTipFromCondition(condition);
-
-      return WeatherData(
-        cityName: resolvedCity,
-        temperature: tempFahrenheit,
-        condition: condition,
-        tip: tip,
-      );
-    } catch (_) {
-      return WeatherData.defaultData(cleanCity);
+    } catch (e) {
+      debugPrint('Open-meteo call error: $e');
     }
+
+    return WeatherData.defaultData(resolvedCityName);
+  }
+
+  static Future<bool> _checkLocationPermission() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return false;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return false;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        return false;
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> _getIPBasedLocation() async {
+    try {
+      final response = await http
+          .get(Uri.parse('https://ipapi.co/json/'))
+          .timeout(const Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'city': data['city'] ?? 'İstanbul',
+          'latitude': data['latitude']?.toDouble() ?? 41.0136,
+          'longitude': data['longitude']?.toDouble() ?? 28.955,
+        };
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> _geocodeCity(String city) async {
+    try {
+      final geoUrl = Uri.parse(
+        'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(city)}&count=1&language=tr&format=json',
+      );
+      final response = await http
+          .get(geoUrl)
+          .timeout(const Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final results = data['results'];
+        if (results != null && results.isNotEmpty) {
+          return {
+            'city': results[0]['name'] ?? city,
+            'latitude': results[0]['latitude']?.toDouble(),
+            'longitude': results[0]['longitude']?.toDouble(),
+          };
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   static String _getConditionFromCode(int code) {
@@ -99,20 +221,21 @@ class WeatherService {
   static String _getTipFromCondition(String condition) {
     switch (condition) {
       case 'Sunny':
-        return 'Sunny, perfect day to water your plants!';
+        return 'Güneşli, bitkilerinizi sulamak için harika bir gün!';
       case 'Partly Cloudy':
-        return 'Milder sunlight. Check soil humidity.';
+        return 'Yarı bulutlu. Toprak nemini kontrol edip sulayabilirsiniz.';
       case 'Rainy':
       case 'Showers':
+        return 'Yağmurlu ve nemli hava. Ev dışı bitkileri fazla sulamayın.';
       case 'Thunderstorm':
-        return 'High humidity outside. Avoid overwatering.';
+        return 'Fırtınalı. Hassas saksı bitkilerinizi korunaklı yere alın.';
       case 'Foggy':
       case 'Cloudy':
-        return 'Lower evaporation rate. Adjust scheduled tasks.';
+        return 'Kapalı hava. Buharlaşma az olacağından sulamayı azaltın.';
       case 'Snowy':
-        return 'Cold waves. Keep sensitive plants inside!';
+        return 'Kar yağışlı ve soğuk. Bitkileri soğuk şokundan koruyun!';
       default:
-        return 'Perfect atmosphere for your green garden.';
+        return 'Bitkileriniz için dengeli bir gün.';
     }
   }
 }

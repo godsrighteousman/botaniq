@@ -6,6 +6,10 @@
 	<string>Botaniq needs camera access to scan and identify your plants.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Botaniq needs microphone access to record videos if needed.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Botaniq, bitkileriniz için gerçek zamanlı hava durumu verilerini almak amacıyla konum bilgisine ihtiyaç duyar.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Botaniq, bitkileriniz için her zaman en güncel hava durumu verilerini almak amacıyla konum bilgisine ihtiyaç duyar.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
