@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OpenAIService {
-  static const String _defaultApiKey =
-      '';
+  static const String _defaultApiKey = String.fromEnvironment('OPENAI_API_KEY');
   static const String _apiUrl = 'https://api.openai.com/v1/chat/completions';
 
   /// Fotoğrafı Base64 formatında alıp tanımlama yapar
