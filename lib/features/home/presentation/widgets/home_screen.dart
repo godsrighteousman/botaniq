@@ -40,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _ctrl.userName.addListener(_rebuild);
     _ctrl.selectedDate.addListener(_rebuild);
     _ctrl.filteredTasks.addListener(_rebuild);
-    _ctrl.overdueTasks.addListener(_rebuild);
     _ctrl.tomorrowTasks.addListener(_rebuild);
     _ctrl.plants.addListener(_rebuild);
     _ctrl.sickPlants.addListener(_rebuild);
@@ -57,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _ctrl.userName.removeListener(_rebuild);
     _ctrl.selectedDate.removeListener(_rebuild);
     _ctrl.filteredTasks.removeListener(_rebuild);
-    _ctrl.overdueTasks.removeListener(_rebuild);
     _ctrl.tomorrowTasks.removeListener(_rebuild);
     _ctrl.plants.removeListener(_rebuild);
     _ctrl.sickPlants.removeListener(_rebuild);
@@ -128,9 +126,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
                 child: TaskListSection(
-                  sectionTitle:
-                      _ctrl.taskSectionTitle(_ctrl.selectedDate.value),
-                  overdueTasks: _ctrl.overdueTasks.value,
+                  sectionTitle: _ctrl.taskSectionTitle(
+                    _ctrl.selectedDate.value,
+                  ),
                   tasks: _ctrl.filteredTasks.value,
                   tomorrowTasks: _ctrl.tomorrowTasks.value,
                   showTomorrow: _isTodaySelected(),
@@ -146,11 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _ctrl.isLoading.value
                     ? _buildLoadingShimmer()
                     : _ctrl.hasPlants
-                        ? MyPlantsCarousel(
-                            plants: _ctrl.plants.value,
-                            onViewAllTap: widget.onViewAllPlants,
-                          )
-                        : const EmptyGardenCard(),
+                    ? MyPlantsCarousel(
+                        plants: _ctrl.plants.value,
+                        onViewAllTap: widget.onViewAllPlants,
+                      )
+                    : const EmptyGardenCard(),
               ),
             ),
 
@@ -176,9 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             // Alt boşluk
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 120),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         ),
       ),
@@ -502,8 +498,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFF6B6B)
-                                      .withOpacity(0.1),
+                                  color: const Color(
+                                    0xFFFF6B6B,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -617,7 +614,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 54,
                       child: ElevatedButton(
                         onPressed: () {
-                          _ctrl.markTaskDone(task.id);
+                          _ctrl.markTaskDone(task);
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
@@ -631,10 +628,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Ink(
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF0ED761),
-                                Color(0xFF0ABF55),
-                              ],
+                              colors: [Color(0xFF0ED761), Color(0xFF0ABF55)],
                             ),
                             borderRadius: BorderRadius.circular(18),
                           ),

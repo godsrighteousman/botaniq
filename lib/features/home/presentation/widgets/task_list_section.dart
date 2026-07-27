@@ -4,12 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/home_models.dart';
 import 'task_card.dart';
 
-/// Görev listesi bölümü. Overdue görevleri her zaman en üstte tutar,
-/// ardından seçili günün görevlerini ve yarın görevlerini listeler.
+/// Görev listesi bölümü. Geciken görevler Today listesine dahil edilir;
+/// ardından yarın görevleri ayrı bir başlık altında gösterilir.
 /// AnimatedSwitcher ile gün değişimlerinde yumuşak geçiş sağlar.
 class TaskListSection extends StatelessWidget {
   final String sectionTitle;
-  final List<CareTask> overdueTasks;
   final List<CareTask> tasks;
   final List<CareTask> tomorrowTasks;
   final bool showTomorrow;
@@ -18,7 +17,6 @@ class TaskListSection extends StatelessWidget {
   const TaskListSection({
     super.key,
     required this.sectionTitle,
-    required this.overdueTasks,
     required this.tasks,
     required this.tomorrowTasks,
     required this.showTomorrow,
@@ -44,19 +42,9 @@ class TaskListSection extends StatelessWidget {
         );
       },
       child: Column(
-        key: ValueKey('$sectionTitle-${tasks.length}-${overdueTasks.length}'),
+        key: ValueKey('$sectionTitle-${tasks.length}'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Overdue bölümü ──
-          if (overdueTasks.isNotEmpty) ...[
-            _buildOverdueHeader(overdueTasks.length),
-            const SizedBox(height: 12),
-            ...overdueTasks.map(
-              (task) => TaskCard(task: task, onTap: () => onTaskTap(task)),
-            ),
-            const SizedBox(height: 20),
-          ],
-
           // ── Seçili gün başlığı ──
           _buildSectionHeader(sectionTitle),
           const SizedBox(height: 14),
@@ -77,66 +65,6 @@ class TaskListSection extends StatelessWidget {
               (task) => TaskCard(task: task, onTap: () => onTaskTap(task)),
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOverdueHeader(int count) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFFFF6B6B).withOpacity(0.12),
-            const Color(0xFFFF8E53).withOpacity(0.06),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFFF6B6B).withOpacity(0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF6B6B).withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.schedule_rounded,
-              color: Color(0xFFFF6B6B),
-              size: 16,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'You have $count overdue ${count == 1 ? 'task' : 'tasks'}',
-              style: GoogleFonts.inter(
-                color: const Color(0xFFCC4444),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF6B6B),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              '$count',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -277,14 +277,15 @@ class _GardenPageState extends State<GardenPage> {
     }
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
                 PlantDetailPage(plantData: plant, isFromGarden: true),
           ),
         );
+        await _fetchPlants();
       },
       child: Container(
         decoration: BoxDecoration(

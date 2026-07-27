@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/care_task_planner.dart';
 import '../models/home_models.dart';
 import '../../../../core/services/weather_service.dart';
 
@@ -18,10 +19,11 @@ class HomeController {
   final ValueNotifier<String> userName = ValueNotifier('');
   final ValueNotifier<DateTime> selectedDate = ValueNotifier(DateTime.now());
   final ValueNotifier<List<CareTask>> filteredTasks = ValueNotifier([]);
-  final ValueNotifier<List<CareTask>> overdueTasks = ValueNotifier([]);
   final ValueNotifier<List<CareTask>> tomorrowTasks = ValueNotifier([]);
   final ValueNotifier<List<PlantSummary>> plants = ValueNotifier([]);
-  final ValueNotifier<List<Map<String, dynamic>>> sickPlants = ValueNotifier([]);
+  final ValueNotifier<List<Map<String, dynamic>>> sickPlants = ValueNotifier(
+    [],
+  );
   final ValueNotifier<Map<String, bool>> daysWithTasks = ValueNotifier({});
 
   // Weather
@@ -38,13 +40,15 @@ class HomeController {
 
   // ── Lifecycle ──
 
-  void _init() {
+  Future<void> _init() async {
     final now = DateTime.now();
     for (int i = 0; i < 14; i++) {
       weekDays.add(now.add(Duration(days: i)));
     }
-    // Paralel başlat
-    Future.wait([_loadUserData(), loadTasksForDate(now)]);
+
+    // Görevler My Garden bitkilerinden de üretildiği için önce bitkiler yüklenir.
+    await _loadUserData();
+    await loadTasksForDate(now);
   }
 
   void dispose() {
@@ -52,7 +56,6 @@ class HomeController {
     userName.dispose();
     selectedDate.dispose();
     filteredTasks.dispose();
-    overdueTasks.dispose();
     tomorrowTasks.dispose();
     plants.dispose();
     sickPlants.dispose();
@@ -71,56 +74,77 @@ class HomeController {
       isLoading.value = false;
       return;
     }
+    final results = await Future.wait<Object?>([
+      _fetchProfile(user.id),
+      _fetchPlants(user.id),
+      _fetchSickPlants(user.id),
+    ]);
+
+    final profile = results[0] as Map<String, dynamic>?;
+    _rawPlants = results[1] as List<Map<String, dynamic>>;
+    sickPlants.value = results[2] as List<Map<String, dynamic>>;
+
+    final rawName =
+        profile?['full_name'] ??
+        user.userMetadata?['full_name'] ??
+        user.userMetadata?['name'] ??
+        user.userMetadata?['first_name'] ??
+        user.userMetadata?['display_name'] ??
+        user.userMetadata?['username'] ??
+        '';
+    String resolvedName = rawName.toString().trim();
+    if (resolvedName.isEmpty) resolvedName = 'Bahçıvan';
+    userName.value = resolvedName;
+
+    plants.value = _rawPlants.map(PlantSummary.fromPlantData).toList();
+    isLoading.value = false;
+
+    final userLoc = profile?['location'] ?? '';
+    _loadWeather(userLoc);
+  }
+
+  Future<Map<String, dynamic>?> _fetchProfile(String userId) async {
     try {
-      final results = await Future.wait([
-        Supabase.instance.client
-            .from('profiles')
-            .select('full_name, location')
-            .eq('id', user.id)
-            .maybeSingle()
-            .timeout(const Duration(seconds: 6)),
-        Supabase.instance.client
-            .from('plants')
-            .select()
-            .eq('user_id', user.id)
-            .order('created_at', ascending: false)
-            .timeout(const Duration(seconds: 6)),
-        Supabase.instance.client
-            .from('sick_plants')
-            .select()
-            .eq('user_id', user.id)
-            .eq('status', 'active')
-            .order('created_at', ascending: false)
-            .timeout(const Duration(seconds: 6)),
-      ]);
+      return await Supabase.instance.client
+          .from('profiles')
+          .select('full_name, location')
+          .eq('id', userId)
+          .maybeSingle()
+          .timeout(const Duration(seconds: 6));
+    } catch (error) {
+      debugPrint('Profil yüklenemedi: $error');
+      return null;
+    }
+  }
 
-      final profile = results[0] as Map<String, dynamic>?;
-      final plantsData = results[1] as List;
-      final sickPlantsData = results[2] as List;
+  Future<List<Map<String, dynamic>>> _fetchPlants(String userId) async {
+    try {
+      final result = await Supabase.instance.client
+          .from('plants')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false)
+          .timeout(const Duration(seconds: 6));
+      return List<Map<String, dynamic>>.from(result);
+    } catch (error) {
+      debugPrint('My Garden bitkileri yüklenemedi: $error');
+      return const [];
+    }
+  }
 
-      // Kullanıcı adını çözümle
-      final rawName = profile?['full_name'] ??
-          user.userMetadata?['full_name'] ??
-          user.userMetadata?['name'] ??
-          user.userMetadata?['first_name'] ??
-          user.userMetadata?['display_name'] ??
-          user.userMetadata?['username'] ??
-          '';
-      String resolvedName = rawName.toString().trim();
-      if (resolvedName.isEmpty) resolvedName = 'Bahçıvan';
-      userName.value = resolvedName;
-
-      // Bitkileri dönüştür
-      _rawPlants = List<Map<String, dynamic>>.from(plantsData);
-      plants.value = _rawPlants.map(PlantSummary.fromPlantData).toList();
-      sickPlants.value = List<Map<String, dynamic>>.from(sickPlantsData);
-      isLoading.value = false;
-
-      // Hava durumu arka planda
-      final userLoc = profile?['location'] ?? '';
-      _loadWeather(userLoc);
-    } catch (_) {
-      isLoading.value = false;
+  Future<List<Map<String, dynamic>>> _fetchSickPlants(String userId) async {
+    try {
+      final result = await Supabase.instance.client
+          .from('sick_plants')
+          .select()
+          .eq('user_id', userId)
+          .eq('status', 'active')
+          .order('created_at', ascending: false)
+          .timeout(const Duration(seconds: 6));
+      return List<Map<String, dynamic>>.from(result);
+    } catch (error) {
+      debugPrint('Hasta bitkiler yüklenemedi: $error');
+      return const [];
     }
   }
 
@@ -147,299 +171,184 @@ class HomeController {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
 
-    final dateStr = DateFormat('yyyy-MM-dd').format(date);
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final selected = DateTime(date.year, date.month, date.day);
+    final today = CareTaskPlanner.startOfLocalDay(now);
+    final selected = CareTaskPlanner.startOfLocalDay(date);
     final isToday = selected == today;
+    var dbTasks = <CareTask>[];
 
     try {
-      // Seçili gün DB görevleri
-      final result = await Supabase.instance.client
-          .from('care_tasks')
-          .select('*, plants(custom_name, name, image_url)')
-          .eq('user_id', user.id)
-          .gte('due_date', '${dateStr}T00:00:00')
-          .lt('due_date', '${dateStr}T23:59:59')
-          .order('due_date')
-          .timeout(const Duration(seconds: 6));
+      final List<dynamic> result;
+      if (isToday) {
+        // Geçmiş + bugün + yarın tek sorguda alınır. Yerel gün sınırı UTC
+        // olarak gönderilerek timestamptz kayıtlarının günü doğru bulunur.
+        final dayAfterTomorrow = today.add(const Duration(days: 2));
+        result = await Supabase.instance.client
+            .from('care_tasks')
+            .select('*, plants(custom_name, name, image_url)')
+            .eq('user_id', user.id)
+            .eq('is_completed', false)
+            .lt('due_date', dayAfterTomorrow.toUtc().toIso8601String())
+            .order('due_date')
+            .timeout(const Duration(seconds: 6));
+      } else {
+        final nextDay = selected.add(const Duration(days: 1));
+        result = await Supabase.instance.client
+            .from('care_tasks')
+            .select('*, plants(custom_name, name, image_url)')
+            .eq('user_id', user.id)
+            .eq('is_completed', false)
+            .gte('due_date', selected.toUtc().toIso8601String())
+            .lt('due_date', nextDay.toUtc().toIso8601String())
+            .order('due_date')
+            .timeout(const Duration(seconds: 6));
+      }
 
-      final dbTasks = (result as List)
+      dbTasks = result
           .map((r) => CareTask.fromDbRow(r as Map<String, dynamic>))
-          .where((t) => !t.isCompleted) // Sadece tamamlanmamış görevler
           .toList();
-
-      final dbPlantWaterNames = dbTasks
-          .where((t) => t.taskType.toLowerCase() == 'water' || t.taskType.toLowerCase() == 'watering')
-          .map((t) => t.plantName.toLowerCase())
-          .toSet();
-
-      final plantTasks = _buildPlantDerivedTasks(date).where((t) {
-        if (t.taskType.toLowerCase() == 'water' || t.taskType.toLowerCase() == 'watering') {
-          return !dbPlantWaterNames.contains(t.plantName.toLowerCase());
-        }
-        return true;
-      }).toList();
-
-      final allTasks = [...dbTasks, ...plantTasks];
-
-      filteredTasks.value = allTasks;
-
-      // Overdue görevler (sadece bugün seçiliyse)
-      if (isToday) {
-        await _loadOverdueTasks(user.id, today);
-      } else {
-        overdueTasks.value = [];
-      }
-
-      // Yarın görevleri (sadece bugün seçiliyse)
-      if (isToday) {
-        final tomorrowDate = today.add(const Duration(days: 1));
-        final tomorrowStr = DateFormat('yyyy-MM-dd').format(tomorrowDate);
-        try {
-          final tResult = await Supabase.instance.client
-              .from('care_tasks')
-              .select('*, plants(custom_name, name, image_url)')
-              .eq('user_id', user.id)
-              .gte('due_date', '${tomorrowStr}T00:00:00')
-              .lt('due_date', '${tomorrowStr}T23:59:59')
-              .order('due_date')
-              .timeout(const Duration(seconds: 6));
-          final tDbTasks = (tResult as List)
-              .map((r) => CareTask.fromDbRow(r as Map<String, dynamic>))
-              .where((t) => !t.isCompleted)
-              .toList();
-          final tPlantTasks = _buildPlantDerivedTasks(tomorrowDate);
-          tomorrowTasks.value = [...tDbTasks, ...tPlantTasks];
-        } catch (_) {
-          tomorrowTasks.value = [];
-        }
-      } else {
-        tomorrowTasks.value = [];
-      }
-
-      _precomputeDaysWithTasks();
-    } catch (_) {}
-  }
-
-  /// Tüm gecikmiş görevleri yükler (bugünden önceki tamamlanmamış görevler).
-  Future<void> _loadOverdueTasks(String userId, DateTime today) async {
-    try {
-      final todayStr = DateFormat('yyyy-MM-dd').format(today);
-      final result = await Supabase.instance.client
-          .from('care_tasks')
-          .select('*, plants(custom_name, name, image_url)')
-          .eq('user_id', userId)
-          .eq('is_completed', false)
-          .lt('due_date', '${todayStr}T00:00:00')
-          .order('due_date')
-          .timeout(const Duration(seconds: 6));
-
-      final dbOverdue = (result as List).map((r) =>
-          CareTask.fromDbRow(r as Map<String, dynamic>)).toList();
-
-      final plantOverdue = _buildOverduePlantTasks(today);
-
-      overdueTasks.value = [...dbOverdue, ...plantOverdue];
-    } catch (_) {
-      overdueTasks.value = [];
+    } catch (error) {
+      // DB erişilemese bile My Garden sulama ihtiyacı gösterilmeye devam eder.
+      debugPrint('Bakım görevleri yüklenemedi: $error');
     }
+
+    if (isToday) {
+      final buckets = CareTaskPlanner.bucketTodayAndTomorrow(dbTasks, now: now);
+      final tomorrow = today.add(const Duration(days: 1));
+      filteredTasks.value = CareTaskPlanner.mergeByPlantAndType(
+        databaseTasks: buckets.today,
+        derivedTasks: _buildPlantWateringTasks(today, now),
+      );
+      tomorrowTasks.value = CareTaskPlanner.mergeByPlantAndType(
+        databaseTasks: buckets.tomorrow,
+        derivedTasks: _buildPlantWateringTasks(tomorrow, now),
+      );
+    } else {
+      filteredTasks.value = CareTaskPlanner.mergeByPlantAndType(
+        databaseTasks: dbTasks,
+        derivedTasks: _buildPlantWateringTasks(selected, now),
+      );
+      tomorrowTasks.value = [];
+    }
+
+    _precomputeDaysWithTasks();
   }
 
   // ── Bitki Tabanlı Görev Hesaplama ──
 
-  List<CareTask> _buildPlantDerivedTasks(DateTime targetDate) {
-    final target = DateTime(targetDate.year, targetDate.month, targetDate.day);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final isTargetToday = target == today;
-    final List<CareTask> tasks = [];
-
-    for (final plant in _rawPlants) {
-      final plantName = plant['custom_name'] ?? plant['name'] ?? 'My Plant';
-      final imageUrl = plant['image_url'] ?? '';
-      final lastWateredStr = plant['last_watered_at'] as String?;
-
-      if (lastWateredStr == null || DateTime.tryParse(lastWateredStr) == null) {
-        // Son sulama tarihi yoksa veya geçersizse (hiç sulanmamışsa) bugün sulanması gerekir!
-        if (isTargetToday) {
-          tasks.add(CareTask.derived(
-            id: 'plant_water_${plant['id']}',
-            plantName: plantName,
-            taskType: 'Water',
-            amount: plant['water_requirement'] ?? '250ml',
-            instruction: 'Time to water your $plantName!',
-            imageUrl: imageUrl,
-            dueDate: today,
-          ));
-        }
-        continue;
-      }
-
-      final lastWatered = DateTime.tryParse(lastWateredStr)!;
-
-      final waterInterval = (plant['watering_interval_days'] as int?) ?? 7;
-
-      // Sulama kontrolü
-      final nextWater = DateTime(
-        lastWatered.year,
-        lastWatered.month,
-        lastWatered.day,
-      ).add(Duration(days: waterInterval));
-
-      bool shouldAddWater = false;
-      if (isTargetToday) {
-        // Bugün seçiliyse: Sulama zamanı geçmiş (overdue) veya bugün olanları Today listesinde göster
-        shouldAddWater = nextWater.isBefore(today) || nextWater == today;
-      } else {
-        // Başka gün seçiliyse: Sadece o güne aitse göster
-        shouldAddWater = nextWater == target;
-      }
-
-      if (shouldAddWater) {
-        tasks.add(CareTask.derived(
-          id: 'plant_water_${plant['id']}',
-          plantName: plantName,
-          taskType: 'Water',
-          amount: plant['water_requirement'] ?? '250ml',
-          instruction: 'Time to water your $plantName!',
-          imageUrl: imageUrl,
-          dueDate: nextWater,
-        ));
-      }
-
-      // Gübreleme kontrolü (21 gün aralık)
-      const fertilizeInterval = 21;
-      final nextFertilize = DateTime(
-        lastWatered.year,
-        lastWatered.month,
-        lastWatered.day,
-      ).add(const Duration(days: fertilizeInterval));
-
-      bool shouldAddFert = false;
-      if (isTargetToday) {
-        shouldAddFert = nextFertilize.isBefore(today) || nextFertilize == today;
-      } else {
-        shouldAddFert = nextFertilize == target;
-      }
-
-      if (shouldAddFert) {
-        tasks.add(CareTask.derived(
-          id: 'plant_fert_${plant['id']}',
-          plantName: plantName,
-          taskType: 'Fertilize',
-          amount: 'Liquid Fertilizer',
-          instruction: 'Time to fertilize your $plantName!',
-          imageUrl: imageUrl,
-          dueDate: nextFertilize,
-        ));
-      }
-    }
-    return tasks;
-  }
-
-  /// Bugünden önceki gecikmiş bitki tabanlı görevleri hesaplar.
-  /// (Artık today tasks içinde gösterdiğimiz için kafa karışıklığını önlemek adına boş dönüyoruz)
-  List<CareTask> _buildOverduePlantTasks(DateTime today) {
-    return const [];
+  List<CareTask> _buildPlantWateringTasks(DateTime targetDate, DateTime now) {
+    return CareTaskPlanner.buildWateringTasks(
+      plants: _rawPlants,
+      targetDate: targetDate,
+      now: now,
+    );
   }
 
   void _precomputeDaysWithTasks() {
     final Map<String, bool> result = {};
+    final now = DateTime.now();
     for (final day in weekDays) {
       final key = DateFormat('yyyy-MM-dd').format(day);
-      final hasDerived = _buildPlantDerivedTasks(day).isNotEmpty;
+      final hasDerived = _buildPlantWateringTasks(day, now).isNotEmpty;
       result[key] = hasDerived;
     }
     final selectedKey = DateFormat('yyyy-MM-dd').format(selectedDate.value);
     if (filteredTasks.value.isNotEmpty) result[selectedKey] = true;
-    final now = DateTime.now();
-    final tomorrowKey = DateFormat('yyyy-MM-dd').format(
-      DateTime(now.year, now.month, now.day).add(const Duration(days: 1)),
-    );
+    final tomorrowKey = DateFormat(
+      'yyyy-MM-dd',
+    ).format(CareTaskPlanner.startOfLocalDay(now).add(const Duration(days: 1)));
     if (tomorrowTasks.value.isNotEmpty) result[tomorrowKey] = true;
     daysWithTasks.value = result;
   }
 
   // ── Görev Aksiyonları ──
 
-  Future<void> markTaskDone(String taskId) async {
+  Future<void> markTaskDone(CareTask task) async {
     final now = DateTime.now();
+    final nowUtc = now.toUtc().toIso8601String();
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
+    final normalizedType = CareTaskPlanner.normalizedTaskType(task.taskType);
+    var isPersisted = false;
 
-    if (taskId.startsWith('plant_water_') || taskId.startsWith('overdue_water_')) {
-      final plantId = taskId
-          .replaceFirst('plant_water_', '')
-          .replaceFirst('overdue_water_', '');
-      try {
-        // 1. Update last_watered_at of the plant to today (formatted as yyyy-MM-dd)
-        await Supabase.instance.client
-            .from('plants')
-            .update({'last_watered_at': now.toIso8601String().substring(0, 10)})
-            .eq('id', plantId);
+    try {
+      if (task.isDerived) {
+        if (normalizedType == 'water' && task.plantId.isNotEmpty) {
+          await Supabase.instance.client
+              .from('plants')
+              .update({
+                'last_watered_at': now.toIso8601String().substring(0, 10),
+              })
+              .eq('id', task.plantId);
+          isPersisted = true;
 
-        // 2. Insert completed care task for history
-        await Supabase.instance.client.from('care_tasks').insert({
-          'plant_id': plantId,
-          'user_id': user.id,
-          'task_type': 'water',
-          'due_date': now.toIso8601String(),
-          'is_completed': true,
-          'completed_at': now.toIso8601String(),
-        });
-      } catch (e) {
-        debugPrint("Error updating derived water task: $e");
-      }
-    } else if (taskId.startsWith('plant_fert_')) {
-      final plantId = taskId.replaceFirst('plant_fert_', '');
-      try {
-        // Insert completed fertilize task
-        await Supabase.instance.client.from('care_tasks').insert({
-          'plant_id': plantId,
-          'user_id': user.id,
-          'task_type': 'fertilize',
-          'due_date': now.toIso8601String(),
-          'is_completed': true,
-          'completed_at': now.toIso8601String(),
-        });
-      } catch (e) {
-        debugPrint("Error updating derived fertilize task: $e");
-      }
-    } else {
-      // Database care task
-      try {
-        await Supabase.instance.client
-            .from('care_tasks')
-            .update({
+          // Sanal görev için bakım geçmişi oluşturmak ikincil bir işlemdir.
+          try {
+            await Supabase.instance.client.from('care_tasks').insert({
+              'plant_id': task.plantId,
+              'user_id': user.id,
+              'task_type': 'water',
+              'due_date': nowUtc,
               'is_completed': true,
-              'completed_at': now.toIso8601String(),
-            })
-            .eq('id', taskId);
-      } catch (e) {
-        debugPrint("Error updating database task: $e");
+              'completed_at': nowUtc,
+            });
+          } catch (error) {
+            debugPrint('Sulama geçmişi eklenemedi: $error');
+          }
+        }
+      } else {
+        final sourceIds = task.sourceTaskIds.isEmpty
+            ? <String>[task.id]
+            : task.sourceTaskIds;
+        await Future.wait(
+          sourceIds
+              .where((id) => id.isNotEmpty)
+              .map(
+                (id) => Supabase.instance.client
+                    .from('care_tasks')
+                    .update({'is_completed': true, 'completed_at': nowUtc})
+                    .eq('id', id),
+              ),
+        );
+        isPersisted = true;
+
+        // Home'dan tamamlanan sulama My Garden durumunu da günceller.
+        if (normalizedType == 'water' && task.plantId.isNotEmpty) {
+          try {
+            await Supabase.instance.client
+                .from('plants')
+                .update({
+                  'last_watered_at': now.toIso8601String().substring(0, 10),
+                })
+                .eq('id', task.plantId);
+          } catch (error) {
+            debugPrint('Bitkinin sulama tarihi güncellenemedi: $error');
+          }
+        }
       }
+    } catch (error) {
+      debugPrint('Bakım görevi tamamlanamadı: $error');
     }
 
-    // Lokal state güncelle: Tamamlanan görevi listeden çıkar
-    final updated = List<CareTask>.from(filteredTasks.value);
-    updated.removeWhere((t) => t.id == taskId);
-    filteredTasks.value = updated;
+    if (!isPersisted) return;
 
-    // Overdue listesinden de çıkar
-    final updatedOverdue = List<CareTask>.from(overdueTasks.value);
-    updatedOverdue.removeWhere((t) => t.id == taskId);
-    overdueTasks.value = updatedOverdue;
+    filteredTasks.value = filteredTasks.value
+        .where((visibleTask) => visibleTask.id != task.id)
+        .toList();
+    tomorrowTasks.value = tomorrowTasks.value
+        .where((visibleTask) => visibleTask.id != task.id)
+        .toList();
 
-    // Bitkilerin sulama durumunun güncellenmesi için verileri arka planda yenile
-    _loadUserData();
-    _precomputeDaysWithTasks();
+    // Bitki durumu değiştikten sonra görevleri taze veriden yeniden hesapla.
+    await _loadUserData();
+    await loadTasksForDate(selectedDate.value);
   }
 
   /// Verileri yeniden yükler (pull-to-refresh için).
   Future<void> refresh() async {
     isLoading.value = true;
-    await Future.wait([_loadUserData(), loadTasksForDate(selectedDate.value)]);
+    await _loadUserData();
+    await loadTasksForDate(selectedDate.value);
   }
 
   /// Seçili güne göre dinamik başlık döndürür.

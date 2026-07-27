@@ -243,6 +243,7 @@ class TaskCard extends StatelessWidget {
       case 'watering':
         return Icons.water_drop_rounded;
       case 'fertilize':
+      case 'fertilizer':
       case 'fertilizing':
         return Icons.eco_rounded;
       case 'prune':

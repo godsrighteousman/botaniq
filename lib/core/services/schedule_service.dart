@@ -24,7 +24,7 @@ class ScheduleService {
         'plant_id': plantId,
         'user_id': userId,
         'task_type': 'water',
-        'due_date': dueDate.toIso8601String(),
+        'due_date': dueDate.toUtc().toIso8601String(),
         'is_completed': false,
       });
     }
@@ -36,7 +36,7 @@ class ScheduleService {
         'plant_id': plantId,
         'user_id': userId,
         'task_type': 'fertilize',
-        'due_date': dueDate.toIso8601String(),
+        'due_date': dueDate.toUtc().toIso8601String(),
         'is_completed': false,
       });
     }

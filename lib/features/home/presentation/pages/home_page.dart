@@ -90,13 +90,15 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
+          onPressed: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => const PhotoInstructionPage(),
               ),
             );
+            if (!mounted) return;
+            await _homeController.refresh();
           },
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -160,11 +162,17 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _currentIndex == index;
-    final color =
-        isSelected ? _accentGreen : _textSecondary.withOpacity(0.6);
+    final color = isSelected ? _accentGreen : _textSecondary.withOpacity(0.6);
 
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () async {
+        if (_currentIndex == index) return;
+
+        setState(() => _currentIndex = index);
+        if (index == 0) {
+          await _homeController.refresh();
+        }
+      },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 60,

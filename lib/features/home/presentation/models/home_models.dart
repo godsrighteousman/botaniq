@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Supabase care_tasks tablosundaki bir bakım görevi.
 class CareTask {
   final String id;
+  final String plantId;
   final String plantName;
   final String taskType;
   final String amount;
@@ -11,9 +12,11 @@ class CareTask {
   final DateTime? dueDate;
   bool isCompleted;
   final bool isDerived;
+  final List<String> sourceTaskIds;
 
   CareTask({
     required this.id,
+    this.plantId = '',
     required this.plantName,
     required this.taskType,
     this.amount = '',
@@ -22,35 +25,44 @@ class CareTask {
     this.dueDate,
     this.isCompleted = false,
     this.isDerived = false,
+    this.sourceTaskIds = const [],
   });
 
   /// Görevi tamamlanmamış VE tarihi geçmişse overdue sayılır.
-  bool get isOverdue {
+  bool get isOverdue => isOverdueAt(DateTime.now());
+
+  bool isOverdueAt(DateTime now) {
     if (isCompleted || dueDate == null) return false;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final due = DateTime(dueDate!.year, dueDate!.month, dueDate!.day);
+    final localNow = now.isUtc ? now.toLocal() : now;
+    final localDue = dueDate!.isUtc ? dueDate!.toLocal() : dueDate!;
+    final today = DateTime(localNow.year, localNow.month, localNow.day);
+    final due = DateTime(localDue.year, localDue.month, localDue.day);
     return due.isBefore(today);
   }
 
   /// Supabase DB sonucundan CareTask oluşturur.
   factory CareTask.fromDbRow(Map<String, dynamic> row) {
     final plant = row['plants'] as Map<String, dynamic>? ?? {};
+    final id = row['id']?.toString() ?? '';
+    final parsedDueDate = DateTime.tryParse(row['due_date']?.toString() ?? '');
     return CareTask(
-      id: row['id']?.toString() ?? '',
+      id: id,
+      plantId: row['plant_id']?.toString() ?? plant['id']?.toString() ?? '',
       plantName: plant['custom_name'] ?? plant['name'] ?? 'My Plant',
       taskType: _capitalizeFirst(row['task_type'] as String? ?? 'care'),
       amount: row['amount'] ?? '',
       instruction: row['instruction'] ?? 'Take care of your plant.',
       imageUrl: plant['image_url'] ?? '',
-      dueDate: DateTime.tryParse(row['due_date'] ?? ''),
+      dueDate: parsedDueDate?.toLocal(),
       isCompleted: row['is_completed'] ?? false,
+      sourceTaskIds: id.isEmpty ? const [] : [id],
     );
   }
 
   /// Bitki verisinden türetilmiş sanal görev oluşturur.
   factory CareTask.derived({
     required String id,
+    required String plantId,
     required String plantName,
     required String taskType,
     required String imageUrl,
@@ -60,6 +72,7 @@ class CareTask {
   }) {
     return CareTask(
       id: id,
+      plantId: plantId,
       plantName: plantName,
       taskType: taskType,
       amount: amount,
@@ -67,6 +80,34 @@ class CareTask {
       imageUrl: imageUrl,
       dueDate: dueDate,
       isDerived: true,
+    );
+  }
+
+  CareTask copyWith({
+    String? id,
+    String? plantId,
+    String? plantName,
+    String? taskType,
+    String? amount,
+    String? instruction,
+    String? imageUrl,
+    DateTime? dueDate,
+    bool? isCompleted,
+    bool? isDerived,
+    List<String>? sourceTaskIds,
+  }) {
+    return CareTask(
+      id: id ?? this.id,
+      plantId: plantId ?? this.plantId,
+      plantName: plantName ?? this.plantName,
+      taskType: taskType ?? this.taskType,
+      amount: amount ?? this.amount,
+      instruction: instruction ?? this.instruction,
+      imageUrl: imageUrl ?? this.imageUrl,
+      dueDate: dueDate ?? this.dueDate,
+      isCompleted: isCompleted ?? this.isCompleted,
+      isDerived: isDerived ?? this.isDerived,
+      sourceTaskIds: sourceTaskIds ?? this.sourceTaskIds,
     );
   }
 
@@ -111,13 +152,18 @@ class PlantSummary {
 
   static _WateringInfo _computeWateringStatus(Map<String, dynamic> plant) {
     final last = plant['last_watered_at'];
-    final interval = (plant['watering_interval_days'] as int?) ?? 7;
+    final interval = _positiveInterval(plant['watering_interval_days']);
     if (last == null) return _WateringInfo('Water today', Colors.redAccent);
-    final lastDate = DateTime.tryParse(last);
+    final lastDate = DateTime.tryParse(last.toString());
     if (lastDate == null) return _WateringInfo('Water today', Colors.redAccent);
-    final next = lastDate.add(Duration(days: interval));
     final now = DateTime.now();
-    final difference = next.difference(now).inDays;
+    final today = DateTime(now.year, now.month, now.day);
+    final next = DateTime(
+      lastDate.year,
+      lastDate.month,
+      lastDate.day,
+    ).add(Duration(days: interval));
+    final difference = next.difference(today).inDays;
 
     if (difference < 0) {
       return _WateringInfo('Needs water!', Colors.redAccent);
@@ -131,6 +177,11 @@ class PlantSummary {
         const Color(0xFF4FA976),
       );
     }
+  }
+
+  static int _positiveInterval(dynamic value) {
+    final parsed = value is num ? value.toInt() : int.tryParse('$value');
+    return parsed != null && parsed > 0 ? parsed : 7;
   }
 }
 
