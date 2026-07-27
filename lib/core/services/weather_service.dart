@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 
 class WeatherData {
   final String cityName;
-  final double temperature; // in Celsius
-  final String condition; // English keyword for icon mapping
-  final String tip; // Turkish description/tip
+  final double temperature;
+  final String condition;
+  final String tip;
 
   WeatherData({
     required this.cityName,
@@ -27,60 +27,41 @@ class WeatherData {
 }
 
 class WeatherService {
+  /// Tüm çağrılar timeout'lu. Worst-case toplam ~5s (eskiden 16s+).
   static Future<WeatherData> getWeather(String preferredCity) async {
     double? lat;
     double? lon;
     String resolvedCityName = preferredCity.trim();
 
-    // 1. Try to get device GPS Location
+    // 1) GPS konumu al — toplam 5s timeout
     try {
-      final hasGps = await _checkLocationPermission();
+      final hasGps = await _checkLocationPermission().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => false,
+      );
       if (hasGps) {
         final position = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.low,
-            timeLimit: Duration(seconds: 4),
+            timeLimit: Duration(seconds: 3),
           ),
         );
         lat = position.latitude;
         lon = position.longitude;
 
-        // Try to reverse geocode GPS using Nominatim to get city name
-        try {
-          final reverseUrl = Uri.parse(
-            'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json&accept-language=tr',
-          );
-          final response = await http
-              .get(reverseUrl, headers: {'User-Agent': 'BotaniqApp'})
-              .timeout(const Duration(seconds: 3));
-          if (response.statusCode == 200) {
-            final data = jsonDecode(response.body);
-            final address = data['address'];
-            if (address != null) {
-              resolvedCityName =
-                  address['city'] ??
-                  address['town'] ??
-                  address['village'] ??
-                  address['province'] ??
-                  'Mevcut Konum';
-            } else {
-              resolvedCityName = 'Mevcut Konum';
-            }
-          } else {
-            resolvedCityName = 'Mevcut Konum';
-          }
-        } catch (_) {
-          resolvedCityName = 'Mevcut Konum';
-        }
+        // Reverse geocode — arka planda, başarısız olursa sorun yok
+        resolvedCityName = await _reverseGeocode(lat, lon) ?? 'Mevcut Konum';
       }
     } catch (e) {
       debugPrint('GPS fetch failed or timed out: $e');
     }
 
-    // 2. If GPS failed, try preferredCity if populated
+    // 2) GPS başarısızsa, tercih edilen şehir ile geocode et
     if ((lat == null || lon == null) && resolvedCityName.isNotEmpty) {
       try {
-        final geoData = await _geocodeCity(resolvedCityName);
+        final geoData = await _geocodeCity(
+          resolvedCityName,
+        ).timeout(const Duration(seconds: 3));
         if (geoData != null) {
           lat = geoData['latitude'];
           lon = geoData['longitude'];
@@ -91,10 +72,12 @@ class WeatherService {
       }
     }
 
-    // 3. If still null, try IP-based location geocoding
+    // 3) Hâlâ null ise IP-based konum
     if (lat == null || lon == null) {
       try {
-        final ipData = await _getIPBasedLocation();
+        final ipData = await _getIPBasedLocation().timeout(
+          const Duration(seconds: 3),
+        );
         if (ipData != null) {
           lat = ipData['latitude'];
           lon = ipData['longitude'];
@@ -105,7 +88,7 @@ class WeatherService {
       }
     }
 
-    // 4. Absolute fallback to Istanbul
+    // 4) Absolute fallback — İstanbul
     if (lat == null || lon == null) {
       lat = 41.0136;
       lon = 28.955;
@@ -114,14 +97,14 @@ class WeatherService {
           : resolvedCityName;
     }
 
-    // Fetch current weather coordinates
+    // 5) Hava durumu API — 4s timeout
     try {
       final weatherUrl = Uri.parse(
         'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current_weather=true',
       );
       final response = await http
           .get(weatherUrl)
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 4));
       if (response.statusCode == 200) {
         final weatherData = jsonDecode(response.body);
         final current = weatherData['current_weather'];
@@ -144,6 +127,29 @@ class WeatherService {
     }
 
     return WeatherData.defaultData(resolvedCityName);
+  }
+
+  static Future<String?> _reverseGeocode(double lat, double lon) async {
+    try {
+      final reverseUrl = Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json&accept-language=tr',
+      );
+      final response = await http
+          .get(reverseUrl, headers: {'User-Agent': 'BotaniqApp'})
+          .timeout(const Duration(seconds: 3));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final address = data['address'];
+        if (address != null) {
+          return address['city'] ??
+              address['town'] ??
+              address['village'] ??
+              address['province'] ??
+              'Mevcut Konum';
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   static Future<bool> _checkLocationPermission() async {
@@ -171,7 +177,7 @@ class WeatherService {
     try {
       final response = await http
           .get(Uri.parse('https://ipapi.co/json/'))
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 3));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return {
@@ -191,7 +197,7 @@ class WeatherService {
       );
       final response = await http
           .get(geoUrl)
-          .timeout(const Duration(seconds: 4));
+          .timeout(const Duration(seconds: 3));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final results = data['results'];

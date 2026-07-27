@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 
 import '../../../../core/services/openai_service.dart';
+import '../../../../core/services/search_history_service.dart';
 import '../../../garden/presentation/pages/add_plant_wizard.dart';
 
 class PlantScannerPage extends StatefulWidget {
@@ -92,6 +93,8 @@ class _PlantScannerPageState extends State<PlantScannerPage>
 
       if (mounted) {
         if (result != null) {
+          // Arama/tarama geçmişine ekle
+          SearchHistoryService.addRecord(result);
           // İşlem başarılı, dialog göster
           _showResultDialog(result, photo.path);
         } else {

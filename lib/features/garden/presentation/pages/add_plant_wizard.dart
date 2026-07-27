@@ -139,6 +139,28 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         lastWateredAt = now.subtract(const Duration(days: 10));
       }
 
+      // 2.5 Catalog eşleştirmesi ara (aynı bitkiden varsa onun tanımlanmış bilgisinden getirmek için)
+      String? catalogId;
+      try {
+        final String searchName = widget.plantData['name'] ?? '';
+        final String searchSpecies = widget.plantData['species'] ?? '';
+        if (searchName.isNotEmpty || searchSpecies.isNotEmpty) {
+          // İsim veya türe göre eşleşen bir katalog kaydı bulalım
+          final catRes = await Supabase.instance.client
+              .from('plant_catalog')
+              .select('id')
+              .or('species.ilike.%$searchSpecies%,name.ilike.%$searchName%')
+              .limit(1)
+              .maybeSingle();
+
+          if (catRes != null) {
+            catalogId = catRes['id'] as String?;
+          }
+        }
+      } catch (e) {
+        debugPrint('Catalog lookup warning: $e');
+      }
+
       // 3. plants tablosuna insert
       final Map<String, dynamic> insertPayload = {
         'user_id': user.id,
@@ -148,6 +170,10 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         'health_status': 'Healthy',
         'watering_interval_days': 7,
       };
+
+      if (catalogId != null) {
+        insertPayload['catalog_id'] = catalogId;
+      }
 
       if (_selectedRoom != null) insertPayload['room'] = _selectedRoom;
       if (_selectedLight != null)
@@ -185,6 +211,9 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           'image_url': imageUrl,
           'health_status': 'Healthy',
         };
+        if (catalogId != null) {
+          basicPayload['catalog_id'] = catalogId;
+        }
         result = await Supabase.instance.client
             .from('plants')
             .insert(basicPayload)

@@ -1,0 +1,192 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Botaniq",
+  "@appTitle": { "description": "Application title" },
+
+  "settings": "Settings",
+  "@settings": { "description": "Settings page title" },
+
+  "preferences": "Preferences",
+  "@preferences": { "description": "Preferences section header" },
+
+  "darkMode": "Dark Mode",
+  "@darkMode": { "description": "Dark mode toggle label" },
+
+  "metricSystem": "Metric System",
+  "@metricSystem": { "description": "Metric system toggle label" },
+
+  "metricSystemSubtitle": "Use Celsius and Meters",
+  "@metricSystemSubtitle": { "description": "Metric system subtitle" },
+
+  "account": "Account",
+  "@account": { "description": "Account section header" },
+
+  "editProfile": "Edit Profile",
+  "@editProfile": { "description": "Edit profile action" },
+
+  "changePassword": "Change Password",
+  "@changePassword": { "description": "Change password action" },
+
+  "subscriptionManagement": "Subscription Management",
+  "@subscriptionManagement": { "description": "Subscription management action" },
+
+  "premium": "Premium",
+  "@premium": { "description": "Premium badge label" },
+
+  "apiSettings": "API Settings (AI)",
+  "@apiSettings": { "description": "API settings section header" },
+
+  "apiKeyHint": "sk-proj-... or sk-...",
+  "@apiKeyHint": { "description": "API key text field hint" },
+
+  "apiKeyDescription": "Enter your own OpenAI API Key to make API requests from your account. The API Key is stored locally on your device in encrypted form.",
+  "@apiKeyDescription": { "description": "API key explanation text" },
+
+  "apiKeySaved": "OpenAI API Key saved successfully.",
+  "@apiKeySaved": { "description": "Snackbar message after saving API key" },
+
+  "language": "Language",
+  "@language": { "description": "Language setting label" },
+
+  "languageSubtitle": "Change app language",
+  "@languageSubtitle": { "description": "Language setting subtitle" },
+
+  "selectLanguage": "Select Language",
+  "@selectLanguage": { "description": "Bottom sheet title for language selection" },
+
+  "systemLanguage": "System Language",
+  "@systemLanguage": { "description": "Option to follow device system language" },
+
+  "english": "English",
+  "@english": { "description": "English language option" },
+
+  "turkish": "Türkçe",
+  "@turkish": { "description": "Turkish language option" },
+
+  "languageChanged": "Language changed successfully.",
+  "@languageChanged": { "description": "Snackbar after changing language" },
+
+  "homeGoodMorning": "Hello,",
+  "@homeGoodMorning": { "description": "Hello text" },
+  "homeEmptyGarden": "Your garden is empty",
+  "@homeEmptyGarden": { "description": "Empty garden text" },
+  "homeEmptyGardenSubtitle": "Start building your green sanctuary\nby adding your first plant.",
+  "@homeEmptyGardenSubtitle": { "description": "Empty garden detail description" },
+  "homeAddFirstPlant": "Add First Plant",
+  "@homeAddFirstPlant": { "description": "Hero button to add first plant" },
+  "homeMyPlants": "My Plants",
+  "@homeMyPlants": { "description": "My Plants title" },
+  "homeViewAll": "View All",
+  "@homeViewAll": { "description": "View all plants label" },
+  "homeSmartCareReminders": "Smart Care Reminders",
+  "@homeSmartCareReminders": { "description": "Smart Care Reminders section" },
+  "homeWatering": "Watering",
+  "@homeWatering": { "description": "Watering task label" },
+  "homeWateringSubtitle": "Soil tracking",
+  "@homeWateringSubtitle": { "description": "Watering details" },
+  "homeFertilizing": "Fertilizing",
+  "@homeFertilizing": { "description": "Fertilizing task label" },
+  "homeFertilizingSubtitle": "Nutrient alerts",
+  "@homeFertilizingSubtitle": { "description": "Fertilizing details" },
+
+  "gardenTitle": "My Garden",
+  "@gardenTitle": { "description": "Garden title" },
+  "gardenAllPlants": "All Plants",
+  "@gardenAllPlants": { "description": "All Plants filter chip" },
+  "gardenNeedsWater": "Needs Water",
+  "@gardenNeedsWater": { "description": "Needs Water filter chip" },
+  "gardenIndoor": "Indoor",
+  "@gardenIndoor": { "description": "Indoor plants filter chip" },
+  "gardenNoPlants": "No plants yet.\nTap + to add your first plant!",
+  "@gardenNoPlants": { "description": "No plants in garden card message" },
+  "gardenNoPlantsCategory": "No plants in this category.",
+  "@gardenNoPlantsCategory": { "description": "No plants in categorised filter message" },
+
+  "discoverTitle": "Discover",
+  "@discoverTitle": { "description": "Discover title" },
+  "discoverSearchHint": "Search plants, articles, guides...",
+  "@discoverSearchHint": { "description": "Discover tab search textfield hint" },
+  "discoverLatestArticles": "Latest Articles",
+  "@discoverLatestArticles": { "description": "Discover latest articles header" },
+  "discoverSeeAll": "See all",
+  "@discoverSeeAll": { "description": "Discover see all articles label" },
+  "discoverTrendingGuides": "Trending Guides",
+  "@discoverTrendingGuides": { "description": "Discover trending guides header" },
+
+  "healthyTitle": "Care Center",
+  "@healthyTitle": { "description": "Healthy tab header title" },
+  "healthySubtitle": "Touch the soul of your plants, talk to them.",
+  "@healthySubtitle": { "description": "Healthy tab status description" },
+  "healthyTabDoctor": "Doctor",
+  "@healthyTabDoctor": { "description": "Tab item for Doctor" },
+  "healthyTabHospital": "Hospital",
+  "@healthyTabHospital": { "description": "Tab item for Hospital" },
+  "healthyTabDiscover": "Discover",
+  "@healthyTabDiscover": { "description": "Tab item for Discover" },
+
+  "profileTitle": "My Profile",
+  "@profileTitle": { "description": "Profile tab title" },
+  "profileEditProfile": "Edit Profile",
+  "@profileEditProfile": { "description": "Edit profile details label" },
+  "profileOverview": "Overview",
+  "@profileOverview": { "description": "Profile overview submenu" },
+  "profileSettingsTab": "Settings",
+  "@profileSettingsTab": { "description": "Profile settings submenu" },
+  "profileGardenerLevel": "Gardener Level",
+  "@profileGardenerLevel": { "description": "Profile level indicator" },
+  "profileTotalPlants": "Total Plants",
+  "@profileTotalPlants": { "description": "Total plants registered by user" },
+  "profileCompletedTasks": "Completed Tasks",
+  "@profileCompletedTasks": { "description": "Total completed tasks in care schedules" },
+  "profileWeeklyActivity": "Weekly Care Activity",
+  "@profileWeeklyActivity": { "description": "Profile weekly activity section" },
+  "profileGeneral": "General",
+  "@profileGeneral": { "description": "General settings section" },
+  "profileAppSettings": "App Settings",
+  "@profileAppSettings": { "description": "Profile app settings item" },
+  "profileNotificationPrefs": "Notification Preferences",
+  "@profileNotificationPrefs": { "description": "Profile notification settings item" },
+  "profileSupportLegal": "Support & Legal",
+  "@profileSupportLegal": { "description": "Profile support and legal section header" },
+  "profileHelpCenter": "Help Center",
+  "@profileHelpCenter": { "description": "Profile help center menu item" },
+  "profileTerms": "Terms of Use & Policies",
+  "@profileTerms": { "description": "Profile terms of usage menu item" },
+  "profileSignOut": "Sign Out",
+  "@profileSignOut": { "description": "Sign out item text" },
+  "profileDeleteAccount": "Delete Account",
+  "@profileDeleteAccount": { "description": "Delete account item text" },
+
+  "profileTitleNew": "New Gardener 🌱",
+  "profileTitleSprout": "Sprout Friend 🌿",
+  "profileTitleLeaf": "Leaf Lover ☘️",
+  "profileTitleSkilled": "Skilled Gardener 🏡",
+  "profileTitleMaster": "Green Thumb Master 👑",
+  "profileNextLevelStart": "Add your first plant and start your gardening adventure!",
+  "profileNextLevelLeaf": "Only {count} plants left to become Leaf Lover.",
+  "@profileNextLevelLeaf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileNextLevelSkilled": "Only {count} plants left to become Skilled Gardener.",
+  "@profileNextLevelSkilled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileNextLevelMaster": "Only {count} plants left to become Green Thumb Master.",
+  "@profileNextLevelMaster": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileNextLevelMax": "You are at the top of your garden, congratulations!"
+}

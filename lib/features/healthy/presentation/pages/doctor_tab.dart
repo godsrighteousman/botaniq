@@ -1,12 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'ai_chat_page.dart';
 import 'light_meter_page.dart';
 
-class DoctorTab extends StatelessWidget {
+class DoctorTab extends StatefulWidget {
   const DoctorTab({super.key});
 
+  @override
+  State<DoctorTab> createState() => _DoctorTabState();
+}
+
+class _DoctorTabState extends State<DoctorTab> {
   final Color _primaryGreen = const Color(0xFF4FA976);
+  List<Map<String, dynamic>> _userPlants = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPlants();
+  }
+
+  Future<void> _loadUserPlants() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final data = await Supabase.instance.client
+          .from('plants')
+          .select('id, name, species, image_url')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      if (mounted) {
+        setState(() {
+          _userPlants = List<Map<String, dynamic>>.from(data);
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +64,7 @@ class DoctorTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _buildQuickToolsGrid(context),
-          const SizedBox(height: 100), // padding
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -36,15 +72,12 @@ class DoctorTab extends StatelessWidget {
 
   Widget _buildConsultationBanner(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        _showConsultationBottomSheet(context);
-      },
+      onTap: () => _showConsultationBottomSheet(context),
       child: Container(
         height: 180,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
           image: const DecorationImage(
-            // Modern, earthy background aesthetic
             image: NetworkImage(
               'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=800',
             ),
@@ -76,7 +109,7 @@ class DoctorTab extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                'AI Tesis Doktoru\nHizmetinizde',
+                'AI Bitki Doktoru\nHizmetinizde',
                 style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontSize: 24,
@@ -129,7 +162,7 @@ class DoctorTab extends StatelessWidget {
       isScrollControlled: true,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.65,
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -161,41 +194,50 @@ class DoctorTab extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Bahçenizdeki bitkilerden birini seçerek anında uzmana bağlanın.',
+                'Bahçenizdeki bitkilerden birini seçin veya yeni bir fotoğraf çekin.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF6E6E73),
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 32),
-              Expanded(
-                child: ListView(
-                  physics: const BouncingScrollPhysics(),
-                  children: [
-                    _buildPlantPatientOption(
-                      context,
-                      name: 'Monstera Deliciosa',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=200',
+              const SizedBox(height: 24),
+              // Yeni fotoğraf çek seçeneği
+              _buildNewPhotoOption(context),
+              const SizedBox(height: 16),
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                )
+              else if (_userPlants.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    'Henüz bahçenize bitki eklememişsiniz.\nYeni bir fotoğraf çekerek başlayın.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF8B9E93),
+                      fontSize: 14,
                     ),
-                    const SizedBox(height: 16),
-                    _buildPlantPatientOption(
-                      context,
-                      name: 'Sansevieria (Snake Plant)',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1593482892290-f54927ae1b7e?auto=format&fit=crop&q=80&w=200',
-                    ),
-                    const SizedBox(height: 16),
-                    _buildPlantPatientOption(
-                      context,
-                      name: 'Fiddle Leaf Fig',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1597055905001-c888d3f6d7ab?auto=format&fit=crop&q=80&w=200',
-                    ),
-                  ],
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _userPlants.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final plant = _userPlants[index];
+                      return _buildPlantPatientOption(
+                        context,
+                        name: plant['name'] ?? 'Bilinmeyen Bitki',
+                        imageUrl: plant['image_url'],
+                      );
+                    },
+                  ),
                 ),
-              ),
             ],
           ),
         );
@@ -203,14 +245,86 @@ class DoctorTab extends StatelessWidget {
     );
   }
 
+  Widget _buildNewPhotoOption(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AiChatPage(plantName: 'Yeni Bitki'),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              _primaryGreen.withOpacity(0.1),
+              _primaryGreen.withOpacity(0.05),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _primaryGreen.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _primaryGreen.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.add_a_photo_rounded,
+                color: _primaryGreen,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Yeni Fotoğraf Çek',
+                    style: GoogleFonts.outfit(
+                      color: const Color(0xFF2C3E35),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Hasta bitkinin fotoğrafını çek ve teşhis koy',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF8B9E93),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: _primaryGreen,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildPlantPatientOption(
     BuildContext context, {
     required String name,
-    required String imageUrl,
+    String? imageUrl,
   }) {
     return GestureDetector(
       onTap: () {
-        Navigator.pop(context); // close bottom sheet
+        Navigator.pop(context);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => AiChatPage(plantName: name)),
@@ -220,11 +334,11 @@ class DoctorTab extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: const Color(0xFFE2E8F0)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+              color: const Color(0xFFCBD5E1).withOpacity(0.16),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -233,34 +347,24 @@ class DoctorTab extends StatelessWidget {
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                imageUrl,
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.local_florist,
-                    color: Color(0xFF8B9E93),
-                    size: 24,
-                  ),
-                ),
-              ),
+              borderRadius: BorderRadius.circular(14),
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _buildPlaceholderAvatar(),
+                    )
+                  : _buildPlaceholderAvatar(),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 name,
                 style: GoogleFonts.outfit(
                   color: const Color(0xFF2C3E35),
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -274,11 +378,27 @@ class DoctorTab extends StatelessWidget {
               child: Icon(
                 Icons.chat_bubble_outline_rounded,
                 color: _primaryGreen,
-                size: 20,
+                size: 18,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderAvatar() {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Icon(
+        Icons.local_florist,
+        color: Color(0xFF8B9E93),
+        size: 24,
       ),
     );
   }
@@ -297,6 +417,15 @@ class DoctorTab extends StatelessWidget {
           icon: Icons.bug_report_rounded,
           color: const Color(0xFFEF7C56),
           subtitle: 'Görsel teşhis',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    const AiChatPage(plantName: 'Haşere Analizi'),
+              ),
+            );
+          },
         ),
         _buildToolCard(
           title: 'Işık Ölçer',

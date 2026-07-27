@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   location    TEXT,
   watering_reminders   BOOLEAN DEFAULT true,
   fertilizer_reminders BOOLEAN DEFAULT true,
+  language_code        TEXT,
   created_at  TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()),
   updated_at  TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now())
 );
@@ -20,7 +21,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS location              TEXT,
   ADD COLUMN IF NOT EXISTS watering_reminders    BOOLEAN DEFAULT true,
-  ADD COLUMN IF NOT EXISTS fertilizer_reminders  BOOLEAN DEFAULT true;
+  ADD COLUMN IF NOT EXISTS fertilizer_reminders  BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS language_code         TEXT;
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
@@ -24,7 +25,7 @@ class DiscoverPage extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 Text(
-                  'Discover',
+                  AppLocalizations.of(context)!.discoverTitle,
                   style: GoogleFonts.outfit(
                     color: _primaryText,
                     fontSize: 32,
@@ -35,7 +36,10 @@ class DiscoverPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 // Search Bar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _cardBg,
                     borderRadius: BorderRadius.circular(20),
@@ -50,20 +54,25 @@ class DiscoverPage extends StatelessWidget {
                   child: TextField(
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Search plants, articles, guides...',
-                      hintStyle: GoogleFonts.inter(color: _textSecondary, fontSize: 14),
+                      hintText: AppLocalizations.of(
+                        context,
+                      )!.discoverSearchHint,
+                      hintStyle: GoogleFonts.inter(
+                        color: _textSecondary,
+                        fontSize: 14,
+                      ),
                       icon: Icon(Icons.search_rounded, color: _textSecondary),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Latest Articles
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Latest Articles',
+                      AppLocalizations.of(context)!.discoverLatestArticles,
                       style: GoogleFonts.outfit(
                         color: _primaryText,
                         fontSize: 20,
@@ -71,7 +80,7 @@ class DiscoverPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'See all',
+                      AppLocalizations.of(context)!.discoverSeeAll,
                       style: GoogleFonts.inter(
                         color: _accentGreen,
                         fontSize: 14,
@@ -88,20 +97,32 @@ class DiscoverPage extends StatelessWidget {
                     physics: const BouncingScrollPhysics(),
                     clipBehavior: Clip.none,
                     children: [
-                      _buildArticleCard('The Secret to Monstera Growth', 'Indoor Plants', 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=400'),
+                      _buildArticleCard(
+                        'The Secret to Monstera Growth',
+                        'Indoor Plants',
+                        'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=400',
+                      ),
                       const SizedBox(width: 16),
-                      _buildArticleCard('Watering Guide for Succulents', 'Cactus & Succulents', 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=400'),
+                      _buildArticleCard(
+                        'Watering Guide for Succulents',
+                        'Cactus & Succulents',
+                        'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=400',
+                      ),
                       const SizedBox(width: 16),
-                      _buildArticleCard('Best Soil Types for Herbs', 'Herbs', 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=400'),
+                      _buildArticleCard(
+                        'Best Soil Types for Herbs',
+                        'Herbs',
+                        'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=400',
+                      ),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 32),
-                
+
                 // Trending Guides
                 Text(
-                  'Trending Guides',
+                  AppLocalizations.of(context)!.discoverTrendingGuides,
                   style: GoogleFonts.outfit(
                     color: _primaryText,
                     fontSize: 20,
@@ -109,12 +130,24 @@ class DiscoverPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildGuideCard('Propagating 101: A Beginner\'s Manual', '12 min read', Icons.eco_rounded),
+                _buildGuideCard(
+                  'Propagating 101: A Beginner\'s Manual',
+                  '12 min read',
+                  Icons.eco_rounded,
+                ),
                 const SizedBox(height: 12),
-                _buildGuideCard('Common Pests and How to Cure Them', '8 min read', Icons.bug_report_rounded),
+                _buildGuideCard(
+                  'Common Pests and How to Cure Them',
+                  '8 min read',
+                  Icons.bug_report_rounded,
+                ),
                 const SizedBox(height: 12),
-                _buildGuideCard('Repotting: When and How?', '15 min read', Icons.yard_rounded),
-                
+                _buildGuideCard(
+                  'Repotting: When and How?',
+                  '15 min read',
+                  Icons.yard_rounded,
+                ),
+
                 const SizedBox(height: 120), // nav bar spacing
               ],
             ),
@@ -142,7 +175,10 @@ class DiscoverPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
             child: Image.network(
               imageUrl,
               height: 120,
@@ -156,7 +192,10 @@ class DiscoverPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _accentGreen.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
@@ -230,15 +269,15 @@ class DiscoverPage extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   readTime,
-                  style: GoogleFonts.inter(
-                    color: _textSecondary,
-                    fontSize: 13,
-                  ),
+                  style: GoogleFonts.inter(color: _textSecondary, fontSize: 13),
                 ),
               ],
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: _textSecondary.withOpacity(0.5)),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: _textSecondary.withOpacity(0.5),
+          ),
         ],
       ),
     );

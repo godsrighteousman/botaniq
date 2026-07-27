@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'search_history_page.dart';
 import 'plant_detail_page.dart';
 import '../../../../core/services/schedule_service.dart';
-import '../../../home/presentation/pages/photo_instruction_page.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 class GardenPage extends StatefulWidget {
   const GardenPage({super.key});
@@ -21,7 +22,7 @@ class _GardenPageState extends State<GardenPage> {
 
   List<Map<String, dynamic>> _plants = [];
   bool _isLoading = true;
-  String _selectedFilter = 'All Plants';
+  String _selectedFilter = 'all';
 
   @override
   void initState() {
@@ -37,7 +38,8 @@ class _GardenPageState extends State<GardenPage> {
           .from('plants')
           .select()
           .eq('user_id', user.id)
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .timeout(const Duration(seconds: 5));
       if (mounted) {
         setState(() {
           _plants = List<Map<String, dynamic>>.from(data);
@@ -50,7 +52,7 @@ class _GardenPageState extends State<GardenPage> {
   }
 
   List<Map<String, dynamic>> get _filteredPlants {
-    if (_selectedFilter == 'Needs Water') {
+    if (_selectedFilter == 'needsWater') {
       return _plants.where((p) {
         final last = p['last_watered_at'];
         final interval = (p['watering_interval_days'] as int?) ?? 7;
@@ -62,7 +64,7 @@ class _GardenPageState extends State<GardenPage> {
             next.difference(DateTime.now()).inDays <= 1;
       }).toList();
     }
-    if (_selectedFilter == 'Indoor') {
+    if (_selectedFilter == 'indoor') {
       return _plants
           .where(
             (p) =>
@@ -94,7 +96,7 @@ class _GardenPageState extends State<GardenPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'My Garden',
+                    AppLocalizations.of(context)!.gardenTitle,
                     style: GoogleFonts.outfit(
                       color: _primaryText,
                       fontSize: 32,
@@ -107,7 +109,7 @@ class _GardenPageState extends State<GardenPage> {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PhotoInstructionPage(),
+                          builder: (context) => const SearchHistoryPage(),
                         ),
                       );
                       _fetchPlants();
@@ -127,7 +129,7 @@ class _GardenPageState extends State<GardenPage> {
                         ],
                       ),
                       child: const Icon(
-                        Icons.add,
+                        Icons.history_rounded,
                         color: Colors.white,
                         size: 24,
                       ),
@@ -143,16 +145,19 @@ class _GardenPageState extends State<GardenPage> {
               child: Row(
                 children: [
                   _buildFilterChip(
-                    'All Plants',
-                    _selectedFilter == 'All Plants',
+                    'all',
+                    AppLocalizations.of(context)!.gardenAllPlants,
                   ),
                   const SizedBox(width: 12),
                   _buildFilterChip(
-                    'Needs Water',
-                    _selectedFilter == 'Needs Water',
+                    'needsWater',
+                    AppLocalizations.of(context)!.gardenNeedsWater,
                   ),
                   const SizedBox(width: 12),
-                  _buildFilterChip('Indoor', _selectedFilter == 'Indoor'),
+                  _buildFilterChip(
+                    'indoor',
+                    AppLocalizations.of(context)!.gardenIndoor,
+                  ),
                 ],
               ),
             ),
@@ -181,9 +186,11 @@ class _GardenPageState extends State<GardenPage> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              _selectedFilter == 'All Plants'
-                                  ? 'No plants yet.\nTap + to add your first plant!'
-                                  : 'No plants in this category.',
+                              _selectedFilter == 'all'
+                                  ? AppLocalizations.of(context)!.gardenNoPlants
+                                  : AppLocalizations.of(
+                                      context,
+                                    )!.gardenNoPlantsCategory,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.inter(
                                 color: _textSecondary,
@@ -219,9 +226,10 @@ class _GardenPageState extends State<GardenPage> {
     );
   }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
+  Widget _buildFilterChip(String value, String label) {
+    final isSelected = _selectedFilter == value;
     return GestureDetector(
-      onTap: () => setState(() => _selectedFilter = label),
+      onTap: () => setState(() => _selectedFilter = value),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(

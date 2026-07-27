@@ -46,6 +46,55 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     if (_localPlantData['description'] == null) {
       if (!mounted) return;
       setState(() => _isLoadingDetails = true);
+
+      // 1. Eger catalog_id varsa veritabanından çek
+      final catalogId = _localPlantData['catalog_id'];
+      if (catalogId != null) {
+        try {
+          final catData = await Supabase.instance.client
+              .from('plant_catalog')
+              .select()
+              .eq('id', catalogId)
+              .maybeSingle();
+          if (catData != null && mounted) {
+            setState(() {
+              _localPlantData.addAll(catData);
+              _isLoadingDetails = false;
+            });
+            return;
+          }
+        } catch (e) {
+          debugPrint('Failed to fetch from catalog by id: $e');
+        }
+      }
+
+      // 2. catalog_id yoksa veya bulunamadıysa, ismine göre katalog araması dene
+      try {
+        final name =
+            _localPlantData['name'] ??
+            _localPlantData['custom_name'] ??
+            _localPlantData['species'] ??
+            '';
+        if (name.isNotEmpty) {
+          final catData = await Supabase.instance.client
+              .from('plant_catalog')
+              .select()
+              .or('name.ilike.%$name%,species.ilike.%$name%')
+              .limit(1)
+              .maybeSingle();
+          if (catData != null && mounted) {
+            setState(() {
+              _localPlantData.addAll(catData);
+              _isLoadingDetails = false;
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        debugPrint('Failed to lookup fallback catalog by name: $e');
+      }
+
+      // 3. Katalogda yoksa OpenAI ile detayları oluştur
       final name =
           _localPlantData['name'] ??
           _localPlantData['custom_name'] ??
@@ -58,14 +107,6 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           _localPlantData.addAll(details);
           _isLoadingDetails = false;
         });
-
-        // Eğer veritabanına kaydetmek istersek (opsiyonel) - şimdilik sadece UI'da tutuyoruz
-        /*
-        final id = _localPlantData['id']?.toString();
-        if (id != null) {
-          // Tabloda uygun kolonlar olmadığı sürece save edilemez.
-        }
-        */
       } else if (mounted) {
         setState(() => _isLoadingDetails = false);
       }
@@ -603,8 +644,18 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     final String feedProtocol =
         _localPlantData['feeding_protocol'] ??
         'Fertilize monthly during spring/summer with balanced liquid fertilizer.';
+    final String waterInterval =
+        _localPlantData['watering_interval_days'] != null
+        ? '${_localPlantData['watering_interval_days']} günde bir sulanmalı.'
+        : 'Genellikle 7-10 günde bir sulanmalı.';
     return Column(
       children: [
+        _buildCareTile(
+          icon: Icons.repeat_one_rounded,
+          title: 'Sulama Sıklığı',
+          subtitle: waterInterval,
+        ),
+        const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.water_drop_rounded,
           title: 'Watering Protocol',

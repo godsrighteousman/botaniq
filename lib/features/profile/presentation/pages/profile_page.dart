@@ -7,6 +7,7 @@ import 'terms_page.dart';
 import 'edit_profile_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../onboarding/presentation/pages/onboarding_page.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -54,16 +55,38 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
       _email = user.email ?? '';
-      try {
-        // En öncelikli olarak 'users' tablosunu kontrol et (çünkü EditProfilePage burayı güncelliyor)
-        final usersData = await Supabase.instance.client
+
+      // Profil verisi + istatistikleri PARALEL yükle
+      await Future.wait([_fetchProfile(user), _fetchStatistics(user.id)]);
+    }
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _fetchProfile(User user) async {
+    try {
+      // users ve profiles tablolarını paralel sorgula
+      final results = await Future.wait([
+        Supabase.instance.client
             .from('users')
             .select()
             .eq('id', user.id)
-            .maybeSingle();
+            .maybeSingle()
+            .timeout(const Duration(seconds: 5)),
+        Supabase.instance.client
+            .from('profiles')
+            .select('full_name, avatar_url')
+            .eq('id', user.id)
+            .maybeSingle()
+            .timeout(const Duration(seconds: 5)),
+      ]);
 
-        if (usersData != null && mounted) {
-          setState(() {
+      final usersData = results[0] as Map<String, dynamic>?;
+      final profilesData = results[1] as Map<String, dynamic>?;
+
+      if (mounted) {
+        setState(() {
+          // Öncelik: users tablosu, sonra profiles, fallback: userMetadata
+          if (usersData != null) {
             if (usersData['full_name'] != null &&
                 usersData['full_name'].toString().isNotEmpty) {
               _fullName = usersData['full_name'];
@@ -73,62 +96,56 @@ class _ProfilePageState extends State<ProfilePage> {
             if (usersData['avatar_url'] != null) {
               _avatarUrl = usersData['avatar_url'];
             }
-          });
-        } else {
-          // profiles tablosuna geri çekil
-          final profilesData = await Supabase.instance.client
-              .from('profiles')
-              .select('full_name, avatar_url')
-              .eq('id', user.id)
-              .maybeSingle();
-          if (profilesData != null && mounted) {
-            setState(() {
-              if (profilesData['full_name'] != null &&
-                  profilesData['full_name'].toString().isNotEmpty) {
-                _fullName = profilesData['full_name'];
-              } else {
-                _fullName = user.userMetadata?['full_name'] ?? 'Bahçıvan';
-              }
-              if (profilesData['avatar_url'] != null) {
-                _avatarUrl = profilesData['avatar_url'];
-              }
-            });
-          }
-        }
-      } catch (_) {
-        if (mounted) {
-          setState(() {
+          } else if (profilesData != null) {
+            if (profilesData['full_name'] != null &&
+                profilesData['full_name'].toString().isNotEmpty) {
+              _fullName = profilesData['full_name'];
+            } else {
+              _fullName = user.userMetadata?['full_name'] ?? 'Bahçıvan';
+            }
+            if (profilesData['avatar_url'] != null) {
+              _avatarUrl = profilesData['avatar_url'];
+            }
+          } else {
             _fullName = user.userMetadata?['full_name'] ?? 'Bahçıvan';
-          });
-        }
+          }
+        });
       }
-
-      await _fetchStatistics(user.id);
+    } catch (_) {
+      if (mounted) {
+        final user2 = Supabase.instance.client.auth.currentUser;
+        setState(() {
+          _fullName = user2?.userMetadata?['full_name'] ?? 'Bahçıvan';
+        });
+      }
     }
-    if (mounted) setState(() => _isLoading = false);
   }
 
   Future<void> _fetchStatistics(String userId) async {
     try {
-      // 1. Bitki Sayısı Sorgusu
-      final plantsRes = await Supabase.instance.client
-          .from('plants')
-          .select('id')
-          .eq('user_id', userId);
+      // Bitki sayısı + görev sayısı PARALEL sorgula
+      final results = await Future.wait([
+        Supabase.instance.client
+            .from('plants')
+            .select('id')
+            .eq('user_id', userId)
+            .timeout(const Duration(seconds: 5)),
+        Supabase.instance.client
+            .from('care_tasks')
+            .select('id, completed_at')
+            .eq('user_id', userId)
+            .eq('is_completed', true)
+            .timeout(const Duration(seconds: 5)),
+      ]);
 
-      // 2. Tamamlanan Görev Sayısı Sorgusu
-      final completedTasksRes = await Supabase.instance.client
-          .from('care_tasks')
-          .select('id, completed_at')
-          .eq('user_id', userId)
-          .eq('is_completed', true);
+      final plantsRes = results[0] as List;
+      final completedTasksRes = results[1] as List;
 
       if (mounted) {
         setState(() {
-          _totalPlantsCount = (plantsRes as List).length;
-          _completedTasksCount = (completedTasksRes as List).length;
+          _totalPlantsCount = plantsRes.length;
+          _completedTasksCount = completedTasksRes.length;
 
-          // Son 7 günün haftalık gün etiketlerini hesaplayalım
           final now = DateTime.now();
           final startOfWeek = DateTime(
             now.year,
@@ -152,7 +169,6 @@ class _ProfilePageState extends State<ProfilePage> {
             _activityDays.add(turkishWeekDays[day.weekday - 1]);
           }
 
-          // Görevleri günlere dağıt
           for (final task in completedTasksRes) {
             final compAtStr = task['completed_at'] as String?;
             if (compAtStr != null) {
@@ -178,23 +194,24 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   String get _gardenerTitle {
-    if (_totalPlantsCount == 0) return 'Yeni Bahçıvan 🌱';
-    if (_totalPlantsCount <= 2) return 'Filiz Dostu 🌿';
-    if (_totalPlantsCount <= 5) return 'Yaprak Sever ☘️';
-    if (_totalPlantsCount <= 10) return 'Yetenekli Bahçıvan 🏡';
-    return 'Yeşil Başparmak Ustası 👑';
+    final l10n = AppLocalizations.of(context)!;
+    if (_totalPlantsCount == 0) return l10n.profileTitleNew;
+    if (_totalPlantsCount <= 2) return l10n.profileTitleSprout;
+    if (_totalPlantsCount <= 5) return l10n.profileTitleLeaf;
+    if (_totalPlantsCount <= 10) return l10n.profileTitleSkilled;
+    return l10n.profileTitleMaster;
   }
 
   String get _nextLevelText {
-    if (_totalPlantsCount == 0)
-      return 'İlk bitkini ekle ve bahçıvanlık macerana başla!';
+    final l10n = AppLocalizations.of(context)!;
+    if (_totalPlantsCount == 0) return l10n.profileNextLevelStart;
     if (_totalPlantsCount <= 2)
-      return 'Yaprak Sever olmaya ${3 - _totalPlantsCount} bitki kaldı.';
+      return l10n.profileNextLevelLeaf(3 - _totalPlantsCount);
     if (_totalPlantsCount <= 5)
-      return 'Yetenekli Bahçıvan olmaya ${6 - _totalPlantsCount} bitki kaldı.';
+      return l10n.profileNextLevelSkilled(6 - _totalPlantsCount);
     if (_totalPlantsCount <= 10)
-      return 'Yeşil Başparmak Ustası olmaya ${11 - _totalPlantsCount} bitki kaldı.';
-    return 'Bahçenizin zirvesindesiniz, tebrikler!';
+      return l10n.profileNextLevelMaster(11 - _totalPlantsCount);
+    return l10n.profileNextLevelMax;
   }
 
   double get _levelProgress {
@@ -224,7 +241,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       const SizedBox(height: 36),
                       // Header
                       Text(
-                        'Profilim',
+                        AppLocalizations.of(context)!.profileTitle,
                         style: GoogleFonts.outfit(
                           color: _primaryText,
                           fontSize: 32,
@@ -308,7 +325,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Text(
-                                        'Profili Düzenle',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.profileEditProfile,
                                         style: GoogleFonts.inter(
                                           color: const Color(0xFF4FA976),
                                           fontSize: 12,
@@ -352,7 +371,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'Genel Bakış',
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.profileOverview,
                                     style: GoogleFonts.inter(
                                       color: _selectedTabIndex == 0
                                           ? Colors.white
@@ -378,7 +399,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'Ayarlar',
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.profileSettingsTab,
                                     style: GoogleFonts.inter(
                                       color: _selectedTabIndex == 1
                                           ? Colors.white
@@ -436,7 +459,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Bahçıvan Seviyen',
+                    AppLocalizations.of(context)!.profileGardenerLevel,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF2C3E35).withOpacity(0.8),
                       fontSize: 14,
@@ -545,7 +568,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Toplam Bitki',
+                      AppLocalizations.of(context)!.profileTotalPlants,
                       style: GoogleFonts.inter(
                         color: _textSecondary,
                         fontSize: 13,
@@ -600,7 +623,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Tamamlanan Bakım',
+                      AppLocalizations.of(context)!.profileCompletedTasks,
                       style: GoogleFonts.inter(
                         color: _textSecondary,
                         fontSize: 13,
@@ -632,7 +655,7 @@ class _ProfilePageState extends State<ProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Haftalık Bakım Aktivitesi',
+                AppLocalizations.of(context)!.profileWeeklyActivity,
                 style: GoogleFonts.outfit(
                   color: _primaryText,
                   fontSize: 20,
@@ -696,7 +719,7 @@ class _ProfilePageState extends State<ProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Genel',
+          AppLocalizations.of(context)!.profileGeneral,
           style: GoogleFonts.inter(
             color: _textSecondary,
             fontSize: 14,
@@ -708,7 +731,7 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildMenuSection([
           _buildMenuItem(
             icon: Icons.settings_rounded,
-            title: 'Uygulama Ayarları',
+            title: AppLocalizations.of(context)!.profileAppSettings,
             onTap: () {
               Navigator.push(
                 context,
@@ -718,7 +741,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           _buildMenuItem(
             icon: Icons.notifications_none_rounded,
-            title: 'Bildirim Tercihleri',
+            title: AppLocalizations.of(context)!.profileNotificationPrefs,
             onTap: () {
               Navigator.push(
                 context,
@@ -732,7 +755,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
         const SizedBox(height: 24),
         Text(
-          'Destek & Yasal',
+          AppLocalizations.of(context)!.profileSupportLegal,
           style: GoogleFonts.inter(
             color: _textSecondary,
             fontSize: 14,
@@ -744,12 +767,12 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildMenuSection([
           _buildMenuItem(
             icon: Icons.help_outline_rounded,
-            title: 'Yardım Merkezi',
+            title: AppLocalizations.of(context)!.profileHelpCenter,
             onTap: () {},
           ),
           _buildMenuItem(
             icon: Icons.description_outlined,
-            title: 'Kullanım Koşulları & Politikalar',
+            title: AppLocalizations.of(context)!.profileTerms,
             onTap: () {
               Navigator.push(
                 context,
@@ -765,14 +788,14 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildMenuSection([
           _buildMenuItem(
             icon: Icons.logout_rounded,
-            title: 'Çıkış Yap',
+            title: AppLocalizations.of(context)!.profileSignOut,
             textColor: _primaryText,
             iconColor: _textSecondary,
             onTap: () => _showSignOutDialog(context),
           ),
           _buildMenuItem(
             icon: Icons.delete_outline_rounded,
-            title: 'Hesabı Sil',
+            title: AppLocalizations.of(context)!.profileDeleteAccount,
             textColor: _dangerColor,
             iconColor: _dangerColor,
             isDestructive: true,

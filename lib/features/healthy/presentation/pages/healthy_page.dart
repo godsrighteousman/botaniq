@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import 'doctor_tab.dart';
 import 'hospital_tab.dart';
 import 'discover_health_tab.dart';
@@ -11,7 +12,8 @@ class HealthyPage extends StatefulWidget {
   State<HealthyPage> createState() => _HealthyPageState();
 }
 
-class _HealthyPageState extends State<HealthyPage> with SingleTickerProviderStateMixin {
+class _HealthyPageState extends State<HealthyPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   final Color _primaryGreen = const Color(0xFF4FA976);
@@ -62,7 +64,7 @@ class _HealthyPageState extends State<HealthyPage> with SingleTickerProviderStat
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Bakım Merkezi',
+            AppLocalizations.of(context)!.healthyTitle,
             style: GoogleFonts.outfit(
               color: const Color(0xFF2C3E35),
               fontSize: 32,
@@ -72,7 +74,7 @@ class _HealthyPageState extends State<HealthyPage> with SingleTickerProviderStat
           ),
           const SizedBox(height: 4),
           Text(
-            'Bitkilerinin ruhuna dokun, onlarla konuş.',
+            AppLocalizations.of(context)!.healthySubtitle,
             style: GoogleFonts.inter(
               color: const Color(0xFF8B9E93),
               fontSize: 15,
@@ -116,10 +118,10 @@ class _HealthyPageState extends State<HealthyPage> with SingleTickerProviderStat
           fontWeight: FontWeight.w500,
         ),
         dividerColor: Colors.transparent,
-        tabs: const [
-          Tab(text: 'Doctor'),
-          Tab(text: 'Hastane'),
-          Tab(text: 'Keşfet'),
+        tabs: [
+          Tab(text: AppLocalizations.of(context)!.healthyTabDoctor),
+          Tab(text: AppLocalizations.of(context)!.healthyTabHospital),
+          Tab(text: AppLocalizations.of(context)!.healthyTabDiscover),
         ],
       ),
     );
