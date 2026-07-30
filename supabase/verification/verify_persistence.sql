@@ -38,9 +38,11 @@ required_columns(table_name, column_name) as (
     ('plant_catalog', 'source_urls'),
     ('plants', 'custom_name'),
     ('plants', 'catalog_id'),
+    ('plants', 'health_status'),
     ('plants', 'watering_interval_days'),
     ('care_tasks', 'instruction'),
     ('sick_plants', 'diagnosis'),
+    ('sick_plants', 'species'),
     ('diagnosis_messages', 'content')
 ),
 column_checks as (
@@ -95,12 +97,13 @@ trigger_checks as (
   from (
     values
       ('trigger:auth.on_auth_user_created', 'auth', 'auth.users', 'on_auth_user_created'),
-      ('trigger:plants.normalize_plant_name_before_write', 'public', 'public.plants', 'normalize_plant_name_before_write')
+      ('trigger:plants.normalize_plant_name_before_write', 'public', 'public.plants', 'normalize_plant_name_before_write'),
+      ('trigger:sick_plants.sync_garden_health', 'public', 'public.sick_plants', 'sick_plants_sync_garden_health')
   ) as expected(check_name, schema_name, relation_name, trigger_name)
   left join (
     select
       n.nspname as schema_name,
-      c.oid::regclass::text as relation_name,
+      n.nspname || '.' || c.relname as relation_name,
       t.tgname as trigger_name
     from pg_trigger t
     join pg_class c on c.oid = t.tgrelid

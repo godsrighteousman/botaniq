@@ -86,11 +86,15 @@ class SickPlantsSection extends StatelessWidget {
                 onTap: () {
                   final name = plant['name'] ?? 'Bilinmeyen';
                   final sickPlantId = plant['id'];
+                  final plantId = plant['plant_id']?.toString();
+                  final imageUrl = plant['image_url']?.toString();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => AiChatPage(
+                        plantId: plantId,
                         plantName: name,
+                        plantImageUrl: imageUrl,
                         sickPlantId: sickPlantId,
                       ),
                     ),

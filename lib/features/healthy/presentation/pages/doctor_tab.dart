@@ -5,7 +5,9 @@ import 'ai_chat_page.dart';
 import 'light_meter_page.dart';
 
 class DoctorTab extends StatefulWidget {
-  const DoctorTab({super.key});
+  final VoidCallback? onHealthChanged;
+
+  const DoctorTab({super.key, this.onHealthChanged});
 
   @override
   State<DoctorTab> createState() => _DoctorTabState();
@@ -29,7 +31,7 @@ class _DoctorTabState extends State<DoctorTab> {
 
       final data = await Supabase.instance.client
           .from('plants')
-          .select('id, name, species, image_url')
+          .select('id, custom_name, name, species, image_url, health_status')
           .eq('user_id', userId)
           .order('created_at', ascending: false);
 
@@ -232,7 +234,12 @@ class _DoctorTabState extends State<DoctorTab> {
                       final plant = _userPlants[index];
                       return _buildPlantPatientOption(
                         context,
-                        name: plant['name'] ?? 'Bilinmeyen Bitki',
+                        plantId: plant['id'].toString(),
+                        name:
+                            plant['custom_name'] ??
+                            plant['name'] ??
+                            plant['species'] ??
+                            'Bilinmeyen Bitki',
                         imageUrl: plant['image_url'],
                       );
                     },
@@ -247,14 +254,16 @@ class _DoctorTabState extends State<DoctorTab> {
 
   Widget _buildNewPhotoOption(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        final navigator = Navigator.of(this.context);
         Navigator.pop(context);
-        Navigator.push(
-          context,
+        await navigator.push(
           MaterialPageRoute(
             builder: (context) => const AiChatPage(plantName: 'Yeni Bitki'),
           ),
         );
+        if (!mounted) return;
+        widget.onHealthChanged?.call();
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -319,16 +328,25 @@ class _DoctorTabState extends State<DoctorTab> {
 
   Widget _buildPlantPatientOption(
     BuildContext context, {
+    required String plantId,
     required String name,
     String? imageUrl,
   }) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        final navigator = Navigator.of(this.context);
         Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AiChatPage(plantName: name)),
+        await navigator.push(
+          MaterialPageRoute(
+            builder: (context) => AiChatPage(
+              plantId: plantId,
+              plantName: name,
+              plantImageUrl: imageUrl,
+            ),
+          ),
         );
+        if (!mounted) return;
+        widget.onHealthChanged?.call();
       },
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -417,14 +435,15 @@ class _DoctorTabState extends State<DoctorTab> {
           icon: Icons.bug_report_rounded,
           color: const Color(0xFFEF7C56),
           subtitle: 'Görsel teşhis',
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) =>
                     const AiChatPage(plantName: 'Haşere Analizi'),
               ),
             );
+            widget.onHealthChanged?.call();
           },
         ),
         _buildToolCard(

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/services/sick_plant_service.dart';
 import 'ai_chat_page.dart';
 
 class HospitalTab extends StatefulWidget {
-  const HospitalTab({super.key});
+  final int refreshVersion;
+
+  const HospitalTab({super.key, this.refreshVersion = 0});
 
   @override
   State<HospitalTab> createState() => _HospitalTabState();
@@ -23,10 +26,21 @@ class _HospitalTabState extends State<HospitalTab> {
     _loadSickPlants();
   }
 
+  @override
+  void didUpdateWidget(covariant HospitalTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshVersion != widget.refreshVersion) {
+      _loadSickPlants();
+    }
+  }
+
   Future<void> _loadSickPlants() async {
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) return;
+      if (userId == null) {
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
 
       final data = await Supabase.instance.client
           .from('sick_plants')
@@ -163,12 +177,15 @@ class _HospitalTabState extends State<HospitalTab> {
 
   Widget _buildPatientCard(Map<String, dynamic> plant) {
     final name = plant['name'] ?? 'Bilinmeyen';
+    final species = (plant['species'] ?? '').toString();
     final diagnosis = plant['diagnosis'] ?? 'Teşhis bekleniyor';
     final prescription = plant['prescription'] ?? 'Tedavi belirlenmedi';
     final urgency = plant['urgency'] ?? 'Orta';
     final recoveryProgress =
         (plant['recovery_progress'] as num?)?.toDouble() ?? 0.0;
     final sickPlantId = plant['id'];
+    final plantId = plant['plant_id']?.toString();
+    final imageUrl = plant['image_url']?.toString();
 
     Color urgencyColor;
     switch (urgency) {
@@ -188,7 +205,12 @@ class _HospitalTabState extends State<HospitalTab> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                AiChatPage(plantName: name, sickPlantId: sickPlantId),
+                AiChatPage(
+                  plantId: plantId,
+                  plantName: name,
+                  plantImageUrl: imageUrl,
+                  sickPlantId: sickPlantId,
+                ),
           ),
         ).then((_) => _loadSickPlants()); // Refresh on return
       },
@@ -266,6 +288,20 @@ class _HospitalTabState extends State<HospitalTab> {
                           ],
                         ),
                         const SizedBox(height: 4),
+                        if (species.isNotEmpty) ...[
+                          Text(
+                            species,
+                            style: GoogleFonts.inter(
+                              color: _primaryGreen,
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 3),
+                        ],
                         Text(
                           diagnosis,
                           style: GoogleFonts.inter(
@@ -379,16 +415,19 @@ class _HospitalTabState extends State<HospitalTab> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => AiChatPage(
+                                  plantId: plantId,
                                   plantName: name,
+                                  plantImageUrl: imageUrl,
                                   sickPlantId: sickPlantId,
                                 ),
                               ),
                             );
+                            await _loadSickPlants();
                           },
                           icon: const Icon(Icons.chat_rounded, size: 18),
                           label: Text(
@@ -422,14 +461,7 @@ class _HospitalTabState extends State<HospitalTab> {
 
   Future<void> _markAsRecovered(String sickPlantId) async {
     try {
-      await Supabase.instance.client
-          .from('sick_plants')
-          .update({
-            'status': 'recovered',
-            'recovery_progress': 1.0,
-            'updated_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', sickPlantId);
+      await SickPlantService.markRecovered(sickPlantId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

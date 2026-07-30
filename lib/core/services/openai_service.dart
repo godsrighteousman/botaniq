@@ -51,8 +51,13 @@ class OpenAIService {
         'image_base64': base64Image,
         'image_mime_type': _imageMimeType(base64Image),
         'prompt':
-            '$plantContext Hastalığını teşhis et ve tedavi önerisini sadece '
-            'şu JSON formatında dön: {"diagnosis":"Teşhis ve sorun",'
+            '$plantContext Önce bitkiyi mümkün olan en doğru ortak adı ve '
+            'bilimsel türüyle tanımla; emin değilsen bunu açıkça belirt ve '
+            'uydurma isim kullanma. Hastalığını teşhis et ve tedavi önerisini '
+            'sadece şu JSON formatında dön: '
+            '{"plant_name":"Bitkinin ortak adı veya Tanımlanamayan Bitki",'
+            '"species":"Bilimsel tür veya Belirsiz",'
+            '"diagnosis":"Teşhis ve sorun",'
             '"prescription":"Tedavi adımları","urgency":"Düşük/Orta/Kritik",'
             '"care_tips":["İpucu 1","İpucu 2"],'
             '"recovery_time":"Tahmini iyileşme süresi"}',

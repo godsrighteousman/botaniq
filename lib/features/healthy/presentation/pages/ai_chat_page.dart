@@ -5,12 +5,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/services/openai_service.dart';
+import '../../../../core/services/sick_plant_service.dart';
 
 class AiChatPage extends StatefulWidget {
   final String plantName;
+  final String? plantId;
+  final String? plantImageUrl;
   final String? sickPlantId; // Mevcut hasta bitkiye devam etmek için
 
-  const AiChatPage({super.key, required this.plantName, this.sickPlantId});
+  const AiChatPage({
+    super.key,
+    required this.plantName,
+    this.plantId,
+    this.plantImageUrl,
+    this.sickPlantId,
+  });
 
   @override
   State<AiChatPage> createState() => _AiChatPageState();
@@ -27,6 +36,7 @@ class _AiChatPageState extends State<AiChatPage> {
   final List<Map<String, dynamic>> _messages = [];
   bool _isLoading = false;
   String? _currentSickPlantId;
+  late String _displayPlantName;
 
   final List<String> _quickReplies = [
     "Yapraklardaki sararmanın sebebi ne?",
@@ -39,6 +49,7 @@ class _AiChatPageState extends State<AiChatPage> {
   void initState() {
     super.initState();
     _currentSickPlantId = widget.sickPlantId;
+    _displayPlantName = widget.plantName;
 
     if (_currentSickPlantId != null) {
       _loadChatHistory();
@@ -137,25 +148,29 @@ class _AiChatPageState extends State<AiChatPage> {
         final diagnosis = result['diagnosis'] ?? 'Teşhis belirlenemedi';
         final prescription = result['prescription'] ?? 'Tedavi önerisi yok';
         final urgency = result['urgency'] ?? 'Orta';
+        final species = _cleanIdentification(result['species']);
+        final detectedName =
+            _cleanIdentification(result['plant_name']) ??
+            _cleanIdentification(result['name']);
+        final resolvedPlantName = _resolvePlantName(
+          detectedName: detectedName,
+          species: species,
+        );
         final careTips = (result['care_tips'] as List?)?.cast<String>() ?? [];
         final recoveryTime = result['recovery_time'] ?? 'Belirsiz';
 
         // Hasta bitki kaydı oluştur
         final userId = Supabase.instance.client.auth.currentUser?.id;
         if (userId != null) {
-          final sickPlantData = await Supabase.instance.client
-              .from('sick_plants')
-              .insert({
-                'user_id': userId,
-                'name': widget.plantName,
-                'diagnosis': diagnosis,
-                'prescription': prescription,
-                'urgency': urgency,
-                'recovery_progress': 0.0,
-                'status': 'active',
-              })
-              .select()
-              .single();
+          final sickPlantData = await SickPlantService.saveDiagnosis(
+            plantId: widget.plantId,
+            plantName: resolvedPlantName,
+            species: species,
+            imageUrl: widget.plantImageUrl,
+            diagnosis: diagnosis.toString(),
+            prescription: prescription.toString(),
+            urgency: urgency,
+          );
 
           _currentSickPlantId = sickPlantData['id'];
 
@@ -172,9 +187,13 @@ class _AiChatPageState extends State<AiChatPage> {
             : '';
 
         final responseText =
-            "🔍 **Teşhis:** $diagnosis\n\n💊 **Tedavi:** $prescription\n\n⚠️ **Aciliyet:** $urgency\n\n⏱️ **Tahmini İyileşme:** $recoveryTime$tipsText";
+            "🌿 **Bitki:** $resolvedPlantName${species == null ? '' : ' ($species)'}\n\n"
+            "🔍 **Teşhis:** $diagnosis\n\n💊 **Tedavi:** $prescription\n\n"
+            "⚠️ **Aciliyet:** ${SickPlantService.normalizeUrgency(urgency)}\n\n"
+            "⏱️ **Tahmini İyileşme:** $recoveryTime$tipsText";
 
         setState(() {
+          _displayPlantName = resolvedPlantName;
           _messages.add({
             'content': responseText,
             'role': 'assistant',
@@ -193,6 +212,36 @@ class _AiChatPageState extends State<AiChatPage> {
     } catch (e) {
       rethrow;
     }
+  }
+
+  String _resolvePlantName({String? detectedName, String? species}) {
+    if (!_isGenericPlantName(widget.plantName)) {
+      return widget.plantName.trim();
+    }
+    return detectedName ?? species ?? 'Tanımlanamayan Bitki';
+  }
+
+  String? _cleanIdentification(Object? value) {
+    final text = value?.toString().trim();
+    if (text == null || text.isEmpty) return null;
+    final normalized = text.toLowerCase();
+    if (normalized == 'belirsiz' ||
+        normalized == 'unknown' ||
+        normalized == 'null' ||
+        normalized == 'n/a') {
+      return null;
+    }
+    return text;
+  }
+
+  bool _isGenericPlantName(String value) {
+    final normalized = value.trim().toLowerCase();
+    return normalized.isEmpty ||
+        normalized == 'yeni bitki' ||
+        normalized == 'new plant' ||
+        normalized == 'bilinmeyen bitki' ||
+        normalized == 'unknown plant' ||
+        normalized == 'haşere analizi';
   }
 
   Future<void> _performChat(String text, String? imageBase64) async {
@@ -325,7 +374,7 @@ class _AiChatPageState extends State<AiChatPage> {
             color: Color(0xFF2C3E35),
             size: 18,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, _currentSickPlantId != null),
         ),
         title: Column(
           children: [
@@ -338,7 +387,7 @@ class _AiChatPageState extends State<AiChatPage> {
               ),
             ),
             Text(
-              'Hasta: ${widget.plantName}',
+              'Hasta: $_displayPlantName',
               style: GoogleFonts.inter(
                 color: _primaryGreen,
                 fontSize: 13,

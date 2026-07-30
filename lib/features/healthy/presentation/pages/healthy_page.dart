@@ -15,6 +15,7 @@ class HealthyPage extends StatefulWidget {
 class _HealthyPageState extends State<HealthyPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _hospitalRefreshVersion = 0;
 
   final Color _primaryGreen = const Color(0xFF4FA976);
   final Color _bgHint = const Color(0xFFF9FAF9);
@@ -23,12 +24,25 @@ class _HealthyPageState extends State<HealthyPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_handleTabChange);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _handleTabChange() {
+    if (_tabController.index == 1 && !_tabController.indexIsChanging) {
+      _refreshHospital();
+    }
+  }
+
+  void _refreshHospital() {
+    if (!mounted) return;
+    setState(() => _hospitalRefreshVersion++);
   }
 
   @override
@@ -44,10 +58,10 @@ class _HealthyPageState extends State<HealthyPage>
               child: TabBarView(
                 controller: _tabController,
                 physics: const BouncingScrollPhysics(),
-                children: const [
-                  DoctorTab(),
-                  HospitalTab(),
-                  DiscoverHealthTab(),
+                children: [
+                  DoctorTab(onHealthChanged: _refreshHospital),
+                  HospitalTab(refreshVersion: _hospitalRefreshVersion),
+                  const DiscoverHealthTab(),
                 ],
               ),
             ),

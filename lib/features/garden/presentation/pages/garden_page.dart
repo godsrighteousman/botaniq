@@ -255,6 +255,8 @@ class _GardenPageState extends State<GardenPage> {
     final name = plant['custom_name'] ?? plant['name'] ?? 'My Plant';
     final species = plant['species'] ?? '';
     final imageUrl = (plant['image_url'] ?? '') as String;
+    final healthStatus = (plant['health_status'] ?? '').toString().toLowerCase();
+    final isSick = healthStatus == 'sick' || healthStatus == 'hasta';
 
     // Sulama durumu hesapla
     String status = 'Not watered yet';
@@ -274,6 +276,10 @@ class _GardenPageState extends State<GardenPage> {
           statusColor = _accentGreen;
         }
       }
+    }
+    if (isSick) {
+      status = 'Hasta • Klinik takibinde';
+      statusColor = const Color(0xFFEF7C56);
     }
 
     return GestureDetector(
@@ -308,14 +314,50 @@ class _GardenPageState extends State<GardenPage> {
                   topLeft: Radius.circular(24),
                   topRight: Radius.circular(24),
                 ),
-                child: imageUrl.isNotEmpty
-                    ? Image.network(
-                        imageUrl,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const _PlantPlaceholder(),
-                      )
-                    : const _PlantPlaceholder(),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    imageUrl.isNotEmpty
+                        ? Image.network(
+                            imageUrl,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) =>
+                                const _PlantPlaceholder(),
+                          )
+                        : const _PlantPlaceholder(),
+                    if (isSick)
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF7C56),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.14),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'Klinikte',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             Padding(

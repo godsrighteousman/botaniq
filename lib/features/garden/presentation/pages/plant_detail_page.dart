@@ -412,6 +412,12 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildHeaderInfo(String name, String species) {
+    final healthStatus = (_localPlantData['health_status'] ?? '')
+        .toString()
+        .toLowerCase();
+    final isSick = healthStatus == 'sick' || healthStatus == 'hasta';
+    final healthColor = isSick ? const Color(0xFFEF7C56) : _accentGreen;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -446,18 +452,22 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: _accentGreen.withOpacity(0.15),
+              color: healthColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.eco, color: _accentGreen, size: 16),
+                Icon(
+                  isSick ? Icons.healing_rounded : Icons.eco,
+                  color: healthColor,
+                  size: 16,
+                ),
                 const SizedBox(width: 4),
                 Text(
-                  'Healthy',
+                  isSick ? 'Klinikte' : 'Sağlıklı',
                   style: GoogleFonts.inter(
-                    color: _accentGreen,
+                    color: healthColor,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),

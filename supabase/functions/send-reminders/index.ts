@@ -1,56 +1,93 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+interface CareTaskRow {
+  task_type?: string;
+  plants?: {
+    custom_name?: string;
+    name?: string;
+  } | null;
+  profiles?: {
+    full_name?: string;
+  } | null;
 }
 
-serve(async (req: Request) => {
-    // Handle CORS preflight requests
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
+Deno.serve(async (request: Request): Promise<Response> => {
+  if (request.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) {
+      return jsonResponse(
+        { error: "Supabase server environment is not configured" },
+        500,
+      );
     }
 
-    try {
-        // This function can be called via pg_cron locally or via triggered HTTP request
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
-        // Create a Supabase client with the service role key to bypass RLS for background jobs
-        const supabaseClient = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        )
+    const { data, error } = await supabase
+      .from("care_tasks")
+      .select(
+        "task_type, plants(custom_name, name), profiles(full_name)",
+      )
+      .eq("is_completed", false)
+      .lte("due_date", new Date().toISOString());
 
-        const today = new Date().toISOString();
+    if (error) throw error;
 
-        // Fetch uncompleted care tasks that are due
-        const { data: tasks, error } = await supabaseClient
-            .from('care_tasks')
-            .select('*, plants(name), profiles(full_name)')
-            .eq('is_completed', false)
-            .lte('due_date', today);
-
-        if (error) {
-            throw error;
-        }
-
-        let sentCount = 0;
-
-        for (const task of tasks) {
-            // Mock logic: here you would integrate with Firebase Cloud Messaging (FCM) or OneSignal
-            // Ex: await pushNotificationService.send({ to: user_fcm_token, title: "Reminder", body: `Time to ${task.task_type} ${task.plants.name}` })
-            console.log(`[Push Notification Simulation] Sending reminder for ${task.plants?.name} (Task: ${task.task_type}) to user ${task.profiles?.full_name}`);
-            sentCount++;
-        }
-
-        return new Response(
-            JSON.stringify({ message: `Successfully processed ${sentCount} reminders.` }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-        )
-    } catch (error) {
-        return new Response(
-            JSON.stringify({ error: (error as any).message }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-        )
+    const tasks = (data ?? []) as unknown as CareTaskRow[];
+    for (const task of tasks) {
+      const plantName = task.plants?.custom_name ?? task.plants?.name ??
+        "Bilinmeyen Bitki";
+      const userName = task.profiles?.full_name ?? "Kullanıcı";
+      console.log(
+        `[Reminder simulation] ${userName}: ${plantName} / ${
+          task.task_type ?? "care"
+        }`,
+      );
     }
-})
+
+    return jsonResponse({
+      message: `Successfully processed ${tasks.length} reminders.`,
+      processed_count: tasks.length,
+    });
+  } catch (error: unknown) {
+    console.error("send-reminders failed", error);
+    return jsonResponse({ error: errorMessage(error) }, 500);
+  }
+});
+
+function jsonResponse(
+  body: Record<string, unknown>,
+  status = 200,
+): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unexpected server error";
+}
