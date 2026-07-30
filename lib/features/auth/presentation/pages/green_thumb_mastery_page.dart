@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import 'location_access_page.dart';
 
@@ -53,6 +54,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       body: SafeArea(
@@ -95,21 +97,21 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
                     letterSpacing: -0.5,
                   ),
                   children: [
-                    const TextSpan(text: 'How\'s your '),
+                    TextSpan(text: l10n.masteryTitleBefore),
                     TextSpan(
-                      text: 'green\nthumb ',
+                      text: l10n.masteryTitleHighlight,
                       style: TextStyle(
                         color: _accentGreen,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
-                    const TextSpan(text: 'lately?'),
+                    TextSpan(text: l10n.masteryTitleAfter),
                   ],
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                'Be honest—we\'ve all been "The Serial Killer" at\nsome point. Select your current mastery.',
+                l10n.masterySubtitle,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF6E6E73),
                   fontSize: 15,
@@ -152,7 +154,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
                           },
                           style: TextButton.styleFrom(padding: EdgeInsets.zero),
                           child: Text(
-                            'Skip for now',
+                            l10n.skipForNow,
                             style: GoogleFonts.inter(
                               color: const Color(0xFF8A8A8E),
                               fontSize: 16,
@@ -185,7 +187,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
                             ),
                           ),
                           child: Text(
-                            'Continue',
+                            l10n.continueLabel,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 16,
@@ -224,7 +226,14 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
   }
 
   Widget _buildMasteryCard(Map<String, String> level) {
+    final l10n = AppLocalizations.of(context)!;
     final bool isSelected = _selectedMastery == level['id'];
+    final localized = switch (level['id']) {
+      'killer' => (l10n.masteryKiller, l10n.masteryKillerSubtitle),
+      'accidental' => (l10n.masteryAccidental, l10n.masteryAccidentalSubtitle),
+      'growth' => (l10n.masteryGrowth, l10n.masteryGrowthSubtitle),
+      _ => (l10n.masteryWhisperer, l10n.masteryWhispererSubtitle),
+    };
 
     return GestureDetector(
       onTap: () {
@@ -269,7 +278,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          level['title']!,
+                          localized.$1,
                           style: GoogleFonts.outfit(
                             color: Colors.black,
                             fontSize: 18,
@@ -296,7 +305,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    level['subtitle']!,
+                    localized.$2,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF6E6E73),
                       fontSize: 13,

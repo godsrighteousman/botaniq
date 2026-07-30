@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../../core/services/care_notification_service.dart';
 
 class NotificationsSettingsPage extends StatefulWidget {
   const NotificationsSettingsPage({super.key});
@@ -22,7 +27,68 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
   bool _newArticles = false;
 
   @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      for (final table in const ['users', 'profiles']) {
+        try {
+          final data = await Supabase.instance.client
+              .from(table)
+              .select('watering_reminders, fertilizer_reminders')
+              .eq('id', user.id)
+              .maybeSingle();
+          if (data != null) {
+            if (!mounted) return;
+            setState(() {
+              _waterReminders = data['watering_reminders'] ?? true;
+              _fertilizeReminders = data['fertilizer_reminders'] ?? true;
+            });
+            break;
+          }
+        } catch (_) {
+          // Kurulum sürümüne göre users veya profiles tablosu bulunmayabilir.
+        }
+      }
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _weatherAlerts = prefs.getBool('weather_alerts') ?? true;
+      _newArticles = prefs.getBool('new_article_alerts') ?? false;
+    });
+  }
+
+  Future<void> _saveCareSetting(String key, bool value) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      for (final table in const ['users', 'profiles']) {
+        try {
+          await Supabase.instance.client
+              .from(table)
+              .update({key: value})
+              .eq('id', user.id);
+        } catch (_) {
+          // Var olan kurulum tablosu güncellendiği sürece diğerini atla.
+        }
+      }
+    }
+
+    if (key == 'watering_reminders' && value) {
+      await CareNotificationService.instance.requestPermissionAndRefresh();
+    } else {
+      await CareNotificationService.instance.refreshSchedules();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       appBar: AppBar(
@@ -37,7 +103,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Notifications',
+          l10n.notificationTitle,
           style: GoogleFonts.outfit(
             color: const Color(0xFF2C3E35),
             fontSize: 22,
@@ -55,7 +121,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Plant Care Alerts',
+                  l10n.notificationPlantCareAlerts,
                   style: GoogleFonts.inter(
                     color: _textSecondary,
                     fontSize: 14,
@@ -81,11 +147,13 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                       _buildSwitchTile(
                         icon: Icons.water_drop_outlined,
                         iconColor: const Color(0xFF4A90E2),
-                        title: 'Watering Reminders',
-                        subtitle: 'Never miss a watering day',
+                        title: l10n.notificationWateringTitle,
+                        subtitle: l10n.notificationWateringSubtitle,
                         value: _waterReminders,
-                        onChanged: (val) =>
-                            setState(() => _waterReminders = val),
+                        onChanged: (val) {
+                          setState(() => _waterReminders = val);
+                          _saveCareSetting('watering_reminders', val);
+                        },
                       ),
                       Divider(
                         height: 1,
@@ -97,18 +165,20 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                       _buildSwitchTile(
                         icon: Icons.eco_outlined,
                         iconColor: const Color(0xFFE2A04A),
-                        title: 'Fertilizing Reminders',
-                        subtitle: 'Schedule feeding alerts',
+                        title: l10n.notificationFertilizerTitle,
+                        subtitle: l10n.notificationFertilizerSubtitle,
                         value: _fertilizeReminders,
-                        onChanged: (val) =>
-                            setState(() => _fertilizeReminders = val),
+                        onChanged: (val) {
+                          setState(() => _fertilizeReminders = val);
+                          _saveCareSetting('fertilizer_reminders', val);
+                        },
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Other Notifications',
+                  l10n.notificationOther,
                   style: GoogleFonts.inter(
                     color: _textSecondary,
                     fontSize: 14,
@@ -134,11 +204,14 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                       _buildSwitchTile(
                         icon: Icons.wb_sunny_outlined,
                         iconColor: const Color(0xFFFFB347),
-                        title: 'Weather Alerts',
-                        subtitle: 'Extreme weather warnings',
+                        title: l10n.notificationWeatherTitle,
+                        subtitle: l10n.notificationWeatherSubtitle,
                         value: _weatherAlerts,
-                        onChanged: (val) =>
-                            setState(() => _weatherAlerts = val),
+                        onChanged: (val) async {
+                          setState(() => _weatherAlerts = val);
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('weather_alerts', val);
+                        },
                       ),
                       Divider(
                         height: 1,
@@ -150,10 +223,14 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                       _buildSwitchTile(
                         icon: Icons.article_outlined,
                         iconColor: _accentGreen,
-                        title: 'New Articles',
-                        subtitle: 'Tips and tricks for your garden',
+                        title: l10n.notificationArticlesTitle,
+                        subtitle: l10n.notificationArticlesSubtitle,
                         value: _newArticles,
-                        onChanged: (val) => setState(() => _newArticles = val),
+                        onChanged: (val) async {
+                          setState(() => _newArticles = val);
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('new_article_alerts', val);
+                        },
                       ),
                     ],
                   ),

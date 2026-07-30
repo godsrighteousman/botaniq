@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import 'notification_access_page.dart';
 
@@ -11,6 +12,7 @@ class LocationAccessPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       body: SafeArea(
@@ -80,7 +82,7 @@ class LocationAccessPage extends StatelessWidget {
               const SizedBox(height: 40),
 
               Text(
-                'Location Access',
+                l10n.locationAccessTitle,
                 style: GoogleFonts.outfit(
                   color: const Color(0xFF2C3E35),
                   fontSize: 32,
@@ -90,7 +92,7 @@ class LocationAccessPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Personalize your plant care experience based\non your local micro-climate.',
+                l10n.locationAccessSubtitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF6E6E73),
@@ -103,20 +105,20 @@ class LocationAccessPage extends StatelessWidget {
               // Feature List
               _buildFeatureRow(
                 icon: Icons.eco_rounded,
-                title: 'Local Recommendations',
-                subtitle: 'Plants that thrive in your area\'s climate',
+                title: l10n.locationRecommendation,
+                subtitle: l10n.locationRecommendationSubtitle,
               ),
               const SizedBox(height: 16),
               _buildFeatureRow(
                 icon: Icons.wb_sunny_rounded,
-                title: 'Smart Weather Sync',
-                subtitle: 'Schedules adjust to real-time local rain',
+                title: l10n.locationWeather,
+                subtitle: l10n.locationWeatherSubtitle,
               ),
               const SizedBox(height: 16),
               _buildFeatureRow(
                 icon: Icons.notifications_active_rounded,
-                title: 'Frost & Heat Alerts',
-                subtitle: 'Get notified before extreme weather hits',
+                title: l10n.locationAlerts,
+                subtitle: l10n.locationAlertsSubtitle,
               ),
 
               const Spacer(),
@@ -153,7 +155,7 @@ class LocationAccessPage extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Enable Location Access',
+                      l10n.locationEnable,
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 16,
@@ -174,7 +176,7 @@ class LocationAccessPage extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  'Maybe Later',
+                  l10n.maybeLater,
                   style: GoogleFonts.inter(
                     color: const Color(0xFF6E6E73),
                     fontSize: 15,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 /// Hava durumu bilgisi kartı. Konum, sıcaklık ve bakım ipucu gösterir.
 /// Botanik konsepte uygun glassmorphism tarzı tasarım.
@@ -19,16 +20,16 @@ class WeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final weatherInfo = _resolveWeatherVisuals(condition);
+    final localizedTip = _localizedTip(l10n, condition);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.85),
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(
-          color: const Color(0xFFE8F5EE),
-        ),
+        border: Border.all(color: const Color(0xFFE8F5EE)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -60,17 +61,17 @@ class WeatherCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  locationName.isEmpty ? 'Weather' : locationName,
+                  locationName.isEmpty ? l10n.weatherTitle : locationName,
                   style: GoogleFonts.inter(
                     color: const Color(0xFF1B3A2A),
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (tip.isNotEmpty) ...[
+                if (localizedTip.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
-                    tip,
+                    localizedTip,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF7A8F82),
                       fontSize: 12,
@@ -96,6 +97,23 @@ class WeatherCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _localizedTip(AppLocalizations l10n, String condition) {
+    final normalized = condition.toLowerCase();
+    if (normalized.contains('rain') || normalized.contains('shower')) {
+      return l10n.weatherRainyTip;
+    }
+    if (normalized.contains('storm') || normalized.contains('thunder')) {
+      return l10n.weatherStormTip;
+    }
+    if (normalized.contains('snow')) return l10n.weatherSnowTip;
+    if (normalized.contains('cloud') ||
+        normalized.contains('fog') ||
+        normalized.contains('mist')) {
+      return l10n.weatherCloudyTip;
+    }
+    return l10n.weatherSunnyTip;
   }
 
   _WeatherVisuals _resolveWeatherVisuals(String condition) {

@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/care_task_planner.dart';
 import '../models/home_models.dart';
 import '../../../../core/services/weather_service.dart';
+import '../../../../core/services/care_notification_service.dart';
 
 /// Home ekranının tüm state yönetimini sağlayan controller.
 /// ValueNotifier tabanlı reaktif yapı ile widget'lar sadece
@@ -299,10 +300,7 @@ class HomeController {
           try {
             await Supabase.instance.client
                 .from('care_tasks')
-                .update({
-                  'is_completed': true,
-                  'completed_at': nowUtc,
-                })
+                .update({'is_completed': true, 'completed_at': nowUtc})
                 .eq('plant_id', task.plantId)
                 .eq('user_id', user.id)
                 .eq('task_type', 'water')
@@ -367,6 +365,7 @@ class HomeController {
     // Bitki durumu değiştikten sonra görevleri taze veriden yeniden hesapla.
     await _loadUserData();
     await loadTasksForDate(selectedDate.value);
+    await CareNotificationService.instance.refreshSchedules();
   }
 
   /// Verileri yeniden yükler (pull-to-refresh için).

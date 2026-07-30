@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../models/home_models.dart';
 
@@ -10,14 +11,11 @@ class TaskCard extends StatelessWidget {
   final CareTask task;
   final VoidCallback onTap;
 
-  const TaskCard({
-    super.key,
-    required this.task,
-    required this.onTap,
-  });
+  const TaskCard({super.key, required this.task, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isCompleted = task.isCompleted;
     final isOverdue = task.isOverdue;
 
@@ -42,15 +40,15 @@ class TaskCard extends StatelessWidget {
           color: isOverdue
               ? null
               : isCompleted
-                  ? const Color(0xFFF5F9F6).withOpacity(0.6)
-                  : Colors.white.withOpacity(0.85),
+              ? const Color(0xFFF5F9F6).withOpacity(0.6)
+              : Colors.white.withOpacity(0.85),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isOverdue && !isCompleted
                 ? const Color(0xFFFF6B6B).withOpacity(0.3)
                 : isCompleted
-                    ? Colors.transparent
-                    : const Color(0xFFE8F5EE),
+                ? Colors.transparent
+                : const Color(0xFFE8F5EE),
             width: isOverdue ? 1.5 : 1,
           ),
           boxShadow: isCompleted
@@ -124,7 +122,7 @@ class TaskCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'OVERDUE',
+                            l10n.homeOverdue,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 10,
@@ -146,8 +144,9 @@ class TaskCard extends StatelessWidget {
                           : const Color(0xFF1B3A2A),
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      decoration:
-                          isCompleted ? TextDecoration.lineThrough : null,
+                      decoration: isCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
                       decorationColor: const Color(0xFF7A8F82),
                     ),
                     maxLines: 1,
@@ -163,14 +162,15 @@ class TaskCard extends StatelessWidget {
                         color: isCompleted
                             ? const Color(0xFF7A8F82)
                             : isOverdue
-                                ? const Color(0xFFFF6B6B)
-                                : const Color(0xFF0ED761),
+                            ? const Color(0xFFFF6B6B)
+                            : const Color(0xFF0ED761),
                         size: 14,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          '${task.taskType}${task.amount.isNotEmpty ? ' · ${task.amount}' : ''}',
+                          '${_localizedTaskType(l10n, task.taskType)}'
+                          '${task.amount.isNotEmpty ? ' · ${task.amount}' : ''}',
                           style: GoogleFonts.inter(
                             color: isCompleted
                                 ? const Color(0xFFADBFB4)
@@ -251,6 +251,22 @@ class TaskCard extends StatelessWidget {
         return Icons.content_cut_rounded;
       default:
         return Icons.spa_rounded;
+    }
+  }
+
+  String _localizedTaskType(AppLocalizations l10n, String taskType) {
+    switch (taskType.toLowerCase()) {
+      case 'water':
+      case 'watering':
+      case 'sulama':
+        return l10n.plantWateringTask;
+      case 'fertilize':
+      case 'fertilizer':
+      case 'fertilizing':
+      case 'gübreleme':
+        return l10n.plantFertilizingTask;
+      default:
+        return taskType;
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../../../home/presentation/pages/home_page.dart';
 
@@ -21,12 +22,6 @@ class _CreatingSanctuaryPageState extends State<CreatingSanctuaryPage>
   final Color _lightBg = const Color(0xFFF5F5F7);
 
   int _currentTextIndex = 0;
-  final List<String> _loadingTexts = [
-    'Analyzing your micro-climate...',
-    'Customizing care schedules...',
-    'Preparing your green sanctuary...',
-  ];
-
   Timer? _textTimer;
 
   @override
@@ -52,7 +47,7 @@ class _CreatingSanctuaryPageState extends State<CreatingSanctuaryPage>
     _textTimer = Timer.periodic(const Duration(milliseconds: 1500), (timer) {
       if (mounted) {
         setState(() {
-          if (_currentTextIndex < _loadingTexts.length - 1) {
+          if (_currentTextIndex < 2) {
             _currentTextIndex++;
           }
         });
@@ -87,6 +82,12 @@ class _CreatingSanctuaryPageState extends State<CreatingSanctuaryPage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final loadingTexts = [
+      l10n.creatingClimate,
+      l10n.creatingSchedules,
+      l10n.creatingSanctuary,
+    ];
     return Scaffold(
       backgroundColor: _lightBg,
       body: Center(
@@ -132,7 +133,7 @@ class _CreatingSanctuaryPageState extends State<CreatingSanctuaryPage>
                 return FadeTransition(opacity: animation, child: child);
               },
               child: Text(
-                _loadingTexts[_currentTextIndex],
+                loadingTexts[_currentTextIndex],
                 key: ValueKey<int>(_currentTextIndex),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(

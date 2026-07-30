@@ -6,7 +6,9 @@ import 'hospital_tab.dart';
 import 'discover_health_tab.dart';
 
 class HealthyPage extends StatefulWidget {
-  const HealthyPage({super.key});
+  final int initialTabIndex;
+
+  const HealthyPage({super.key, this.initialTabIndex = 0});
 
   @override
   State<HealthyPage> createState() => _HealthyPageState();
@@ -23,8 +25,21 @@ class _HealthyPageState extends State<HealthyPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTabIndex.clamp(0, 2),
+    );
     _tabController.addListener(_handleTabChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant HealthyPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final target = widget.initialTabIndex.clamp(0, 2);
+    if (target != oldWidget.initialTabIndex && _tabController.index != target) {
+      _tabController.animateTo(target);
+    }
   }
 
   @override

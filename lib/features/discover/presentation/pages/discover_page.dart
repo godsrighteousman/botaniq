@@ -13,6 +13,7 @@ class DiscoverPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       body: SafeArea(
@@ -98,20 +99,20 @@ class DiscoverPage extends StatelessWidget {
                     clipBehavior: Clip.none,
                     children: [
                       _buildArticleCard(
-                        'The Secret to Monstera Growth',
-                        'Indoor Plants',
+                        l10n.discoverMonsteraTitle,
+                        l10n.discoverIndoorPlants,
                         'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=400',
                       ),
                       const SizedBox(width: 16),
                       _buildArticleCard(
-                        'Watering Guide for Succulents',
-                        'Cactus & Succulents',
+                        l10n.discoverSucculentWatering,
+                        l10n.discoverCacti,
                         'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=400',
                       ),
                       const SizedBox(width: 16),
                       _buildArticleCard(
-                        'Best Soil Types for Herbs',
-                        'Herbs',
+                        l10n.discoverHerbSoil,
+                        l10n.discoverHerbs,
                         'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=400',
                       ),
                     ],
@@ -131,20 +132,20 @@ class DiscoverPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildGuideCard(
-                  'Propagating 101: A Beginner\'s Manual',
-                  '12 min read',
+                  l10n.discoverPropagation,
+                  l10n.discoverMinutesRead(12),
                   Icons.eco_rounded,
                 ),
                 const SizedBox(height: 12),
                 _buildGuideCard(
-                  'Common Pests and How to Cure Them',
-                  '8 min read',
+                  l10n.discoverPests,
+                  l10n.discoverMinutesRead(8),
                   Icons.bug_report_rounded,
                 ),
                 const SizedBox(height: 12),
                 _buildGuideCard(
-                  'Repotting: When and How?',
-                  '15 min read',
+                  l10n.discoverRepotting,
+                  l10n.discoverMinutesRead(15),
                   Icons.yard_rounded,
                 ),
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 class TermsPage extends StatelessWidget {
   const TermsPage({super.key});
@@ -10,6 +11,7 @@ class TermsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       appBar: AppBar(
@@ -24,7 +26,7 @@ class TermsPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Terms & Policies',
+          l10n.termsTitle,
           style: GoogleFonts.outfit(
             color: const Color(0xFF2C3E35),
             fontSize: 22,
@@ -41,7 +43,7 @@ class TermsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Last updated: Oct 2026',
+                l10n.termsUpdated,
                 style: GoogleFonts.inter(
                   color: _textSecondary,
                   fontSize: 14,
@@ -49,26 +51,18 @@ class TermsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildSectionTitle('1. Terms of Use'),
-              _buildParagraph(
-                'By accessing or using the Botaniq application, you agree to be bound by these Terms of Use and all applicable laws and regulations. If you do not agree with any part of these terms, you may not use our services.',
-              ),
-              _buildSectionTitle('2. User Privacy'),
-              _buildParagraph(
-                'Your privacy is deeply important to us. We only collect the minimal personal data necessary to provide you with tailored plant care schedules. We do not sell your personal data to third parties. For more information, please read our detailed Privacy Policy available on our website.',
-              ),
-              _buildSectionTitle('3. Plant Data'),
-              _buildParagraph(
-                'The plant care instructions, species identification, and diagnosis information provided by the app are for informational purposes only. While we strive to provide highly accurate AI-driven results, we cannot guarantee absolute correctness, and we are not liable for any damaged plants.',
-              ),
-              _buildSectionTitle('4. Premium Subscriptions'),
-              _buildParagraph(
-                'Botaniq Premium offers advanced identification, unlimited plant tracking, and specialized disease diagnosis. Subscriptions are billed on a recurring basis as per your app store agreement. You may cancel at any time, but no refunds will be issued for partial periods.',
-              ),
+              _buildSectionTitle(l10n.termsUseTitle),
+              _buildParagraph(l10n.termsUseBody),
+              _buildSectionTitle(l10n.termsPrivacyTitle),
+              _buildParagraph(l10n.termsPrivacyBody),
+              _buildSectionTitle(l10n.termsPlantTitle),
+              _buildParagraph(l10n.termsPlantBody),
+              _buildSectionTitle(l10n.termsPremiumTitle),
+              _buildParagraph(l10n.termsPremiumBody),
               const SizedBox(height: 32),
               Center(
                 child: Text(
-                  'Enjoy peace of mind and happier plants.',
+                  l10n.termsClosing,
                   style: GoogleFonts.inter(
                     color: _primaryText,
                     fontSize: 16,

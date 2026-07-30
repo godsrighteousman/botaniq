@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import 'your_green_journey_page.dart';
 
@@ -56,6 +57,7 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _bgColor,
       body: SafeArea(
@@ -92,18 +94,18 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                     letterSpacing: -0.5,
                   ),
                   children: [
-                    const TextSpan(text: 'What can we\n'),
+                    TextSpan(text: l10n.helpTitleBefore),
                     TextSpan(
-                      text: 'help you ',
+                      text: l10n.helpTitleHighlight,
                       style: TextStyle(color: _accentGreen),
                     ),
-                    const TextSpan(text: 'with?'),
+                    TextSpan(text: l10n.helpTitleAfter),
                   ],
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                'Select one or more goals to personalize your\ngarden.',
+                l10n.helpSubtitle,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF666666),
                   fontSize: 16,
@@ -146,7 +148,7 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Something else',
+                        l10n.helpOther,
                         style: GoogleFonts.inter(
                           color: Colors.black,
                           fontSize: 16,
@@ -191,7 +193,7 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                           ),
                         ),
                         child: Text(
-                          'Skip',
+                          l10n.skip,
                           style: GoogleFonts.inter(
                             color: Colors.black,
                             fontSize: 16,
@@ -224,7 +226,7 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                           ),
                         ),
                         child: Text(
-                          'Continue',
+                          l10n.continueLabel,
                           style: GoogleFonts.inter(
                             color: Colors.black,
                             fontSize: 16,
@@ -245,8 +247,15 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
   }
 
   Widget _buildGoalCard(Map<String, dynamic> goal) {
+    final l10n = AppLocalizations.of(context)!;
     final bool isSelected = _selectedGoals.contains(goal['id']);
     final Color itemColor = goal['color'];
+    final title = switch (goal['id']) {
+      'heal' => l10n.helpHeal,
+      'care' => l10n.helpCare,
+      'identify' => l10n.helpIdentify,
+      _ => l10n.helpJournal,
+    };
 
     return GestureDetector(
       onTap: () => _toggleSelection(goal['id']),
@@ -289,7 +298,7 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  goal['title'],
+                  title,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.outfit(
                     color: Colors.black,

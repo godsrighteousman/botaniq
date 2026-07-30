@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:camera/camera.dart';
 
 import '../../../../core/services/openai_service.dart';
@@ -99,8 +100,8 @@ class _PlantScannerPageState extends State<PlantScannerPage>
           _showResultDialog(result, photo.path);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Tarama başarısız oldu. Lütfen tekrar deneyin.'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.scannerFailed),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -119,7 +120,9 @@ class _PlantScannerPageState extends State<PlantScannerPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Hata oluştu: ${e.toString()}'),
+            content: Text(
+              AppLocalizations.of(context)!.scannerError(e.toString()),
+            ),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -212,6 +215,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -383,7 +387,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Bitki',
+                            l10n.scannerPlant,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -421,7 +425,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Mantar',
+                            l10n.scannerMushroom,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -470,8 +474,8 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                           const SizedBox(width: 16),
                           Text(
                             _isMushroomMode
-                                ? 'Mantar Tanımlanıyor...'
-                                : 'Bitki Tanımlanıyor...',
+                                ? l10n.scannerIdentifyingMushroom
+                                : l10n.scannerIdentifyingPlant,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 16,
@@ -493,7 +497,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Text(
-                          'Fotoğrafı Çek ve Tara',
+                          l10n.scannerCapture,
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 16,
@@ -544,6 +548,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
   }
 
   void _showResultDialog(Map<String, dynamic> data, String imagePath) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) {
@@ -554,7 +559,9 @@ class _PlantScannerPageState extends State<PlantScannerPage>
           ),
           title: Text(
             data['name'] ??
-                (_isMushroomMode ? 'Bilinmeyen Mantar' : 'Bilinmeyen Bitki'),
+                (_isMushroomMode
+                    ? l10n.scannerUnknownMushroom
+                    : l10n.scannerUnknownPlant),
             style: GoogleFonts.outfit(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -618,7 +625,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Kapat',
+                l10n.commonClose,
                 style: GoogleFonts.inter(
                   color: _accentGreen,
                   fontWeight: FontWeight.bold,
@@ -638,7 +645,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                 );
               },
               child: Text(
-                'Bahçeme Ekle',
+                l10n.plantAddGardenAction,
                 style: GoogleFonts.inter(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

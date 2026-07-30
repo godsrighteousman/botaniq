@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import '../../../healthy/presentation/pages/ai_chat_page.dart';
 
 /// Anasayfada gösterilecek "Bitki Kliniği / Hasta Bitkiler" bölümü.
@@ -17,6 +18,7 @@ class SickPlantsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (sickPlants.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,7 +32,7 @@ class SickPlantsSection extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'Bitki Kliniği',
+                    l10n.homeSickPlants,
                     style: GoogleFonts.outfit(
                       color: const Color(0xFF1B3A2A),
                       fontSize: 20,
@@ -50,13 +52,16 @@ class SickPlantsSection extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEF7C56).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  '${sickPlants.length} Hasta',
+                  l10n.homeSickCount(sickPlants.length),
                   style: GoogleFonts.inter(
                     color: const Color(0xFFEF7C56),
                     fontSize: 12,
@@ -84,7 +89,7 @@ class SickPlantsSection extends StatelessWidget {
               return _SickPlantCard(
                 plant: plant,
                 onTap: () {
-                  final name = plant['name'] ?? 'Bilinmeyen';
+                  final name = plant['name'] ?? l10n.clinicUnknown;
                   final sickPlantId = plant['id'];
                   final plantId = plant['plant_id']?.toString();
                   final imageUrl = plant['image_url']?.toString();
@@ -113,17 +118,16 @@ class _SickPlantCard extends StatelessWidget {
   final Map<String, dynamic> plant;
   final VoidCallback onTap;
 
-  const _SickPlantCard({
-    required this.plant,
-    required this.onTap,
-  });
+  const _SickPlantCard({required this.plant, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final name = plant['name'] ?? 'Bilinmeyen';
-    final diagnosis = plant['diagnosis'] ?? 'Teşhis bekleniyor';
+    final l10n = AppLocalizations.of(context)!;
+    final name = plant['name'] ?? l10n.clinicUnknown;
+    final diagnosis = plant['diagnosis'] ?? l10n.clinicPendingDiagnosis;
     final urgency = plant['urgency'] ?? 'Orta';
-    final recoveryProgress = (plant['recovery_progress'] as num?)?.toDouble() ?? 0.0;
+    final recoveryProgress =
+        (plant['recovery_progress'] as num?)?.toDouble() ?? 0.0;
 
     Color urgencyColor;
     switch (urgency) {
@@ -145,10 +149,7 @@ class _SickPlantCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.85),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: urgencyColor.withOpacity(0.2),
-            width: 1,
-          ),
+          border: Border.all(color: urgencyColor.withOpacity(0.2), width: 1),
           boxShadow: [
             BoxShadow(
               color: urgencyColor.withOpacity(0.05),
@@ -177,10 +178,7 @@ class _SickPlantCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: const Center(
-                        child: Text(
-                          '🌿',
-                          style: TextStyle(fontSize: 24),
-                        ),
+                        child: Text('🌿', style: TextStyle(fontSize: 24)),
                       ),
                     ),
                     Positioned(
@@ -192,10 +190,7 @@ class _SickPlantCard extends StatelessWidget {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Text(
-                          '🩹',
-                          style: TextStyle(fontSize: 13),
-                        ),
+                        child: const Text('🩹', style: TextStyle(fontSize: 13)),
                       ),
                     ),
                   ],
@@ -217,13 +212,16 @@ class _SickPlantCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: urgencyColor.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          urgency,
+                          _localizedUrgency(l10n, urgency.toString()),
                           style: GoogleFonts.inter(
                             color: urgencyColor,
                             fontSize: 10,
@@ -260,7 +258,7 @@ class _SickPlantCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'İyileşme Durumu',
+                      l10n.clinicRecovery,
                       style: GoogleFonts.inter(
                         color: const Color(0xFF7A8F82),
                         fontSize: 10,
@@ -292,5 +290,19 @@ class _SickPlantCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _localizedUrgency(AppLocalizations l10n, String urgency) {
+    switch (urgency.toLowerCase()) {
+      case 'kritik':
+      case 'critical':
+        return l10n.clinicUrgencyCritical;
+      case 'düşük':
+      case 'dusuk':
+      case 'low':
+        return l10n.clinicUrgencyLow;
+      default:
+        return l10n.clinicUrgencyMedium;
+    }
   }
 }

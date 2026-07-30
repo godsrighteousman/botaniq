@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
@@ -126,7 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
                 child: TaskListSection(
-                  sectionTitle: _ctrl.taskSectionTitle(
+                  sectionTitle: _localizedTaskTitle(
+                    context,
                     _ctrl.selectedDate.value,
                   ),
                   tasks: _ctrl.filteredTasks.value,
@@ -147,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? MyPlantsCarousel(
                         plants: _ctrl.plants.value,
                         onViewAllTap: widget.onViewAllPlants,
+                        onPlantChanged: _ctrl.refresh,
                       )
                     : const EmptyGardenCard(),
               ),
@@ -190,6 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLoadingShimmer() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -210,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Loading plants...',
+            l10n.homeLoadingPlants,
             style: GoogleFonts.inter(
               color: const Color(0xFF7A8F82),
               fontSize: 14,
@@ -225,6 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Dialogs & Bottom Sheets ──
 
   void _showNotificationsBottomSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -246,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Notifications',
+                    l10n.homeNotifications,
                     style: GoogleFonts.outfit(
                       color: const Color(0xFF1B3A2A),
                       fontSize: 22,
@@ -273,17 +279,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
               _buildNotificationItem(
-                'Watering Time',
-                'Your indoor plants need watering.',
-                '10 min ago',
+                l10n.homeWateringTime,
+                l10n.homeWateringNotification,
+                l10n.homeTenMinutesAgo,
                 Icons.water_drop_rounded,
                 const Color(0xFF5A9FFE),
               ),
               const SizedBox(height: 12),
               _buildNotificationItem(
-                'Welcome!',
-                'Welcome to Botaniq. Start by adding your first plant.',
-                '1 day ago',
+                l10n.homeWelcome,
+                l10n.homeWelcomeNotification,
+                l10n.homeOneDayAgo,
                 Icons.emoji_nature_rounded,
                 const Color(0xFF0ED761),
               ),
@@ -359,27 +365,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showSignOutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
-          'Sign Out',
+          l10n.profileSignOut,
           style: GoogleFonts.outfit(
             color: const Color(0xFF1B3A2A),
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
-          'Are you sure you want to sign out?',
+          l10n.profileSignOutQuestion,
           style: GoogleFonts.inter(color: const Color(0xFF5C7165)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              l10n.cancel,
               style: GoogleFonts.inter(
                 color: const Color(0xFF5C7165),
                 fontWeight: FontWeight.w600,
@@ -399,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
               elevation: 0,
             ),
             child: Text(
-              'Sign Out',
+              l10n.profileSignOut,
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -413,6 +420,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showTaskDetails(BuildContext context, CareTask task) {
     if (task.isCompleted) return;
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -482,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
-                                task.taskType,
+                                _localizedTaskType(l10n, task.taskType),
                                 style: GoogleFonts.inter(
                                   color: const Color(0xFF0ED761),
                                   fontSize: 12,
@@ -504,7 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  'Overdue',
+                                  l10n.homeOverdue,
                                   style: GoogleFonts.inter(
                                     color: const Color(0xFFFF6B6B),
                                     fontSize: 12,
@@ -526,7 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Instructions',
+                  l10n.homeInstructions,
                   style: GoogleFonts.outfit(
                     color: const Color(0xFF1B3A2A),
                     fontSize: 16,
@@ -568,7 +576,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Required: ${task.amount}',
+                        l10n.homeRequiredAmount(task.amount),
                         style: GoogleFonts.inter(
                           color: const Color(0xFF1B3A2A),
                           fontSize: 15,
@@ -597,7 +605,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         child: Text(
-                          'Later',
+                          l10n.homeLater,
                           style: GoogleFonts.inter(
                             color: const Color(0xFF1B3A2A),
                             fontSize: 15,
@@ -635,7 +643,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Container(
                             alignment: Alignment.center,
                             child: Text(
-                              'Mark as Done',
+                              l10n.homeMarkDone,
                               style: GoogleFonts.inter(
                                 color: Colors.white,
                                 fontSize: 15,
@@ -655,5 +663,34 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  String _localizedTaskTitle(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(date.year, date.month, date.day);
+    if (selected == today) return l10n.homeTodayTasks;
+    if (selected == today.add(const Duration(days: 1))) {
+      return l10n.homeTomorrowTasks;
+    }
+    final locale = Localizations.localeOf(context).toString();
+    return l10n.homeDateTasks(DateFormat('d MMM', locale).format(date));
+  }
+
+  String _localizedTaskType(AppLocalizations l10n, String taskType) {
+    switch (taskType.toLowerCase()) {
+      case 'water':
+      case 'watering':
+      case 'sulama':
+        return l10n.plantWateringTask;
+      case 'fertilize':
+      case 'fertilizer':
+      case 'fertilizing':
+      case 'gübreleme':
+        return l10n.plantFertilizingTask;
+      default:
+        return taskType;
+    }
   }
 }

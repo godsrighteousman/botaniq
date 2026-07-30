@@ -4,17 +4,20 @@ import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../models/home_models.dart';
 import '../../../garden/presentation/pages/plant_detail_page.dart';
+import '../../../../core/services/watering_schedule_service.dart';
 
 /// Kullanıcının bitkilerini yatay kaydırılabilir carousel olarak gösterir.
 /// Glassmorphism tarzı kartlar ile premium görünüm sağlar.
 class MyPlantsCarousel extends StatelessWidget {
   final List<PlantSummary> plants;
   final VoidCallback onViewAllTap;
+  final Future<void> Function()? onPlantChanged;
 
   const MyPlantsCarousel({
     super.key,
     required this.plants,
     required this.onViewAllTap,
+    this.onPlantChanged,
   });
 
   @override
@@ -74,8 +77,10 @@ class MyPlantsCarousel extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             itemCount: plants.length,
             separatorBuilder: (_, _a) => const SizedBox(width: 14),
-            itemBuilder: (context, index) =>
-                _PlantCard(plant: plants[index]),
+            itemBuilder: (context, index) => _PlantCard(
+              plant: plants[index],
+              onPlantChanged: onPlantChanged,
+            ),
           ),
         ),
       ],
@@ -85,28 +90,47 @@ class MyPlantsCarousel extends StatelessWidget {
 
 class _PlantCard extends StatelessWidget {
   final PlantSummary plant;
+  final Future<void> Function()? onPlantChanged;
 
-  const _PlantCard({required this.plant});
+  const _PlantCard({required this.plant, this.onPlantChanged});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final watering = WateringScheduleService.fromPlant(plant.rawData);
+    final wateringStatus = watering.lastWateredAt == null
+        ? l10n.wateringNeverDue
+        : watering.isOverdue
+        ? l10n.wateringOverdue(watering.daysUntilDue.abs())
+        : watering.isDueToday
+        ? l10n.wateringDueToday
+        : watering.isDueTomorrow
+        ? l10n.wateringDueTomorrow
+        : l10n.wateringDueInDays(watering.daysUntilDue);
+    final date = watering.lastWateredAt;
+    final lastWatered = date == null
+        ? l10n.wateringNever
+        : l10n.wateringLastDate(
+            '${date.day.toString().padLeft(2, '0')}.'
+            '${date.month.toString().padLeft(2, '0')}.${date.year}',
+          );
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        final changed = await Navigator.push<bool>(
           context,
           MaterialPageRoute(
-            builder: (context) => PlantDetailPage(plantData: plant.rawData),
+            builder: (context) =>
+                PlantDetailPage(plantData: plant.rawData, isFromGarden: true),
           ),
         );
+        if (changed == true) await onPlantChanged?.call();
       },
       child: Container(
         width: 155,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.85),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFFE8F5EE),
-          ),
+          border: Border.all(color: const Color(0xFFE8F5EE)),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF0ED761).withOpacity(0.06),
@@ -185,7 +209,8 @@ class _PlantCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 7),
                   Text(
-                    plant.wateringDetails,
+                    '$lastWatered • '
+                    '${l10n.wateringInterval(watering.intervalDays)}',
                     style: GoogleFonts.inter(
                       color: const Color(0xFF7A8F82),
                       fontSize: 9,
@@ -216,7 +241,7 @@ class _PlantCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            plant.wateringStatus,
+                            wateringStatus,
                             style: GoogleFonts.inter(
                               color: plant.statusColor,
                               fontSize: 10,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import 'green_thumb_mastery_page.dart';
 
@@ -45,6 +46,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       body: SafeArea(
@@ -80,7 +82,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
 
               // Title Area
               Text(
-                'Your Green Journey',
+                l10n.journeyTitle,
                 style: GoogleFonts.outfit(
                   color: Colors.black,
                   fontSize: 32,
@@ -90,7 +92,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Select the level of care you wish to provide.',
+                l10n.journeySubtitle,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF6E6E73),
                   fontSize: 16,
@@ -138,7 +140,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
                             ),
                           ),
                           child: Text(
-                            'Skip',
+                            l10n.skip,
                             style: GoogleFonts.inter(
                               color: Colors.black,
                               fontSize: 16,
@@ -171,7 +173,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
                             ),
                           ),
                           child: Text(
-                            'Continue',
+                            l10n.continueLabel,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 16,
@@ -226,7 +228,25 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
   }
 
   Widget _buildLevelCard(Map<String, String> level) {
+    final l10n = AppLocalizations.of(context)!;
     final bool isSelected = _selectedCareLevel == level['id'];
+    final localized = switch (level['id']) {
+      'casual' => (
+        l10n.journeyCasualLabel,
+        l10n.journeyCasualTitle,
+        l10n.journeyCasualSubtitle,
+      ),
+      'enthusiast' => (
+        l10n.journeyEnthusiastLabel,
+        l10n.journeyEnthusiastTitle,
+        l10n.journeyEnthusiastSubtitle,
+      ),
+      _ => (
+        l10n.journeyObsessedLabel,
+        l10n.journeyObsessedTitle,
+        l10n.journeyObsessedSubtitle,
+      ),
+    };
 
     return GestureDetector(
       onTap: () {
@@ -283,7 +303,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          level['label']!,
+                          localized.$1,
                           style: GoogleFonts.inter(
                             color: isSelected
                                 ? _accentGreen
@@ -295,7 +315,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          level['title']!,
+                          localized.$2,
                           style: GoogleFonts.outfit(
                             color: Colors.white,
                             fontSize: 22,
@@ -305,7 +325,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          level['subtitle']!,
+                          localized.$3,
                           style: GoogleFonts.inter(
                             color: const Color(0xFFE0E0E0),
                             fontSize: 13,

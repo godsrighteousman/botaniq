@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -32,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
@@ -54,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Welcome Back',
+                l10n.welcomeBack,
                 style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontSize: 36,
@@ -64,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Log in to continue caring for your garden.',
+                l10n.loginSubtitle,
                 style: GoogleFonts.inter(
                   color: AppColors.textSecondary,
                   fontSize: 16,
@@ -76,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
               // Email Field
               _buildTextField(
                 controller: _emailController,
-                hintText: 'Email Address',
+                hintText: l10n.emailAddress,
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -85,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
               // Password Field
               _buildTextField(
                 controller: _passwordController,
-                hintText: 'Password',
+                hintText: l10n.password,
                 icon: Icons.lock_outline,
                 obscureText: _obscurePassword,
                 isPassword: true,
@@ -108,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Forgot Password?',
+                    l10n.forgotPassword,
                     style: GoogleFonts.inter(
                       color: AppColors.primary,
                       fontSize: 14,
@@ -130,11 +132,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         if (email.isEmpty || password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Please enter your email and password.',
-                              ),
-                            ),
+                            SnackBar(content: Text(l10n.enterEmailPassword)),
                           );
                           return;
                         }
@@ -162,7 +160,10 @@ class _LoginPageState extends State<LoginPage> {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Hata Detayı: $e', maxLines: 3),
+                                content: Text(
+                                  l10n.authError(e.toString()),
+                                  maxLines: 3,
+                                ),
                               ),
                             );
                           }
@@ -200,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           )
                         : Text(
-                            'Log In',
+                            l10n.login,
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 18,
@@ -255,7 +256,7 @@ class _LoginPageState extends State<LoginPage> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Dev Login Error: $e',
+                                  l10n.authError(e.toString()),
                                   maxLines: 3,
                                 ),
                               ),
@@ -268,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
                         }
                       },
                 child: Text(
-                  'Bypass Auth (Create Dev Session)',
+                  l10n.developerSession,
                   style: GoogleFonts.outfit(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -291,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      'Or log in with',
+                      l10n.loginWith,
                       style: GoogleFonts.inter(
                         color: AppColors.textSecondary,
                         fontSize: 14,
@@ -337,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Don\'t have an account? ',
+                    l10n.noAccount,
                     style: GoogleFonts.inter(
                       color: AppColors.textSecondary,
                       fontSize: 14,
@@ -358,7 +359,7 @@ class _LoginPageState extends State<LoginPage> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
-                      'Sign Up',
+                      l10n.signUp,
                       style: GoogleFonts.inter(
                         color: AppColors.primary,
                         fontSize: 14,
@@ -377,6 +378,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _nativeGoogleSignIn() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     try {
       /// TODO: Get these IDs from Google Cloud Console
@@ -413,7 +415,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Google Girişi Hata: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.authError(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -421,6 +423,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _nativeAppleSignIn() async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     try {
       final rawNonce = Supabase.instance.client.auth.generateRawNonce();
@@ -454,7 +457,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Apple Girişi Hata: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.authError(e.toString()))));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

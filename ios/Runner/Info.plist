@@ -4,6 +4,8 @@
 <dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Botaniq needs camera access to scan and identify your plants.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Botaniq needs photo library access so you can choose a profile or plant photo.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Botaniq needs microphone access to record videos if needed.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

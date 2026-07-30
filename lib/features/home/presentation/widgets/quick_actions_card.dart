@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../pages/photo_instruction_page.dart';
 
@@ -10,13 +11,14 @@ class QuickActionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            'Quick Actions',
+            l10n.homeQuickActions,
             style: GoogleFonts.outfit(
               color: const Color(0xFF1B3A2A),
               fontSize: 20,
@@ -83,7 +85,7 @@ class QuickActionsCard extends StatelessWidget {
                       ),
                       const Spacer(),
                       Text(
-                        'Scan Plant',
+                        l10n.scanPlant,
                         style: GoogleFonts.outfit(
                           color: Colors.white,
                           fontSize: 18,
@@ -92,7 +94,7 @@ class QuickActionsCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Identify with your camera',
+                        l10n.homeIdentifyCamera,
                         style: GoogleFonts.inter(
                           color: Colors.white.withOpacity(0.8),
                           fontSize: 12,

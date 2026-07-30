@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import 'what_can_we_help_page.dart';
 
 class WhereAreYourPlantsPage extends StatefulWidget {
@@ -53,6 +54,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white, // Light background
       body: SafeArea(
@@ -91,7 +93,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
 
               // Title Area
               Text(
-                'Where are your plants?',
+                l10n.wherePlantsTitle,
                 style: GoogleFonts.outfit(
                   color: Colors.black,
                   fontSize: 32,
@@ -101,7 +103,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Select all that apply to customize your care\nschedules',
+                l10n.wherePlantsSubtitle,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF666666),
                   fontSize: 16,
@@ -143,7 +145,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
                             ),
                           ),
                           child: Text(
-                            'Skip',
+                            l10n.skip,
                             style: GoogleFonts.inter(
                               color: Colors.black,
                               fontSize: 16,
@@ -175,7 +177,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
                             ),
                           ),
                           child: Text(
-                            'Next Step',
+                            l10n.nextStep,
                             style: GoogleFonts.inter(
                               color: Colors.black,
                               fontSize: 16,
@@ -224,7 +226,18 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
   }
 
   Widget _buildLocationCard(Map<String, dynamic> location) {
+    final l10n = AppLocalizations.of(context)!;
     final bool isSelected = _selectedLocations.contains(location['id']);
+    final title = switch (location['id']) {
+      'indoor' => l10n.locationIndoor,
+      'balcony' => l10n.locationBalcony,
+      _ => l10n.locationGarden,
+    };
+    final subtitle = switch (location['id']) {
+      'indoor' => l10n.locationIndoorSubtitle,
+      'balcony' => l10n.locationBalconySubtitle,
+      _ => l10n.locationGardenSubtitle,
+    };
 
     return GestureDetector(
       onTap: () => _toggleSelection(location['id']),
@@ -294,7 +307,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                location['title'],
+                                title,
                                 style: GoogleFonts.outfit(
                                   color: Colors.black,
                                   fontSize: 18,
@@ -303,7 +316,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                location['subtitle'],
+                                subtitle,
                                 style: GoogleFonts.inter(
                                   color: const Color(0xFF666666),
                                   fontSize: 13,

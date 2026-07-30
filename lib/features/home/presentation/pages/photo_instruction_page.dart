@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import 'plant_scanner_page.dart';
 
@@ -14,6 +15,7 @@ class PhotoInstructionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       body: SafeArea(
@@ -31,7 +33,7 @@ class PhotoInstructionPage extends StatelessWidget {
                       _buildHeroIllustration(),
                       const SizedBox(height: 40),
                       Text(
-                        'Photo of the whole\nplant or mushroom',
+                        l10n.photoWholeSpecimen,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.outfit(
                           color: _primaryText,
@@ -43,7 +45,7 @@ class PhotoInstructionPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Make sure the entire specimen is in the center\nof the frame for better identification.',
+                        l10n.photoWholeSpecimenSubtitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           color: _textSecondary,
@@ -59,7 +61,7 @@ class PhotoInstructionPage extends StatelessWidget {
                               imagePath:
                                   'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=400',
                               isCorrect: true,
-                              label: 'Correct',
+                              label: l10n.photoCorrect,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -68,7 +70,7 @@ class PhotoInstructionPage extends StatelessWidget {
                               imagePath:
                                   'https://images.unsplash.com/photo-1601985705806-5b9a71f6004f?auto=format&fit=crop&q=80&w=400',
                               isCorrect: false,
-                              label: 'Too Close',
+                              label: l10n.photoTooClose,
                             ),
                           ),
                         ],
@@ -122,7 +124,7 @@ class PhotoInstructionPage extends StatelessWidget {
             ),
           ),
           Text(
-            'Instructions',
+            AppLocalizations.of(context)!.photoInstructions,
             style: GoogleFonts.outfit(
               color: _primaryText,
               fontSize: 20,
@@ -294,7 +296,7 @@ class PhotoInstructionPage extends StatelessWidget {
             shadowColor: _primaryText.withOpacity(0.4),
           ),
           child: Text(
-            'I Understand, Open Camera',
+            AppLocalizations.of(context)!.photoOpenCamera,
             style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 16,

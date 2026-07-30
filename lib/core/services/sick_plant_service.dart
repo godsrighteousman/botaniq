@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'care_notification_service.dart';
+
 /// Keeps the clinic record and the matching garden plant in sync.
 class SickPlantService {
   SickPlantService._();
@@ -92,6 +94,7 @@ class SickPlantService {
           .eq('user_id', user.id);
     }
 
+    await CareNotificationService.instance.refreshSchedules();
     return record;
   }
 
@@ -119,7 +122,10 @@ class SickPlantService {
         .eq('id', sickPlantId)
         .eq('user_id', user.id);
 
-    if (plantId == null) return;
+    if (plantId == null) {
+      await CareNotificationService.instance.refreshSchedules();
+      return;
+    }
 
     final otherActiveRecords = await _client
         .from('sick_plants')
@@ -137,6 +143,7 @@ class SickPlantService {
           .eq('id', plantId)
           .eq('user_id', user.id);
     }
+    await CareNotificationService.instance.refreshSchedules();
   }
 
   static String? _nonEmpty(String? value) {

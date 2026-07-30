@@ -245,13 +245,17 @@ class _GardenPageState extends State<GardenPage> {
   }
 
   Widget _buildPlantCard(BuildContext context, Map<String, dynamic> plant) {
-    final name = plant['custom_name'] ?? plant['name'] ?? 'My Plant';
+    final l10n = AppLocalizations.of(context)!;
+    final name =
+        plant['custom_name'] ?? plant['name'] ?? l10n.gardenMyPlantFallback;
     final species = plant['species'] ?? '';
     final imageUrl = (plant['image_url'] ?? '') as String;
-    final healthStatus = (plant['health_status'] ?? '').toString().toLowerCase();
+    final healthStatus = (plant['health_status'] ?? '')
+        .toString()
+        .toLowerCase();
     final isSick = healthStatus == 'sick' || healthStatus == 'hasta';
     final watering = WateringScheduleService.fromPlant(plant);
-    final status = watering.statusLabel;
+    final status = _wateringStatus(l10n, watering);
     final statusColor = watering.isDue
         ? Colors.redAccent
         : watering.isDueTomorrow
@@ -323,7 +327,7 @@ class _GardenPageState extends State<GardenPage> {
                             ],
                           ),
                           child: Text(
-                            'Klinikte',
+                            l10n.gardenClinicBadge,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 10,
@@ -362,7 +366,8 @@ class _GardenPageState extends State<GardenPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${watering.lastWateredLabel} • ${watering.intervalLabel}',
+                    '${_lastWateredLabel(l10n, watering)} • '
+                    '${l10n.wateringInterval(watering.intervalDays)}',
                     style: GoogleFonts.inter(
                       color: _textSecondary,
                       fontSize: 9,
@@ -404,6 +409,31 @@ class _GardenPageState extends State<GardenPage> {
         ),
       ),
     );
+  }
+
+  String _wateringStatus(
+    AppLocalizations l10n,
+    PlantWateringSchedule watering,
+  ) {
+    if (watering.lastWateredAt == null) return l10n.wateringNeverDue;
+    if (watering.isOverdue) {
+      return l10n.wateringOverdue(watering.daysUntilDue.abs());
+    }
+    if (watering.isDueToday) return l10n.wateringDueToday;
+    if (watering.isDueTomorrow) return l10n.wateringDueTomorrow;
+    return l10n.wateringDueInDays(watering.daysUntilDue);
+  }
+
+  String _lastWateredLabel(
+    AppLocalizations l10n,
+    PlantWateringSchedule watering,
+  ) {
+    final date = watering.lastWateredAt;
+    if (date == null) return l10n.wateringNever;
+    final formatted =
+        '${date.day.toString().padLeft(2, '0')}.'
+        '${date.month.toString().padLeft(2, '0')}.${date.year}';
+    return l10n.wateringLastDate(formatted);
   }
 }
 

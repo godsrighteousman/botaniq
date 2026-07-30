@@ -5,6 +5,8 @@ import 'photo_instruction_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../garden/presentation/pages/garden_page.dart';
 import '../../../healthy/presentation/pages/healthy_page.dart';
+import '../../../../core/services/care_notification_service.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../controllers/home_controller.dart';
 import '../widgets/home_screen.dart';
@@ -23,18 +25,44 @@ class _HomePageState extends State<HomePage> {
   static const _textSecondary = Color(0xFF7A8F82);
 
   int _currentIndex = 0;
+  int _clinicInitialTabIndex = 0;
+  int _clinicNavigationVersion = 0;
   late final HomeController _homeController;
 
   @override
   void initState() {
     super.initState();
     _homeController = HomeController();
+    CareNotificationService.instance.destination.addListener(
+      _handleNotificationDestination,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleNotificationDestination();
+      CareNotificationService.instance.requestPermissionOnceAndRefresh();
+    });
   }
 
   @override
   void dispose() {
+    CareNotificationService.instance.destination.removeListener(
+      _handleNotificationDestination,
+    );
     _homeController.dispose();
     super.dispose();
+  }
+
+  void _handleNotificationDestination() {
+    final destination = CareNotificationService.instance.consumeDestination();
+    if (!mounted || destination == null) return;
+    setState(() {
+      if (destination == CareNotificationDestination.garden) {
+        _currentIndex = 1;
+      } else {
+        _clinicInitialTabIndex = 1;
+        _clinicNavigationVersion++;
+        _currentIndex = 2;
+      }
+    });
   }
 
   @override
@@ -58,7 +86,10 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const GardenPage();
       case 2:
-        return const HealthyPage();
+        return HealthyPage(
+          key: ValueKey(_clinicNavigationVersion),
+          initialTabIndex: _clinicInitialTabIndex,
+        );
       case 3:
         return const ProfilePage();
       default:
@@ -72,9 +103,10 @@ class _HomePageState extends State<HomePage> {
   // ── FAB ──
 
   Widget _buildFAB() {
+    final l10n = AppLocalizations.of(context)!;
     return Semantics(
       button: true,
-      label: 'Scan Plant',
+      label: l10n.scanPlant,
       child: Container(
         height: 60,
         width: 60,
@@ -130,6 +162,7 @@ class _HomePageState extends State<HomePage> {
   // ── Bottom Navigation ──
 
   Widget _buildBottomNav() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -149,11 +182,11 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildNavItem(Icons.home_filled, 'Home', 0),
-            _buildNavItem(Icons.local_florist_outlined, 'Garden', 1),
+            _buildNavItem(Icons.home_filled, l10n.navHome, 0),
+            _buildNavItem(Icons.local_florist_outlined, l10n.navGarden, 1),
             const SizedBox(width: 48), // FAB boşluğu
-            _buildNavItem(Icons.medical_services_outlined, 'Clinic', 2),
-            _buildNavItem(Icons.person_outline, 'Profile', 3),
+            _buildNavItem(Icons.medical_services_outlined, l10n.navClinic, 2),
+            _buildNavItem(Icons.person_outline, l10n.navProfile, 3),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import '../../../../core/services/search_history_service.dart';
 import 'add_plant_wizard.dart';
 
@@ -38,27 +39,28 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
   }
 
   Future<void> _clearAllHistory() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
-          'Geçmişi Temizle',
+          l10n.historyClearTitle,
           style: GoogleFonts.outfit(
             color: _primaryText,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
-          'Tüm arama ve tarama geçmişiniz silinecektir. Emin misiniz?',
+          l10n.historyClearMessage,
           style: GoogleFonts.inter(color: const Color(0xFF5C7165)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'Vazgeç',
+              l10n.commonBack,
               style: GoogleFonts.inter(
                 color: _textSecondary,
                 fontWeight: FontWeight.w600,
@@ -75,7 +77,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
               elevation: 0,
             ),
             child: Text(
-              'Sil',
+              l10n.commonDelete,
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -94,6 +96,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       appBar: AppBar(
@@ -107,12 +110,16 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFFE8F5EE)),
             ),
-            child: Icon(Icons.arrow_back_rounded, color: _primaryText, size: 20),
+            child: Icon(
+              Icons.arrow_back_rounded,
+              color: _primaryText,
+              size: 20,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Arama Geçmişi',
+          l10n.historyTitle,
           style: GoogleFonts.outfit(
             color: _primaryText,
             fontSize: 22,
@@ -136,7 +143,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                 ),
               ),
               onPressed: _clearAllHistory,
-              tooltip: 'Geçmişi Temizle',
+              tooltip: l10n.historyClearTooltip,
             ),
           const SizedBox(width: 12),
         ],
@@ -146,30 +153,31 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
               child: CircularProgressIndicator(color: Color(0xFF0ED761)),
             )
           : _historyList.isEmpty
-              ? _buildEmptyHistoryState()
-              : RefreshIndicator(
-                  onRefresh: _loadHistory,
-                  color: _accentGreen,
-                  child: ListView.separated(
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
-                    ),
-                    padding: const EdgeInsets.all(24),
-                    itemCount: _historyList.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 14),
-                    itemBuilder: (context, index) {
-                      final item = _historyList[index];
-                      return _HistoryCard(
-                        item: item,
-                        onTap: () => _showItemDetailSheet(item),
-                      );
-                    },
-                  ),
+          ? _buildEmptyHistoryState()
+          : RefreshIndicator(
+              onRefresh: _loadHistory,
+              color: _accentGreen,
+              child: ListView.separated(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
                 ),
+                padding: const EdgeInsets.all(24),
+                itemCount: _historyList.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 14),
+                itemBuilder: (context, index) {
+                  final item = _historyList[index];
+                  return _HistoryCard(
+                    item: item,
+                    onTap: () => _showItemDetailSheet(item),
+                  );
+                },
+              ),
+            ),
     );
   }
 
   Widget _buildEmptyHistoryState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(36),
@@ -183,15 +191,11 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                 color: _accentGreen.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.history_rounded,
-                color: _accentGreen,
-                size: 44,
-              ),
+              child: Icon(Icons.history_rounded, color: _accentGreen, size: 44),
             ),
             const SizedBox(height: 24),
             Text(
-              'Arama Kaydı Bulunmuyor',
+              l10n.historyEmptyTitle,
               style: GoogleFonts.outfit(
                 color: _primaryText,
                 fontSize: 22,
@@ -200,7 +204,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Kamera ile taranan veya aratılan bitkileriniz burada geçmiş kaydı olarak görüntülenecektir.',
+              l10n.historyEmptySubtitle,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 color: _textSecondary,
@@ -215,11 +219,12 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
   }
 
   void _showItemDetailSheet(Map<String, dynamic> item) {
-    final name = item['name'] ?? 'Bilinmeyen Bitki';
+    final l10n = AppLocalizations.of(context)!;
+    final name = item['name'] ?? l10n.plantUnknown;
     final species = item['species'] ?? '';
-    final description = item['description'] ?? 'Detaylı bilgi bulunmuyor.';
-    final waterNeeds = item['water_needs'] ?? 'Düzenli sulama';
-    final lightNeeds = item['light_needs'] ?? 'Dolaylı ışık';
+    final description = item['description'] ?? l10n.historyNoDetails;
+    final waterNeeds = item['water_needs'] ?? l10n.historyRegularWater;
+    final lightNeeds = item['light_needs'] ?? l10n.historyIndirectLight;
 
     showModalBottomSheet(
       context: context,
@@ -302,7 +307,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
               const SizedBox(height: 20),
 
               Text(
-                'Açıklama',
+                l10n.historyDescription,
                 style: GoogleFonts.outfit(
                   color: _primaryText,
                   fontSize: 16,
@@ -326,7 +331,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                   Expanded(
                     child: _buildInfoChip(
                       Icons.water_drop_rounded,
-                      'Sulama',
+                      l10n.historyWatering,
                       waterNeeds,
                       const Color(0xFF5A9FFE),
                     ),
@@ -335,7 +340,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                   Expanded(
                     child: _buildInfoChip(
                       Icons.wb_sunny_rounded,
-                      'Işık',
+                      l10n.historyLight,
                       lightNeeds,
                       const Color(0xFFFFB347),
                     ),
@@ -394,10 +399,14 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                          const Icon(
+                            Icons.add_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Text(
-                            'Bahçeme Ekle',
+                            l10n.plantAddGardenAction,
                             style: GoogleFonts.inter(
                               color: Colors.white,
                               fontSize: 16,
@@ -418,7 +427,12 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String title, String value, Color color) {
+  Widget _buildInfoChip(
+    IconData icon,
+    String title,
+    String value,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -464,30 +478,31 @@ class _HistoryCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onTap;
 
-  const _HistoryCard({
-    required this.item,
-    required this.onTap,
-  });
+  const _HistoryCard({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final name = item['name'] ?? 'Bilinmeyen Bitki';
+    final l10n = AppLocalizations.of(context)!;
+    final name = item['name'] ?? l10n.plantUnknown;
     final species = item['species'] ?? '';
     final searchedAtStr = item['searched_at'] as String?;
-    String timeAgo = 'Yakın zamanda';
+    String timeAgo = l10n.historyRecently;
 
     if (searchedAtStr != null) {
       final date = DateTime.tryParse(searchedAtStr);
       if (date != null) {
         final diff = DateTime.now().difference(date);
         if (diff.inMinutes < 60) {
-          timeAgo = '${diff.inMinutes} dk önce';
+          timeAgo = l10n.historyMinutesAgo(diff.inMinutes);
         } else if (diff.inHours < 24) {
-          timeAgo = '${diff.inHours} saat önce';
+          timeAgo = l10n.historyHoursAgo(diff.inHours);
         } else if (diff.inDays == 1) {
-          timeAgo = 'Dün';
+          timeAgo = l10n.historyYesterday;
         } else {
-          timeAgo = DateFormat('d MMM', 'tr_TR').format(date);
+          timeAgo = DateFormat(
+            'd MMM',
+            Localizations.localeOf(context).toString(),
+          ).format(date);
         }
       }
     }
@@ -538,11 +553,13 @@ class _HistoryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    species.isNotEmpty ? species : 'Bitki Arama Kaydı',
+                    species.isNotEmpty ? species : l10n.historyPlantRecord,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF7A8F82),
                       fontSize: 12,
-                      fontStyle: species.isNotEmpty ? FontStyle.italic : FontStyle.normal,
+                      fontStyle: species.isNotEmpty
+                          ? FontStyle.italic
+                          : FontStyle.normal,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

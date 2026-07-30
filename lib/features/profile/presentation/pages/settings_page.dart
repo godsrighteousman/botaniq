@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/locale/locale_provider.dart';
+import '../../../../core/services/care_notification_service.dart';
 import 'edit_profile_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -574,7 +575,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 9),
                 _buildLanguageOption(
                   title: 'English',
-                  subtitle: 'English',
+                  subtitle: _l10n.languageEnglish,
                   emoji: '🇺🇸',
                   selected: currentCode == 'en',
                   onTap: () => _selectLanguage(sheetContext, provider, 'en'),
@@ -582,7 +583,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 9),
                 _buildLanguageOption(
                   title: 'Türkçe',
-                  subtitle: 'Turkish',
+                  subtitle: _l10n.languageTurkish,
                   emoji: '🇹🇷',
                   selected: currentCode == 'tr',
                   onTap: () => _selectLanguage(sheetContext, provider, 'tr'),
@@ -670,6 +671,7 @@ class _SettingsPageState extends State<SettingsPage> {
   ) {
     Navigator.pop(sheetContext);
     provider.setLocale(languageCode);
+    CareNotificationService.instance.refreshSchedules();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _showSnack(AppLocalizations.of(context)!.languageChanged);

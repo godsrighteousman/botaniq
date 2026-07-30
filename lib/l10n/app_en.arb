@@ -199,5 +199,580 @@
       }
     }
   },
-  "profileNextLevelMax": "You are at the top of your garden, congratulations!"
+  "profileNextLevelMax": "You are at the top of your garden, congratulations!",
+
+  "navHome": "Home",
+  "navGarden": "Garden",
+  "navClinic": "Clinic",
+  "navProfile": "Profile",
+  "scanPlant": "Scan Plant",
+
+  "deletePlantTitle": "Remove this plant?",
+  "deletePlantMessage": "The plant, its care tasks and Clinic records will be permanently removed from your account.",
+  "deletePlantAction": "Remove Plant",
+  "deletePlantNotFound": "The plant could not be found or has already been removed.",
+  "deletePlantError": "The plant could not be removed: {error}",
+  "@deletePlantError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "profileChoosePhoto": "Choose Profile Photo",
+  "profileFullName": "Full Name",
+  "profileFullNameHint": "Enter your full name",
+  "profileNickname": "Nickname",
+  "profileNicknameHint": "How should we call you?",
+  "profileAge": "Age",
+  "profileAgeHint": "1–120",
+  "profileAgeValidation": "Please enter an age between 1 and 120.",
+  "profileLoadError": "Could not load profile: {error}",
+  "@profileLoadError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "languageEnglish": "English",
+  "languageTurkish": "Turkish",
+  "profileEmailReadOnly": "Email Address (Read Only)",
+  "profileEmailHint": "Enter your email",
+  "profileLocation": "Location",
+  "profileLocationHint": "City, Country",
+  "profileSaveChanges": "Save Changes",
+  "profileUpdated": "Your profile has been updated.",
+  "profileSaveError": "Profile could not be saved: {error}",
+  "@profileSaveError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "notificationWateringTitle": "Watering Reminders",
+  "notificationWateringSubtitle": "Get notified when it’s time to water",
+  "notificationFertilizerTitle": "Fertilizer Reminders",
+  "notificationFertilizerSubtitle": "Seasonal feeding alerts for your plants",
+  "notificationTitle": "Notifications",
+  "notificationPlantCareAlerts": "Plant Care Alerts",
+  "notificationOther": "Other Notifications",
+  "notificationWeatherTitle": "Weather Alerts",
+  "notificationWeatherSubtitle": "Extreme weather warnings",
+  "notificationArticlesTitle": "New Articles",
+  "notificationArticlesSubtitle": "Tips and tricks for your garden",
+
+  "gardenMyPlantFallback": "My Plant",
+  "gardenClinicBadge": "In Clinic",
+  "wateringNever": "Last watered: Never",
+  "wateringLastDate": "Last watered: {date}",
+  "@wateringLastDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "wateringInterval": "Every {days} days",
+  "@wateringInterval": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "wateringNeverDue": "Not watered yet • Water today",
+  "wateringOverdue": "{days} days overdue",
+  "@wateringOverdue": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "wateringDueToday": "Water today",
+  "wateringDueTomorrow": "Water tomorrow",
+  "wateringDueInDays": "Water in {days} days",
+  "@wateringDueInDays": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+
+  "plantUnknown": "Unknown Plant",
+  "plantSpeciesFallback": "Plant Species",
+  "plantDifficultyMedium": "Medium",
+  "plantAbout": "About",
+  "plantLocationEnvironment": "Location & Environment",
+  "plantCareProtocol": "Care Protocol",
+  "plantCareHistory": "Last 10 Days Care History",
+  "plantHealthy": "Healthy",
+  "plantInClinic": "In Clinic",
+  "plantDifficulty": "Difficulty",
+  "plantToxicity": "Toxicity",
+  "plantEnvironment": "Environment",
+  "plantLightNeed": "Light Need",
+  "plantToxicPets": "Toxic to pets",
+  "plantNonToxic": "Non-toxic",
+  "plantIndoor": "Indoor",
+  "plantBrightIndirect": "Bright Indirect",
+  "plantInfoUnavailable": "Verified information is not available yet.",
+  "plantIdealClimate": "Ideal Climate",
+  "plantHumidity": "Humidity",
+  "plantTemperatureRange": "Temperature Range",
+  "plantWateringFrequency": "Watering Frequency",
+  "plantWateringFrequencyValue": "Water {interval}.",
+  "@plantWateringFrequencyValue": {
+    "placeholders": {
+      "interval": { "type": "String" }
+    }
+  },
+  "plantNextWatering": "Next Watering",
+  "plantWateringProtocol": "Watering Protocol",
+  "plantSoilProtocol": "Soil",
+  "plantFeedingProtocol": "Feeding Protocol",
+  "plantPruningCleaning": "Pruning & Cleaning",
+  "plantPruningFallback": "Wipe leaves monthly. Prune dead or yellowing leaves to encourage growth.",
+  "plantHistoryEmpty": "No care history for the last 10 days.",
+  "plantWateringTask": "Watering",
+  "plantFertilizingTask": "Fertilizing",
+  "plantWateredAction": "Watered ✓",
+  "plantWaterNowAction": "Water Now",
+  "plantFertilizedAction": "Fertilized ✓",
+  "plantFertilizeAction": "Fertilize",
+  "plantAddGardenAction": "Add to My Garden",
+  "plantWaterSuccess": "💧 You watered your plant! Great job!",
+  "plantFertilizeSuccess": "🌱 Fertilizer added! Your plant says thanks!",
+  "plantWaterError": "Watering could not be saved: {error}",
+  "@plantWaterError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "plantFertilizeError": "Fertilizing could not be saved: {error}",
+  "@plantFertilizeError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "clinicQuickTools": "Quick Tools",
+  "clinicDoctorHero": "AI Plant Doctor\nAt Your Service",
+  "clinicStartConsultation": "Start Consultation",
+  "clinicChoosePlant": "Which plant would you like to discuss?",
+  "clinicChoosePlantSubtitle": "Choose a plant from your garden or take a new photo.",
+  "clinicNoGardenPlants": "There are no plants in your garden yet.\nStart by taking a new photo.",
+  "clinicNewPhoto": "Take a New Photo",
+  "clinicNewPhotoSubtitle": "Photograph the sick plant and get a diagnosis",
+  "clinicPestAnalysis": "Pest Analysis",
+  "clinicVisualDiagnosis": "Visual diagnosis",
+  "clinicLightMeter": "Light Meter",
+  "clinicSensorSimulation": "Sensor simulation",
+  "clinicTitle": "Plant Clinic",
+  "clinicSickCount": "{count} Sick",
+  "@clinicSickCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "clinicAllHealthy": "All Your Plants Are Healthy! 🌿",
+  "clinicEmpty": "There are no sick plants in the Clinic.\nIf you are concerned about a plant,\nask from the Doctor tab.",
+  "clinicUnknown": "Unknown",
+  "clinicPendingDiagnosis": "Waiting for diagnosis",
+  "clinicNoTreatment": "Treatment has not been determined",
+  "clinicPrescription": "Prescription:",
+  "clinicRecovery": "Recovery",
+  "clinicRecovered": "Recovered",
+  "clinicContinue": "Continue",
+  "clinicRecoveredSuccess": "🎉 Your plant is healthy again!",
+  "clinicUrgencyLow": "Low",
+  "clinicUrgencyMedium": "Medium",
+  "clinicUrgencyCritical": "Critical",
+
+  "healthTrendingTips": "Trending Health Tips",
+  "healthHumidityArticleTitle": "Winter Prep: Keeping Humidity Balanced",
+  "healthHumidityArticleSubtitle": "How to protect your plants from dry radiator air during cold months.",
+  "healthWeeklySpotlight": "Patient & Remedy of the Week",
+  "healthAphidTitle": "Aphid Infestation",
+  "healthAphidSubtitle": "Early intervention and a natural Neem Oil treatment.",
+
+  "lightMeterTitle": "Light Meter",
+  "lightMeterInstructionTitle": "To Measure Light",
+  "lightMeterInstruction": "Point the phone’s front camera toward\nthe plant’s position and light source.",
+  "lightLow": "Low Light (Shade)",
+  "lightMedium": "Medium Light (Bright Room)",
+  "lightHigh": "High Light (Near Window)",
+  "lightVeryHigh": "Very High Light (Direct Sun)",
+  "lightLowRecommendation": "Suitable for Calathea, ferns or snake plants.",
+  "lightMediumRecommendation": "Ideal for Monstera, Ficus and Anthurium.",
+  "lightHighRecommendation": "Suitable for sun-loving Aloe, cacti and geraniums.",
+  "lightVeryHighRecommendation": "Best for outdoor plants and succulents.",
+
+  "homeLoadingPlants": "Loading plants...",
+  "homeNotifications": "Notifications",
+  "homeWateringTime": "Watering Time",
+  "homeWateringNotification": "Your indoor plants need watering.",
+  "homeWelcome": "Welcome!",
+  "homeWelcomeNotification": "Welcome to Botaniq. Start by adding your first plant.",
+  "homeTenMinutesAgo": "10 min ago",
+  "homeOneDayAgo": "1 day ago",
+  "homeQuickActions": "Quick Actions",
+  "homeIdentifyCamera": "Identify with your camera",
+  "homeTomorrow": "Tomorrow",
+  "homeNoTasks": "No tasks for this day!",
+  "homeAllCared": "Your plants are all taken care of 🌿",
+  "homeOverdue": "OVERDUE",
+  "homeInstructions": "Instructions",
+  "homeRequiredAmount": "Required: {amount}",
+  "@homeRequiredAmount": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "homeLater": "Later",
+  "homeMarkDone": "Mark as Done",
+  "homeSickPlants": "Plant Clinic",
+  "homeSickCount": "{count} Sick",
+  "@homeSickCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "homeGreetingMorning": "Good Morning",
+  "homeGreetingAfternoon": "Good Afternoon",
+  "homeGreetingEvening": "Good Evening",
+  "homeTodayTasks": "Today's Tasks",
+  "homeTomorrowTasks": "Tomorrow's Tasks",
+  "homeDateTasks": "{date} Tasks",
+  "@homeDateTasks": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+
+  "commonSkip": "Skip",
+  "commonContinue": "Continue",
+  "commonClose": "Close",
+  "commonDelete": "Delete",
+  "commonBack": "Go Back",
+  "commonUnknown": "Unknown",
+
+  "wizardSaveGarden": "Save & Add to Garden",
+  "wizardPlantAdded": "{name} was added to your garden! 🌿",
+  "@wizardPlantAdded": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "wizardRoomTitle": "Where is your plant?",
+  "wizardRoomSubtitle": "Categorize your plant by room to manage it easily.",
+  "wizardLivingRoom": "Living Room",
+  "wizardBedroom": "Bedroom",
+  "wizardKitchen": "Kitchen",
+  "wizardOffice": "Office",
+  "wizardBathroom": "Bathroom",
+  "wizardBalcony": "Balcony",
+  "wizardLightTitle": "How is the light in this spot?",
+  "wizardLightSubtitle": "Light is one of the most important factors for your plant’s health.",
+  "wizardDirectSun": "Direct Sun",
+  "wizardDirectSunDescription": "Unfiltered sunlight directly on the plant",
+  "wizardBrightIndirect": "Bright Indirect",
+  "wizardBrightIndirectDescription": "Close to an east- or west-facing window",
+  "wizardMediumLight": "Medium Light",
+  "wizardMediumLightDescription": "A few feet away from a window",
+  "wizardLowLight": "Low Light",
+  "wizardLowLightDescription": "Far from windows or under artificial light",
+  "wizardDistanceTitle": "Distance to Window",
+  "wizardDistanceSubtitle": "Select the approximate distance to the nearest window.",
+  "wizardMoreThanFiveMeters": "More than 5 m",
+  "wizardActiveHoursTitle": "Active Light Hours",
+  "wizardActiveHoursSubtitle": "How many hours of direct or bright light does this spot receive?",
+  "wizardHour": "{count} hour",
+  "@wizardHour": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "wizardHours": "{count} hours",
+  "@wizardHours": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "wizardSixPlusHours": "6+ hours",
+  "wizardRepottedTitle": "When was this plant last repotted?",
+  "wizardRepottedSubtitle": "Fresh soil is crucial for a happy plant.",
+  "wizardRecently": "Recently (under 3 months)",
+  "wizardSixMonthsAgo": "6 months ago",
+  "wizardOneYearAgo": "1 year ago",
+  "wizardTwoYearsAgo": "2+ years ago",
+  "wizardDontKnow": "I don’t know",
+  "wizardPotTitle": "What material is the pot?",
+  "wizardPotSubtitle": "Pot material affects how quickly the soil dries.",
+  "wizardPlasticPot": "Plastic / Nursery",
+  "wizardTerracottaPot": "Terracotta",
+  "wizardCeramicPot": "Ceramic / Glazed",
+  "wizardMetalPot": "Metal",
+  "wizardWateredTitle": "When did you last water this plant?",
+  "wizardWateredSubtitle": "This helps calculate the exact next watering time.",
+  "wizardToday": "Today",
+  "wizardYesterday": "Yesterday",
+  "wizardFewDaysAgo": "A few days ago",
+  "wizardWeekAgo": "A week ago",
+  "wizardMoreWeekAgo": "More than a week ago",
+
+  "historyTitle": "Search History",
+  "historyClearTitle": "Clear History",
+  "historyClearMessage": "All search and scan history will be deleted. Are you sure?",
+  "historyClearTooltip": "Clear History",
+  "historyEmptyTitle": "No Search History",
+  "historyEmptySubtitle": "Plants scanned with the camera or searched for will appear here.",
+  "historyNoDetails": "Detailed information is not available.",
+  "historyRegularWater": "Regular watering",
+  "historyIndirectLight": "Indirect light",
+  "historyDescription": "Description",
+  "historyWatering": "Watering",
+  "historyLight": "Light",
+  "historyRecently": "Recently",
+  "historyMinutesAgo": "{minutes} min ago",
+  "@historyMinutesAgo": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "historyHoursAgo": "{hours} hours ago",
+  "@historyHoursAgo": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "historyYesterday": "Yesterday",
+  "historyPlantRecord": "Plant Search Record",
+
+  "photoWholeSpecimen": "Photo of the whole\nplant or mushroom",
+  "photoWholeSpecimenSubtitle": "Keep the whole specimen centered in the frame for better identification.",
+  "photoCorrect": "Correct",
+  "photoTooClose": "Too Close",
+  "photoInstructions": "Instructions",
+  "photoOpenCamera": "I Understand, Open Camera",
+
+  "scannerPlant": "Plant",
+  "scannerMushroom": "Mushroom",
+  "scannerIdentifyingPlant": "Identifying Plant...",
+  "scannerIdentifyingMushroom": "Identifying Mushroom...",
+  "scannerCapture": "Take Photo & Scan",
+  "scannerFailed": "Scanning failed. Please try again.",
+  "scannerError": "An error occurred: {error}",
+  "@scannerError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "scannerUnknownPlant": "Unknown Plant",
+  "scannerUnknownMushroom": "Unknown Mushroom",
+
+  "scheduleTitle": "Schedule",
+  "scheduleTodayTask": "Today’s Tasks",
+  "scheduleNoTasks": "No tasks for today!",
+  "scheduleInstructions": "Instructions",
+  "scheduleRequired": "Required: {amount}",
+  "@scheduleRequired": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "scheduleRemindLater": "Remind Later",
+  "scheduleDone": "Done",
+  "scheduleCareFallback": "Take care of your plant.",
+
+  "chatDoctorTitle": "AI Plant Doctor",
+  "chatPatient": "Patient: {name}",
+  "@chatPatient": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "chatAnalyzing": "Analyzing...",
+  "chatHint": "Ask about {name}...",
+  "@chatHint": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "chatWelcome": "Hello! 🌿 I’m your AI Plant Doctor. How can I help with {name}?\n\nI can diagnose a photo or answer your care questions.",
+  "@chatWelcome": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "chatContinueWelcome": "Hello! Let’s continue with {name}. 🌱",
+  "@chatContinueWelcome": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "chatQuestionYellowing": "What is causing the yellow leaves?",
+  "chatQuestionTreatment": "How can I treat this plant?",
+  "chatQuestionWatering": "Should I change the watering frequency?",
+  "chatQuestionFertilizer": "Which fertilizer should I use?",
+  "chatPhotoSent": "Photo sent",
+  "chatAnalyzePhoto": "Analyze the photo",
+  "chatDiagnosisUnknown": "Diagnosis could not be determined",
+  "chatNoTreatment": "No treatment recommendation",
+  "chatRecoveryUnknown": "Unknown",
+  "chatUnableIdentify": "Unidentified Plant",
+  "chatError": "Sorry, an error occurred: {error}. Please try again.",
+  "@chatError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "chatCareTips": "Care Tips",
+  "chatPlantLabel": "Plant",
+  "chatDiagnosisLabel": "Diagnosis",
+  "chatTreatmentLabel": "Treatment",
+  "chatUrgencyLabel": "Urgency",
+  "chatRecoveryLabel": "Estimated Recovery",
+
+  "discoverMonsteraTitle": "The Secret to Monstera Growth",
+  "discoverIndoorPlants": "Indoor Plants",
+  "discoverSucculentWatering": "Watering Guide for Succulents",
+  "discoverCacti": "Cacti & Succulents",
+  "discoverHerbSoil": "Best Soil Types for Herbs",
+  "discoverHerbs": "Herbs",
+  "discoverPropagation": "Propagation 101: A Beginner’s Manual",
+  "discoverPests": "Common Pests and How to Treat Them",
+  "discoverRepotting": "Repotting: When and How?",
+  "discoverMinutesRead": "{minutes} min read",
+  "@discoverMinutesRead": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "skip": "Skip",
+  "skipForNow": "Skip for now",
+  "continueLabel": "Continue",
+  "getStarted": "Get Started",
+  "nextStep": "Next Step",
+  "maybeLater": "Maybe Later",
+  "emailAddress": "Email Address",
+  "password": "Password",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "login": "Log In",
+  "signUp": "Sign Up",
+  "welcomeBack": "Welcome Back",
+  "loginSubtitle": "Log in to continue caring for your garden.",
+  "signUpSubtitle": "Join us and start building your green sanctuary.",
+  "forgotPassword": "Forgot Password?",
+  "enterEmailPassword": "Please enter your email and password.",
+  "fillAllFields": "Please fill all fields.",
+  "authError": "Something went wrong: {error}",
+  "@authError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "loginWith": "Or log in with",
+  "signUpWith": "Or sign up with",
+  "noAccount": "Don’t have an account? ",
+  "alreadyAccount": "Already have an account? ",
+  "developerSession": "Create Developer Session",
+  "welcomeBotaniq": "Welcome to Botaniq",
+  "loginOptionsSubtitle": "Log in or sign up to back up your plants, schedules, and preferences.",
+
+  "notificationAccessTitle": "Don’t miss a watering",
+  "notificationAccessSubtitle": "We’ll gently remind you when it’s time to care for your green friends. Plant care made effortless and stress-free.",
+  "notificationTurnOn": "Turn on Reminders",
+  "creatingClimate": "Analyzing your micro-climate...",
+  "creatingSchedules": "Customizing care schedules...",
+  "creatingSanctuary": "Preparing your green sanctuary...",
+
+  "locationAccessTitle": "Location Access",
+  "locationAccessSubtitle": "Personalize plant care based on your local micro-climate.",
+  "locationRecommendation": "Local Recommendations",
+  "locationRecommendationSubtitle": "Plants that thrive in your area’s climate",
+  "locationWeather": "Smart Weather Sync",
+  "locationWeatherSubtitle": "Schedules adjust to real-time local rain",
+  "locationAlerts": "Frost & Heat Alerts",
+  "locationAlertsSubtitle": "Get notified before extreme weather hits",
+  "locationEnable": "Enable Location Access",
+
+  "wherePlantsTitle": "Where are your plants?",
+  "wherePlantsSubtitle": "Select all that apply to customize your care schedules.",
+  "locationIndoor": "Indoor",
+  "locationIndoorSubtitle": "Living room, bedroom, office",
+  "locationBalcony": "Balcony",
+  "locationBalconySubtitle": "Potted plants on a deck or terrace",
+  "locationGarden": "Garden",
+  "locationGardenSubtitle": "In-ground plants and flowerbeds",
+
+  "helpTitleBefore": "What can we\n",
+  "helpTitleHighlight": "help you ",
+  "helpTitleAfter": "with?",
+  "helpSubtitle": "Select one or more goals to personalize your garden.",
+  "helpHeal": "Heal sick\nplants",
+  "helpCare": "Care\nreminders",
+  "helpIdentify": "Identify\nspecies",
+  "helpJournal": "Growth\njournal",
+  "helpOther": "Something else",
+
+  "journeyTitle": "Your Green Journey",
+  "journeySubtitle": "Select the level of care you wish to provide.",
+  "journeyCasualLabel": "CASUAL",
+  "journeyCasualTitle": "Low Maintenance",
+  "journeyCasualSubtitle": "I just want to keep my simple plants alive and thriving.",
+  "journeyEnthusiastLabel": "ENTHUSIAST",
+  "journeyEnthusiastTitle": "Balanced Care",
+  "journeyEnthusiastSubtitle": "I enjoy spending some weekly time with my growing collection.",
+  "journeyObsessedLabel": "OBSESSED",
+  "journeyObsessedTitle": "Plant Parent Extraordinaire",
+  "journeyObsessedSubtitle": "I live for my plants and want expert schedules for my indoor jungle.",
+
+  "masteryTitleBefore": "How’s your ",
+  "masteryTitleHighlight": "green\nthumb ",
+  "masteryTitleAfter": "lately?",
+  "masterySubtitle": "Be honest—we’ve all been “The Serial Killer” at some point. Select your current mastery.",
+  "masteryKiller": "The Serial Killer",
+  "masteryKillerSubtitle": "Even my plastic plants look worried when I enter the room.",
+  "masteryAccidental": "Accidental Parent",
+  "masteryAccidentalSubtitle": "My cactus has survived two weeks. We’re still getting to know each other.",
+  "masteryGrowth": "Growth Mindset",
+  "masteryGrowthSubtitle": "Most of my friends have leaves. I know my Monsteras from my Pothos.",
+  "masteryWhisperer": "Plant Whisperer",
+  "masteryWhispererSubtitle": "I propagate rare plants and speak fluent botanical Latin.",
+
+  "onboardingOneTitle": "Take Care\nof Your Plants\n",
+  "onboardingOneHighlight": "Like a Pro",
+  "onboardingOneSubtitle": "Smart schedules and instant identification for your urban jungle.",
+  "onboardingOneBadge": "AI-POWERED CARE",
+  "onboardingAiScan": "AI Scan",
+  "onboardingSmartWater": "Smart Water",
+  "onboardingLightTracking": "Light Tracking",
+  "onboardingTwoTitle": "Identify Any\nPlant in\n",
+  "onboardingTwoHighlight": "Seconds",
+  "onboardingTwoSubtitle": "Take a photo to learn its name, species, and care requirements.",
+  "onboardingTwoBadge": "BOTANICAL EXPERT",
+  "onboardingSnapPhoto": "Snap Photo",
+  "onboardingAccurateResult": "Accurate Result",
+  "onboardingPlantWiki": "Plant Wiki",
+  "onboardingThreeTitle": "Never Forget\nTo Water\n",
+  "onboardingThreeHighlight": "Again",
+  "onboardingThreeSubtitle": "Get reminders timed to your plant’s needs and environment.",
+  "onboardingThreeBadge": "SMART SCHEDULES",
+  "onboardingReminders": "Reminders",
+  "onboardingClimateData": "Climate Data",
+  "onboardingHealthyGrowth": "Healthy Growth",
+  "onboardingCommunity": "Join 50,000+ plant parents",
+  "onboardingAgreement": "BY CONTINUING, YOU AGREE TO OUR TERMS & PRIVACY POLICY",
+
+  "termsTitle": "Terms & Policies",
+  "termsUpdated": "Last updated: July 2026",
+  "termsUseTitle": "1. Terms of Use",
+  "termsUseBody": "By accessing or using Botaniq, you agree to these Terms of Use and applicable laws. If you do not agree, you may not use the service.",
+  "termsPrivacyTitle": "2. User Privacy",
+  "termsPrivacyBody": "We collect only the personal data needed to provide tailored plant-care schedules. We do not sell your personal data to third parties.",
+  "termsPlantTitle": "3. Plant Data",
+  "termsPlantBody": "Plant-care, identification, and diagnosis information is provided for informational purposes. AI results may not always be correct, so observe your plant and seek an expert for serious risks.",
+  "termsPremiumTitle": "4. Premium Subscriptions",
+  "termsPremiumBody": "Premium subscriptions are billed according to your app-store agreement. You may cancel at any time; partial billing periods are not refundable.",
+  "termsClosing": "Enjoy peace of mind and happier plants.",
+  "weatherTitle": "Weather",
+  "weatherSunnyTip": "Sunny today—check the soil before watering.",
+  "weatherCloudyTip": "Cloudy weather slows evaporation; water a little less.",
+  "weatherRainyTip": "Rainy and humid—avoid overwatering outdoor plants.",
+  "weatherStormTip": "Stormy weather—move delicate pots to a sheltered spot.",
+  "weatherSnowTip": "Cold and snowy—protect plants from temperature shock."
 }

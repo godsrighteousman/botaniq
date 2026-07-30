@@ -29,8 +29,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   int _selectedTabIndex = 0;
   String _fullName = 'Bahçıvan';
+  String _nickname = '';
   String _email = '';
-  String _avatarUrl = 'https://i.pravatar.cc/150?img=68';
+  String _avatarUrl = '';
   bool _isLoading = true;
 
   int _totalPlantsCount = 0;
@@ -82,13 +83,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _fetchProfile(User user) async {
     final rows = await Future.wait([
-      _profileRow('users', 'full_name, avatar_url', user.id),
-      _profileRow('profiles', 'full_name, avatar_url', user.id),
+      _profileRow('users', 'full_name, avatar_url, nickname, age', user.id),
+      _profileRow('profiles', 'full_name, avatar_url, nickname, age', user.id),
     ]);
-    final profile = rows[0] ?? rows[1];
+    var profile = rows[0] ?? rows[1];
+    profile ??= await _profileRow('users', 'full_name, avatar_url', user.id);
+    profile ??= await _profileRow('profiles', 'full_name, avatar_url', user.id);
     final metadataName = user.userMetadata?['full_name']?.toString().trim();
     final storedName = profile?['full_name']?.toString().trim();
     final storedAvatar = profile?['avatar_url']?.toString().trim();
+    final storedNickname = profile?['nickname']?.toString().trim();
 
     if (!mounted) {
       return;
@@ -102,6 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (storedAvatar != null && storedAvatar.isNotEmpty) {
         _avatarUrl = storedAvatar;
       }
+      _nickname = storedNickname ?? '';
     });
   }
 
@@ -528,7 +533,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _email,
+                            _nickname.isEmpty
+                                ? _email
+                                : '@$_nickname  •  $_email',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(

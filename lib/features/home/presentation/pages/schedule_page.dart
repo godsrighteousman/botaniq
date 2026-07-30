@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -50,10 +51,15 @@ class _SchedulePageState extends State<SchedulePage> {
             final plant = t['plants'] as Map<String, dynamic>? ?? {};
             return {
               'id': t['id'],
-              'plantName': plant['custom_name'] ?? plant['name'] ?? 'My Plant',
+              'plantName':
+                  plant['custom_name'] ??
+                  plant['name'] ??
+                  AppLocalizations.of(context)!.gardenMyPlantFallback,
               'taskType': _capitalize(t['task_type'] as String? ?? 'care'),
               'amount': t['amount'] ?? '',
-              'instruction': t['instruction'] ?? 'Take care of your plant.',
+              'instruction':
+                  t['instruction'] ??
+                  AppLocalizations.of(context)!.scheduleCareFallback,
               'image': plant['image_url'] ?? '',
               'isCompleted': t['is_completed'] ?? false,
             };
@@ -86,6 +92,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
   void _showTaskDetails(BuildContext context, Map<String, dynamic> task) {
     if (task['isCompleted']) return; // Disable interaction if completed
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
@@ -162,7 +169,7 @@ class _SchedulePageState extends State<SchedulePage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Instructions',
+                  l10n.scheduleInstructions,
                   style: GoogleFonts.inter(
                     color: Colors.black,
                     fontSize: 16,
@@ -200,7 +207,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Required: ${task['amount']}',
+                      l10n.scheduleRequired(task['amount'].toString()),
                       style: GoogleFonts.inter(
                         color: Colors.black,
                         fontSize: 15,
@@ -231,7 +238,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           ),
                         ),
                         child: Text(
-                          'Remind later',
+                          l10n.scheduleRemindLater,
                           style: GoogleFonts.inter(
                             color: Colors.black,
                             fontSize: 16,
@@ -259,7 +266,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           ),
                         ),
                         child: Text(
-                          'Done',
+                          l10n.scheduleDone,
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 16,
@@ -281,6 +288,8 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     return Scaffold(
       backgroundColor: _lightBg,
       body: SafeArea(
@@ -310,7 +319,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   const Spacer(),
                   Text(
-                    'Schedule',
+                    l10n.scheduleTitle,
                     style: GoogleFonts.outfit(
                       color: Colors.black,
                       fontSize: 20,
@@ -371,7 +380,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            DateFormat('EEE').format(date),
+                            DateFormat('EEE', localeName).format(date),
                             style: GoogleFonts.inter(
                               color: isSelected ? Colors.white : _textSecondary,
                               fontSize: 13,
@@ -420,7 +429,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     physics: const BouncingScrollPhysics(),
                     children: [
                       Text(
-                        'Today Task',
+                        l10n.scheduleTodayTask,
                         style: GoogleFonts.outfit(
                           color: Colors.black,
                           fontSize: 24,
@@ -436,7 +445,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           padding: const EdgeInsets.symmetric(vertical: 40),
                           child: Center(
                             child: Text(
-                              'No tasks for today!',
+                              l10n.scheduleNoTasks,
                               style: GoogleFonts.inter(
                                 color: _textSecondary,
                                 fontSize: 16,

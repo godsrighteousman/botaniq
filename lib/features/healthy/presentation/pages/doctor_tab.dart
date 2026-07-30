@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import 'ai_chat_page.dart';
 import 'light_meter_page.dart';
 
@@ -48,6 +49,7 @@ class _DoctorTabState extends State<DoctorTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -57,7 +59,7 @@ class _DoctorTabState extends State<DoctorTab> {
           _buildConsultationBanner(context),
           const SizedBox(height: 32),
           Text(
-            'Hızlı Araçlar',
+            l10n.clinicQuickTools,
             style: GoogleFonts.outfit(
               color: const Color(0xFF2C3E35),
               fontSize: 20,
@@ -73,6 +75,7 @@ class _DoctorTabState extends State<DoctorTab> {
   }
 
   Widget _buildConsultationBanner(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: () => _showConsultationBottomSheet(context),
       child: Container(
@@ -111,7 +114,7 @@ class _DoctorTabState extends State<DoctorTab> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                'AI Bitki Doktoru\nHizmetinizde',
+                l10n.clinicDoctorHero,
                 style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontSize: 24,
@@ -140,7 +143,7 @@ class _DoctorTabState extends State<DoctorTab> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Danışmanlığı Başlat',
+                      l10n.clinicStartConsultation,
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -158,6 +161,7 @@ class _DoctorTabState extends State<DoctorTab> {
   }
 
   void _showConsultationBottomSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -186,7 +190,7 @@ class _DoctorTabState extends State<DoctorTab> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Hangi Bitkiniz İçin Danışacaksınız?',
+                l10n.clinicChoosePlant,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
                   color: const Color(0xFF2C3E35),
@@ -196,7 +200,7 @@ class _DoctorTabState extends State<DoctorTab> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Bahçenizdeki bitkilerden birini seçin veya yeni bir fotoğraf çekin.',
+                l10n.clinicChoosePlantSubtitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF6E6E73),
@@ -216,7 +220,7 @@ class _DoctorTabState extends State<DoctorTab> {
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    'Henüz bahçenize bitki eklememişsiniz.\nYeni bir fotoğraf çekerek başlayın.',
+                    l10n.clinicNoGardenPlants,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF8B9E93),
@@ -239,7 +243,7 @@ class _DoctorTabState extends State<DoctorTab> {
                             plant['custom_name'] ??
                             plant['name'] ??
                             plant['species'] ??
-                            'Bilinmeyen Bitki',
+                            l10n.plantUnknown,
                         imageUrl: plant['image_url'],
                       );
                     },
@@ -253,13 +257,14 @@ class _DoctorTabState extends State<DoctorTab> {
   }
 
   Widget _buildNewPhotoOption(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: () async {
         final navigator = Navigator.of(this.context);
         Navigator.pop(context);
         await navigator.push(
           MaterialPageRoute(
-            builder: (context) => const AiChatPage(plantName: 'Yeni Bitki'),
+            builder: (context) => AiChatPage(plantName: l10n.plantUnknown),
           ),
         );
         if (!mounted) return;
@@ -297,7 +302,7 @@ class _DoctorTabState extends State<DoctorTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Yeni Fotoğraf Çek',
+                    l10n.clinicNewPhoto,
                     style: GoogleFonts.outfit(
                       color: const Color(0xFF2C3E35),
                       fontSize: 16,
@@ -306,7 +311,7 @@ class _DoctorTabState extends State<DoctorTab> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Hasta bitkinin fotoğrafını çek ve teşhis koy',
+                    l10n.clinicNewPhotoSubtitle,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF8B9E93),
                       fontSize: 12,
@@ -422,6 +427,7 @@ class _DoctorTabState extends State<DoctorTab> {
   }
 
   Widget _buildQuickToolsGrid(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 16,
@@ -431,38 +437,32 @@ class _DoctorTabState extends State<DoctorTab> {
       physics: const NeverScrollableScrollPhysics(),
       children: [
         _buildToolCard(
-          title: 'Haşere Analizi',
+          title: l10n.clinicPestAnalysis,
           icon: Icons.bug_report_rounded,
           color: const Color(0xFFEF7C56),
-          subtitle: 'Görsel teşhis',
+          subtitle: l10n.clinicVisualDiagnosis,
           onTap: () async {
             await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    const AiChatPage(plantName: 'Haşere Analizi'),
+                    AiChatPage(plantName: l10n.clinicPestAnalysis),
               ),
             );
             widget.onHealthChanged?.call();
           },
         ),
         _buildToolCard(
-          title: 'Işık Ölçer',
+          title: l10n.clinicLightMeter,
           icon: Icons.wb_sunny_rounded,
           color: const Color(0xFFE2A04A),
-          subtitle: 'Sensör simülasyonu',
+          subtitle: l10n.clinicSensorSimulation,
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const LightMeterPage()),
             );
           },
-        ),
-        _buildToolCard(
-          title: 'Toprak pH',
-          icon: Icons.science_rounded,
-          color: const Color(0xFF6B7D73),
-          subtitle: 'Sağlık verisi',
         ),
       ],
     );

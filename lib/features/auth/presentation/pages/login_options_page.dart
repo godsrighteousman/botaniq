@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import 'sign_up_page.dart';
@@ -10,6 +11,7 @@ class LoginOptionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: Stack(
@@ -70,7 +72,7 @@ class LoginOptionsPage extends StatelessWidget {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(
-                          'Skip',
+                          l10n.skip,
                           style: GoogleFonts.inter(
                             color: AppColors.textSecondary,
                             fontSize: 14,
@@ -102,7 +104,7 @@ class LoginOptionsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Welcome to Botaniq',
+                    l10n.welcomeBotaniq,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.outfit(
                       color: Colors.white,
@@ -113,7 +115,7 @@ class LoginOptionsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Log in or sign up to backup your plants,\nschedules, and preferences.',
+                    l10n.loginOptionsSubtitle,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       color: AppColors.textSecondary,
@@ -153,7 +155,7 @@ class LoginOptionsPage extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          'Kayıt Ol',
+                          l10n.signUp,
                           style: GoogleFonts.outfit(
                             color: Colors.white,
                             fontSize: 18,
@@ -187,7 +189,7 @@ class LoginOptionsPage extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          'Giriş Yap',
+                          l10n.login,
                           style: GoogleFonts.outfit(
                             color: Colors.white,
                             fontSize: 18,

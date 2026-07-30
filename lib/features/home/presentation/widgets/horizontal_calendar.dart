@@ -20,6 +20,7 @@ class HorizontalCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeName = Localizations.localeOf(context).toLanguageTag();
     return SizedBox(
       height: 100,
       child: ListView.builder(
@@ -55,8 +56,8 @@ class HorizontalCalendar extends StatelessWidget {
                   color: isSelected
                       ? Colors.transparent
                       : isToday
-                          ? const Color(0xFF0ED761).withOpacity(0.4)
-                          : const Color(0xFFE8F5EE),
+                      ? const Color(0xFF0ED761).withOpacity(0.4)
+                      : const Color(0xFFE8F5EE),
                   width: isToday && !isSelected ? 1.5 : 1,
                 ),
                 boxShadow: isSelected
@@ -80,7 +81,7 @@ class HorizontalCalendar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    DateFormat('EEE').format(date).toUpperCase(),
+                    DateFormat('EEE', localeName).format(date).toUpperCase(),
                     style: GoogleFonts.inter(
                       color: isSelected
                           ? Colors.white.withOpacity(0.85)

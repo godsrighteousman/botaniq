@@ -12,7 +12,7 @@ const jsonHeaders = {
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const OPENAI_MODEL = "gpt-4o-mini";
 
-type AnalysisMode = "identify" | "diagnose" | "chat" | "details";
+type AnalysisMode = "identify" | "diagnose" | "chat" | "details" | "localize";
 
 interface AnalyzePlantRequest {
   mode?: AnalysisMode;
@@ -20,6 +20,8 @@ interface AnalyzePlantRequest {
   image_mime_type?: string;
   prompt?: string;
   messages?: ChatInputMessage[];
+  language_code?: string;
+  content?: Record<string, unknown>;
 }
 
 interface ChatInputMessage {
@@ -65,17 +67,28 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const body = await readRequestBody(request);
     if (!body.mode) {
       return jsonResponse(
-        { error: "Invalid mode. Use: identify, diagnose, chat, or details" },
+        {
+          error:
+            "Invalid mode. Use: identify, diagnose, chat, details, or localize",
+        },
         400,
       );
     }
 
     if (body.mode === "chat") {
-      return await handleChat(apiKey, body.messages);
+      return await handleChat(apiKey, body.messages, body.language_code);
     }
 
     if (body.mode === "details") {
-      return await handleDetails(apiKey, body.prompt);
+      return await handleDetails(apiKey, body.prompt, body.language_code);
+    }
+
+    if (body.mode === "localize") {
+      return await handleLocalization(
+        apiKey,
+        body.content,
+        body.language_code,
+      );
     }
 
     if (!body.image_base64?.trim()) {
@@ -95,12 +108,14 @@ Deno.serve(async (request: Request): Promise<Response> => {
 async function handleChat(
   apiKey: string,
   inputMessages: ChatInputMessage[] | undefined,
+  languageCode: string | undefined,
 ): Promise<Response> {
+  const language = responseLanguage(languageCode);
   const messages: OpenAIMessage[] = [
     {
       role: "system",
       content:
-        "Sen uzman bir bitki doktoru ve botanikçisin. Kullanıcının bitki sağlığı ve bakımı hakkındaki sorularını kısa, anlaşılır, güvenli ve pratik biçimde Türkçe yanıtla.",
+        `Sen uzman bir bitki doktoru ve botanikçisin. Kullanıcının bitki sağlığı ve bakımı hakkındaki sorularını kısa, anlaşılır, güvenli ve pratik biçimde ${language} yanıtla.`,
     },
   ];
 
@@ -139,12 +154,14 @@ async function handleChat(
 async function handleDetails(
   apiKey: string,
   prompt: string | undefined,
+  languageCode: string | undefined,
 ): Promise<Response> {
+  const language = responseLanguage(languageCode);
   const messages: OpenAIMessage[] = [
     {
       role: "system",
       content:
-        "Sen uzman bir botanikçisin. Yalnızca geçerli bir JSON objesi ve Türkçe, bitkiye özgü bilgiler döndür. Emin olmadığın bilgiyi uydurma.",
+        `Sen uzman bir botanikçisin. Yalnızca geçerli bir JSON objesi ve ${language}, bitkiye özgü bilgiler döndür. Emin olmadığın bilgiyi uydurma.`,
     },
     {
       role: "user",
@@ -162,16 +179,44 @@ async function handleDetails(
   return jsonResponse({ result: parseJsonObject(result.content) });
 }
 
+async function handleLocalization(
+  apiKey: string,
+  content: Record<string, unknown> | undefined,
+  languageCode: string | undefined,
+): Promise<Response> {
+  if (!content || Object.keys(content).length === 0) {
+    return jsonResponse({ error: "content is required for localize mode" }, 400);
+  }
+  const language = responseLanguage(languageCode);
+  const messages: OpenAIMessage[] = [
+    {
+      role: "system",
+      content:
+        `Verilen bitki verilerini ${language} diline çevir. Yeni bilgi, bakım önerisi veya kesinlik ekleme; bilimsel tür adlarını değiştirme. JSON anahtarlarını aynen koru ve yalnızca geçerli JSON döndür.`,
+    },
+    { role: "user", content: JSON.stringify(content) },
+  ];
+
+  const result = await callOpenAI(apiKey, messages, {
+    maxTokens: 1200,
+    temperature: 0,
+    jsonMode: true,
+  });
+  if (!result.ok) return result.response;
+  return jsonResponse({ result: parseJsonObject(result.content) });
+}
+
 async function handleImageAnalysis(
   apiKey: string,
   body: AnalyzePlantRequest,
 ): Promise<Response> {
   const isDiagnosis = body.mode === "diagnose";
   const mimeType = body.image_mime_type === "png" ? "png" : "jpeg";
+  const language = responseLanguage(body.language_code);
 
   const systemPrompt = isDiagnosis
-    ? "Sen uzman bir botanikçi ve bitki doktorusun. Fotoğraftaki bitkiyi görsel kanıta dayanarak tanımla, ardından hastalığını teşhis et. Emin değilsen uydurma isim verme; plant_name için Tanımlanamayan Bitki, species için Belirsiz yaz. Yalnızca geçerli JSON ve Türkçe yanıt ver."
-    : "Sen uzman bir botanikçisin. Fotoğraftaki bitkiyi görsel kanıta dayanarak tanımla. Emin olmadığın türü uydurma. Yalnızca geçerli JSON ve Türkçe yanıt ver.";
+    ? `Sen uzman bir botanikçi ve bitki doktorusun. Fotoğraftaki bitkiyi görsel kanıta dayanarak tanımla, ardından hastalığını teşhis et. Emin değilsen uydurma isim verme; tanımlanamadığını açıkça yaz. Yalnızca geçerli JSON ve ${language} yanıt ver.`
+    : `Sen uzman bir botanikçisin. Fotoğraftaki bitkiyi görsel kanıta dayanarak tanımla. Emin olmadığın türü uydurma. Yalnızca geçerli JSON ve ${language} yanıt ver.`;
 
   const fallbackPrompt = isDiagnosis
     ? 'Şu JSON şemasında cevap ver: {"plant_name":"Ortak ad veya Tanımlanamayan Bitki","species":"Bilimsel tür veya Belirsiz","diagnosis":"Teşhis","prescription":"Tedavi adımları","urgency":"Düşük/Orta/Kritik","care_tips":["İpucu"],"recovery_time":"Tahmini süre"}'
@@ -266,7 +311,9 @@ async function readRequestBody(
   }
 
   const mode = typeof value.mode === "string" &&
-      ["identify", "diagnose", "chat", "details"].includes(value.mode)
+      ["identify", "diagnose", "chat", "details", "localize"].includes(
+        value.mode,
+      )
     ? value.mode as AnalysisMode
     : undefined;
 
@@ -275,6 +322,8 @@ async function readRequestBody(
     image_base64: stringValue(value.image_base64),
     image_mime_type: stringValue(value.image_mime_type),
     prompt: stringValue(value.prompt),
+    language_code: stringValue(value.language_code),
+    content: isRecord(value.content) ? value.content : undefined,
     messages: Array.isArray(value.messages)
       ? value.messages.filter(isRecord).map((message) => ({
         role: message.role === "assistant" ? "assistant" : "user",
@@ -283,6 +332,10 @@ async function readRequestBody(
       }))
       : undefined,
   };
+}
+
+function responseLanguage(languageCode: string | undefined): string {
+  return languageCode === "en" ? "English" : "Türkçe";
 }
 
 async function readOpenAIResponse(

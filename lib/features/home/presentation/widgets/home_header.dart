@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 /// Kullanıcıyı karşılayan header bileşeni.
 /// Kullanıcı adı, tarih bilgisi ve aksiyon butonları içerir.
@@ -20,7 +21,7 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
     final now = DateTime.now();
-    final greeting = _getGreeting(now);
+    final greeting = _getGreeting(AppLocalizations.of(context)!, now);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,21 +61,18 @@ class HomeHeader extends StatelessWidget {
               onTap: onNotificationsTap,
             ),
             const SizedBox(width: 10),
-            _ActionButton(
-              icon: Icons.logout_rounded,
-              onTap: onSignOutTap,
-            ),
+            _ActionButton(icon: Icons.logout_rounded, onTap: onSignOutTap),
           ],
         ),
       ],
     );
   }
 
-  String _getGreeting(DateTime now) {
+  String _getGreeting(AppLocalizations l10n, DateTime now) {
     final hour = now.hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return l10n.homeGreetingMorning;
+    if (hour < 17) return l10n.homeGreetingAfternoon;
+    return l10n.homeGreetingEvening;
   }
 }
 
@@ -94,9 +92,7 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.85),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: const Color(0xFF0ED761).withOpacity(0.12),
-          ),
+          border: Border.all(color: const Color(0xFF0ED761).withOpacity(0.12)),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF0ED761).withOpacity(0.06),

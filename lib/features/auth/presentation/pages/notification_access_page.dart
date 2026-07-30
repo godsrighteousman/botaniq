@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import 'creating_sanctuary_page.dart';
+import '../../../../core/services/care_notification_service.dart';
 
 class NotificationAccessPage extends StatelessWidget {
   const NotificationAccessPage({super.key});
@@ -11,6 +13,7 @@ class NotificationAccessPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       body: SafeArea(
@@ -123,7 +126,7 @@ class NotificationAccessPage extends StatelessWidget {
               const SizedBox(height: 48),
 
               Text(
-                'Don\'t miss a watering',
+                l10n.notificationAccessTitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
                   color: Colors.black,
@@ -134,7 +137,7 @@ class NotificationAccessPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'We\'ll gently remind you when it\'s time to water,\nfertilize, or repot your green friends. Plant care\nmade effortless and stress-free.',
+                l10n.notificationAccessSubtitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: const Color(0xFF6E6E73),
@@ -160,7 +163,10 @@ class NotificationAccessPage extends StatelessWidget {
                 child: SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await CareNotificationService.instance
+                          .requestPermissionAndRefresh();
+                      if (!context.mounted) return;
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -176,7 +182,7 @@ class NotificationAccessPage extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Turn on Reminders',
+                      l10n.notificationTurnOn,
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 16,
@@ -188,7 +194,10 @@ class NotificationAccessPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  await CareNotificationService.instance
+                      .markPermissionPromptSkipped();
+                  if (!context.mounted) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -197,7 +206,7 @@ class NotificationAccessPage extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  'Maybe Later',
+                  l10n.maybeLater,
                   style: GoogleFonts.inter(
                     color: const Color(0xFF6E6E73),
                     fontSize: 15,

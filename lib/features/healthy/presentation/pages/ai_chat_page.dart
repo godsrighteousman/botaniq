@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import '../../../../core/services/openai_service.dart';
 import '../../../../core/services/sick_plant_service.dart';
 
@@ -37,13 +38,7 @@ class _AiChatPageState extends State<AiChatPage> {
   bool _isLoading = false;
   String? _currentSickPlantId;
   late String _displayPlantName;
-
-  final List<String> _quickReplies = [
-    "Yapraklardaki sararmanın sebebi ne?",
-    "Bu bitkiyi nasıl tedavi edebilirim?",
-    "Sulama sıklığını değiştirmeli miyim?",
-    "Hangi gübre kullanmalıyım?",
-  ];
+  bool _welcomeInitialized = false;
 
   @override
   void initState() {
@@ -53,13 +48,20 @@ class _AiChatPageState extends State<AiChatPage> {
 
     if (_currentSickPlantId != null) {
       _loadChatHistory();
-    } else {
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_currentSickPlantId == null && !_welcomeInitialized) {
+      final l10n = AppLocalizations.of(context)!;
       _messages.add({
-        'content':
-            "Merhaba! 🌿 Ben AI Bitki Doktorunuz. ${widget.plantName} hakkında size nasıl yardımcı olabilirim?\n\nBitkinin fotoğrafını çekerek teşhis koyabilirim veya bakım sorularınızı yanıtlayabilirim.",
+        'content': l10n.chatWelcome(widget.plantName),
         'role': 'assistant',
         'image_url': null,
       });
+      _welcomeInitialized = true;
     }
   }
 
@@ -82,9 +84,9 @@ class _AiChatPageState extends State<AiChatPage> {
             });
           }
           if (_messages.isEmpty) {
+            final l10n = AppLocalizations.of(context)!;
             _messages.add({
-              'content':
-                  "Merhaba! ${widget.plantName} hakkında devam edelim. 🌱",
+              'content': l10n.chatContinueWelcome(widget.plantName),
               'role': 'assistant',
               'image_url': null,
             });
@@ -123,10 +125,13 @@ class _AiChatPageState extends State<AiChatPage> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        final message = e.toString().length > 100
+            ? '${e.toString().substring(0, 100)}...'
+            : e.toString();
         setState(() {
           _messages.add({
-            'content':
-                "Üzgünüm, bir hata oluştu: ${e.toString().length > 100 ? '${e.toString().substring(0, 100)}...' : e.toString()}. Lütfen tekrar deneyin.",
+            'content': l10n.chatError(message),
             'role': 'assistant',
             'image_url': null,
           });
@@ -145,8 +150,9 @@ class _AiChatPageState extends State<AiChatPage> {
       );
 
       if (result != null && mounted) {
-        final diagnosis = result['diagnosis'] ?? 'Teşhis belirlenemedi';
-        final prescription = result['prescription'] ?? 'Tedavi önerisi yok';
+        final l10n = AppLocalizations.of(context)!;
+        final diagnosis = result['diagnosis'] ?? l10n.chatDiagnosisUnknown;
+        final prescription = result['prescription'] ?? l10n.chatNoTreatment;
         final urgency = result['urgency'] ?? 'Orta';
         final species = _cleanIdentification(result['species']);
         final detectedName =
@@ -157,7 +163,8 @@ class _AiChatPageState extends State<AiChatPage> {
           species: species,
         );
         final careTips = (result['care_tips'] as List?)?.cast<String>() ?? [];
-        final recoveryTime = result['recovery_time'] ?? 'Belirsiz';
+        final recoveryTime =
+            result['recovery_time'] ?? l10n.chatRecoveryUnknown;
 
         // Hasta bitki kaydı oluştur
         final userId = Supabase.instance.client.auth.currentUser?.id;
@@ -176,21 +183,25 @@ class _AiChatPageState extends State<AiChatPage> {
 
           // Mesajları DB'ye kaydet
           await _saveMessageToDb(
-            userText ?? 'Fotoğraf gönderildi',
+            userText ?? l10n.chatPhotoSent,
             'user',
             imageUrl: 'photo',
           );
         }
 
         final tipsText = careTips.isNotEmpty
-            ? '\n\n💡 **Bakım İpuçları:**\n${careTips.map((t) => '• $t').join('\n')}'
+            ? '\n\n💡 **${l10n.chatCareTips}:**\n'
+                  '${careTips.map((t) => '• $t').join('\n')}'
             : '';
 
         final responseText =
-            "🌿 **Bitki:** $resolvedPlantName${species == null ? '' : ' ($species)'}\n\n"
-            "🔍 **Teşhis:** $diagnosis\n\n💊 **Tedavi:** $prescription\n\n"
-            "⚠️ **Aciliyet:** ${SickPlantService.normalizeUrgency(urgency)}\n\n"
-            "⏱️ **Tahmini İyileşme:** $recoveryTime$tipsText";
+            "🌿 **${l10n.chatPlantLabel}:** $resolvedPlantName"
+            "${species == null ? '' : ' ($species)'}\n\n"
+            "🔍 **${l10n.chatDiagnosisLabel}:** $diagnosis\n\n"
+            "💊 **${l10n.chatTreatmentLabel}:** $prescription\n\n"
+            "⚠️ **${l10n.chatUrgencyLabel}:** "
+            "${_localizedUrgency(l10n, urgency)}\n\n"
+            "⏱️ **${l10n.chatRecoveryLabel}:** $recoveryTime$tipsText";
 
         setState(() {
           _displayPlantName = resolvedPlantName;
@@ -218,7 +229,20 @@ class _AiChatPageState extends State<AiChatPage> {
     if (!_isGenericPlantName(widget.plantName)) {
       return widget.plantName.trim();
     }
-    return detectedName ?? species ?? 'Tanımlanamayan Bitki';
+    return detectedName ??
+        species ??
+        AppLocalizations.of(context)!.chatUnableIdentify;
+  }
+
+  String _localizedUrgency(AppLocalizations l10n, Object? urgency) {
+    switch (SickPlantService.normalizeUrgency(urgency)) {
+      case 'Kritik':
+        return l10n.clinicUrgencyCritical;
+      case 'Düşük':
+        return l10n.clinicUrgencyLow;
+      default:
+        return l10n.clinicUrgencyMedium;
+    }
   }
 
   String? _cleanIdentification(Object? value) {
@@ -315,7 +339,10 @@ class _AiChatPageState extends State<AiChatPage> {
       if (image != null) {
         final bytes = await File(image.path).readAsBytes();
         final base64Image = base64Encode(bytes);
-        await _sendMessage('Fotoğrafı analiz et', imageBase64: base64Image);
+        await _sendMessage(
+          AppLocalizations.of(context)!.chatAnalyzePhoto,
+          imageBase64: base64Image,
+        );
       }
     } catch (e) {
       debugPrint("Fotoğraf çekme hatası: $e");
@@ -334,7 +361,10 @@ class _AiChatPageState extends State<AiChatPage> {
       if (image != null) {
         final bytes = await File(image.path).readAsBytes();
         final base64Image = base64Encode(bytes);
-        await _sendMessage('Fotoğrafı analiz et', imageBase64: base64Image);
+        await _sendMessage(
+          AppLocalizations.of(context)!.chatAnalyzePhoto,
+          imageBase64: base64Image,
+        );
       }
     } catch (e) {
       debugPrint("Galeri hatası: $e");
@@ -362,6 +392,7 @@ class _AiChatPageState extends State<AiChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _bgHint,
       appBar: AppBar(
@@ -379,7 +410,7 @@ class _AiChatPageState extends State<AiChatPage> {
         title: Column(
           children: [
             Text(
-              'AI Bitki Doktoru',
+              l10n.chatDoctorTitle,
               style: GoogleFonts.outfit(
                 color: const Color(0xFF2C3E35),
                 fontSize: 18,
@@ -387,7 +418,7 @@ class _AiChatPageState extends State<AiChatPage> {
               ),
             ),
             Text(
-              'Hasta: $_displayPlantName',
+              l10n.chatPatient(_displayPlantName),
               style: GoogleFonts.inter(
                 color: _primaryGreen,
                 fontSize: 13,
@@ -454,7 +485,7 @@ class _AiChatPageState extends State<AiChatPage> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Analiz ediliyor...',
+              AppLocalizations.of(context)!.chatAnalyzing,
               style: GoogleFonts.inter(
                 color: const Color(0xFF8B9E93),
                 fontSize: 14,
@@ -532,16 +563,23 @@ class _AiChatPageState extends State<AiChatPage> {
   }
 
   Widget _buildQuickReplies() {
+    final l10n = AppLocalizations.of(context)!;
+    final quickReplies = [
+      l10n.chatQuestionYellowing,
+      l10n.chatQuestionTreatment,
+      l10n.chatQuestionWatering,
+      l10n.chatQuestionFertilizer,
+    ];
     return SizedBox(
       height: 48,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: _quickReplies.length,
+        itemCount: quickReplies.length,
         separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          final reply = _quickReplies[index];
+          final reply = quickReplies[index];
           return GestureDetector(
             onTap: () => _sendMessage(reply),
             child: Container(
@@ -625,7 +663,9 @@ class _AiChatPageState extends State<AiChatPage> {
                 controller: _messageController,
                 enabled: !_isLoading,
                 decoration: InputDecoration(
-                  hintText: '${widget.plantName} hakkında sor...',
+                  hintText: AppLocalizations.of(
+                    context,
+                  )!.chatHint(widget.plantName),
                   hintStyle: GoogleFonts.inter(
                     color: const Color(0xFF8B9E93),
                     fontSize: 14,

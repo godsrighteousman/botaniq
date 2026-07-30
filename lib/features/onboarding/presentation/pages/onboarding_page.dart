@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/pages/login_options_page.dart';
@@ -15,44 +16,56 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<Map<String, dynamic>> _onboardingData = [
+  List<Map<String, dynamic>> _onboardingData(AppLocalizations l10n) => [
     {
-      'title': 'Take Care\nof Your Plants\n',
-      'highlight': 'Like a Pro',
-      'subtitle':
-          'Smart schedules and instant\nidentification for your urban\njungle.',
+      'title': l10n.onboardingOneTitle,
+      'highlight': l10n.onboardingOneHighlight,
+      'subtitle': l10n.onboardingOneSubtitle,
       'image': 'assets/images/onboarding_1.png',
-      'badge': 'AI-POWERED CARE',
+      'badge': l10n.onboardingOneBadge,
       'features': [
-        {'icon': Icons.document_scanner_outlined, 'label': 'AI Scan'},
-        {'icon': Icons.water_drop_outlined, 'label': 'Smart Water'},
-        {'icon': Icons.wb_sunny_outlined, 'label': 'Light Tracking'},
+        {
+          'icon': Icons.document_scanner_outlined,
+          'label': l10n.onboardingAiScan,
+        },
+        {'icon': Icons.water_drop_outlined, 'label': l10n.onboardingSmartWater},
+        {
+          'icon': Icons.wb_sunny_outlined,
+          'label': l10n.onboardingLightTracking,
+        },
       ],
     },
     {
-      'title': 'Identify Any\nPlant in\n',
-      'highlight': 'Seconds',
-      'subtitle':
-          'Just take a photo to learn its\nname, species, and ultimate\ncare requirements.',
+      'title': l10n.onboardingTwoTitle,
+      'highlight': l10n.onboardingTwoHighlight,
+      'subtitle': l10n.onboardingTwoSubtitle,
       'image': 'assets/images/onboarding_2.png',
-      'badge': 'BOTANICAL EXPERT',
+      'badge': l10n.onboardingTwoBadge,
       'features': [
-        {'icon': Icons.camera_alt_outlined, 'label': 'Snap Photo'},
-        {'icon': Icons.search_outlined, 'label': 'Accurate Result'},
-        {'icon': Icons.library_books_outlined, 'label': 'Plant Wiki'},
+        {'icon': Icons.camera_alt_outlined, 'label': l10n.onboardingSnapPhoto},
+        {'icon': Icons.search_outlined, 'label': l10n.onboardingAccurateResult},
+        {
+          'icon': Icons.library_books_outlined,
+          'label': l10n.onboardingPlantWiki,
+        },
       ],
     },
     {
-      'title': 'Never Forget\nTo Water\n',
-      'highlight': 'Again',
-      'subtitle':
-          'Get perfectly timed reminders\nbased on your plant\'s exact\nneeds and environment.',
+      'title': l10n.onboardingThreeTitle,
+      'highlight': l10n.onboardingThreeHighlight,
+      'subtitle': l10n.onboardingThreeSubtitle,
       'image': 'assets/images/onboarding_3.png',
-      'badge': 'SMART SCHEDULES',
+      'badge': l10n.onboardingThreeBadge,
       'features': [
-        {'icon': Icons.notifications_active_outlined, 'label': 'Reminders'},
-        {'icon': Icons.thermostat_outlined, 'label': 'Climate Data'},
-        {'icon': Icons.eco_outlined, 'label': 'Healthy Growth'},
+        {
+          'icon': Icons.notifications_active_outlined,
+          'label': l10n.onboardingReminders,
+        },
+        {
+          'icon': Icons.thermostat_outlined,
+          'label': l10n.onboardingClimateData,
+        },
+        {'icon': Icons.eco_outlined, 'label': l10n.onboardingHealthyGrowth},
       ],
     },
   ];
@@ -64,7 +77,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _nextPage() {
-    if (_currentPage < _onboardingData.length - 1) {
+    if (_currentPage < 2) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -84,6 +97,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final onboardingData = _onboardingData(l10n);
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: Stack(
@@ -96,9 +111,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 _currentPage = index;
               });
             },
-            itemCount: _onboardingData.length,
+            itemCount: onboardingData.length,
             itemBuilder: (context, index) {
-              final data = _onboardingData[index];
+              final data = onboardingData[index];
               return _buildPageContent(data);
             },
           ),
@@ -168,7 +183,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
-                      'Skip',
+                      l10n.skip,
                       style: GoogleFonts.inter(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 16,
@@ -208,7 +223,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
-                        _onboardingData.length,
+                        onboardingData.length,
                         (index) => Container(
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                           width: _currentPage == index ? 24 : 8,
@@ -241,9 +256,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              _currentPage == _onboardingData.length - 1
-                                  ? 'Get Started'
-                                  : 'Continue',
+                              _currentPage == onboardingData.length - 1
+                                  ? l10n.getStarted
+                                  : l10n.continueLabel,
                               style: GoogleFonts.inter(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -270,7 +285,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           _AvatarStack(),
                           const SizedBox(width: 12),
                           Text(
-                            'Join 50,000+ plant parents',
+                            l10n.onboardingCommunity,
                             style: GoogleFonts.inter(
                               color: AppColors.textSecondary,
                               fontSize: 13,
@@ -279,25 +294,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ],
                       ),
                     ] else ...[
-                      Text.rich(
-                        const TextSpan(
-                          text: 'BY CONTINUING, YOU AGREE TO OUR ',
-                          children: [
-                            TextSpan(
-                              text: 'TERMS\n',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                            TextSpan(text: '& '),
-                            TextSpan(
-                              text: 'PRIVACY POLICY',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ],
-                        ),
+                      Text(
+                        l10n.onboardingAgreement,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           color: AppColors.textSecondary.withOpacity(0.6),

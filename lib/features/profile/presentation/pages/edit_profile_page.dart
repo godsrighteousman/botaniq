@@ -1,7 +1,12 @@
+import 'dart:typed_data';
+
+import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/services/care_notification_service.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -13,11 +18,17 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _fullNameController = TextEditingController();
+  final _nicknameController = TextEditingController();
+  final _ageController = TextEditingController();
   final _emailController = TextEditingController(); // read-only reference
   final _locationController = TextEditingController();
+  final _imagePicker = ImagePicker();
 
   bool _wateringReminders = true;
   bool _fertilizerReminders = true;
+  String _avatarUrl = '';
+  Uint8List? _selectedAvatarBytes;
+  String _avatarExtension = 'jpg';
 
   bool _isLoading = true;
   bool _isSaving = false;
@@ -42,28 +53,41 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     try {
-      final data = await Supabase.instance.client
-          .from('users')
-          .select()
-          .eq('id', user.id)
-          .maybeSingle();
+      Map<String, dynamic>? data;
+      for (final table in const ['users', 'profiles']) {
+        try {
+          data = await Supabase.instance.client
+              .from(table)
+              .select()
+              .eq('id', user.id)
+              .maybeSingle();
+          if (data != null) break;
+        } catch (_) {
+          // Eski kurulumlarda profil tablosu farklı olabilir.
+        }
+      }
 
       if (data != null && mounted) {
+        final profile = data;
         setState(() {
-          _fullNameController.text = data['full_name'] ?? '';
-          _emailController.text = data['email'] ?? user.email ?? '';
-          _locationController.text = data['location'] ?? '';
-          _wateringReminders = data['watering_reminders'] ?? true;
-          _fertilizerReminders = data['fertilizer_reminders'] ?? true;
+          _fullNameController.text = profile['full_name'] ?? '';
+          _nicknameController.text = profile['nickname'] ?? '';
+          _ageController.text = profile['age']?.toString() ?? '';
+          _emailController.text = profile['email'] ?? user.email ?? '';
+          _locationController.text = profile['location'] ?? '';
+          _avatarUrl = profile['avatar_url']?.toString() ?? '';
+          _wateringReminders = profile['watering_reminders'] ?? true;
+          _fertilizerReminders = profile['fertilizer_reminders'] ?? true;
         });
       } else {
         _emailController.text = user.email ?? '';
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Profil okunamadi: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.profileLoadError(e.toString()))),
+        );
       }
     } finally {
       if (mounted) {
@@ -73,32 +97,70 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Future<void> _saveProfile() async {
+    final l10n = AppLocalizations.of(context)!;
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
+
+    final ageText = _ageController.text.trim();
+    final age = ageText.isEmpty ? null : int.tryParse(ageText);
+    if (ageText.isNotEmpty && (age == null || age < 1 || age > 120)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.profileAgeValidation)));
+      return;
+    }
 
     setState(() => _isSaving = true);
 
     try {
-      await Supabase.instance.client.from('users').upsert({
+      final avatarUrl = await _uploadAvatarIfNeeded(user.id);
+      final nickname = _nicknameController.text.trim().replaceFirst(
+        RegExp(r'^@+'),
+        '',
+      );
+      final payload = <String, dynamic>{
         'id': user.id,
         'full_name': _fullNameController.text.trim(),
         'email': _emailController.text.trim(),
         'location': _locationController.text.trim(),
+        'nickname': nickname.isEmpty ? null : nickname,
+        'age': age,
+        'avatar_url': avatarUrl,
         'watering_reminders': _wateringReminders,
         'fertilizer_reminders': _fertilizerReminders,
+      };
+
+      await Supabase.instance.client.from('users').upsert(payload);
+      await Supabase.instance.client.from('profiles').upsert({
+        ...payload,
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
       });
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(
+          data: {
+            'full_name': _fullNameController.text.trim(),
+            'nickname': nickname,
+            'avatar_url': avatarUrl,
+          },
+        ),
+      );
+      try {
+        await CareNotificationService.instance.refreshSchedules();
+      } catch (error) {
+        debugPrint('Profil kaydı sonrası bildirimler yenilenemedi: $error');
+      }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil basariyla güncellendi!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.profileUpdated)));
         Navigator.pop(context, true); // true indicates successful save
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Kaydetme hatasi: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.profileSaveError(e.toString()))),
+        );
       }
     } finally {
       if (mounted) {
@@ -107,9 +169,48 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  Future<String> _uploadAvatarIfNeeded(String userId) async {
+    final bytes = _selectedAvatarBytes;
+    if (bytes == null) return _avatarUrl;
+
+    final path =
+        '${userId}_profile_${DateTime.now().millisecondsSinceEpoch}.$_avatarExtension';
+    await Supabase.instance.client.storage
+        .from('plant-images')
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(
+            contentType: _avatarExtension == 'png' ? 'image/png' : 'image/jpeg',
+          ),
+        );
+    return Supabase.instance.client.storage
+        .from('plant-images')
+        .getPublicUrl(path);
+  }
+
+  Future<void> _pickAvatar() async {
+    final selected = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      imageQuality: 86,
+    );
+    if (selected == null) return;
+
+    final bytes = await selected.readAsBytes();
+    final extension = selected.name.split('.').last.toLowerCase();
+    if (!mounted) return;
+    setState(() {
+      _selectedAvatarBytes = bytes;
+      _avatarExtension = extension == 'png' ? 'png' : 'jpg';
+    });
+  }
+
   @override
   void dispose() {
     _fullNameController.dispose();
+    _nicknameController.dispose();
+    _ageController.dispose();
     _emailController.dispose();
     _locationController.dispose();
     super.dispose();
@@ -117,6 +218,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Scaffold(
         backgroundColor: _lightBg,
@@ -134,7 +236,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Edit Profile',
+          l10n.editProfile,
           style: GoogleFonts.outfit(
             color: _primaryText,
             fontSize: 20,
@@ -152,73 +254,116 @@ class _EditProfilePageState extends State<EditProfilePage> {
               const SizedBox(height: 24),
               // Avatar
               Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: _accentGreen.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                        image: const DecorationImage(
-                          image: NetworkImage(
-                            'https://i.pravatar.cc/150?img=68',
-                          ),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
+                child: GestureDetector(
+                  onTap: _pickAvatar,
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: _accentGreen.withOpacity(0.2),
                           shape: BoxShape.circle,
+                          image: _selectedAvatarBytes != null
+                              ? DecorationImage(
+                                  image: MemoryImage(_selectedAvatarBytes!),
+                                  fit: BoxFit.cover,
+                                )
+                              : _avatarUrl.isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(_avatarUrl),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
                         ),
-                        child: const Icon(
-                          Icons.camera_alt_rounded,
-                          color: Colors.white,
-                          size: 16,
+                        child:
+                            _selectedAvatarBytes == null && _avatarUrl.isEmpty
+                            ? Icon(
+                                Icons.person_rounded,
+                                color: _primaryText.withValues(alpha: 0.45),
+                                size: 42,
+                              )
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: TextButton.icon(
+                  onPressed: _pickAvatar,
+                  icon: const Icon(Icons.add_a_photo_outlined, size: 18),
+                  label: Text(l10n.profileChoosePhoto),
                 ),
               ),
               const SizedBox(height: 32),
 
-              _buildInputLabel('Full Name'),
+              _buildInputLabel(l10n.profileFullName),
               _buildTextField(
                 _fullNameController,
-                'Enter your full name',
+                l10n.profileFullNameHint,
                 Icons.person_outline_rounded,
               ),
 
               const SizedBox(height: 20),
 
-              _buildInputLabel('Email Address (Read Only)'),
+              _buildInputLabel(l10n.profileNickname),
+              _buildTextField(
+                _nicknameController,
+                l10n.profileNicknameHint,
+                Icons.alternate_email_rounded,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildInputLabel(l10n.profileAge),
+              _buildTextField(
+                _ageController,
+                l10n.profileAgeHint,
+                Icons.cake_outlined,
+                keyboardType: TextInputType.number,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildInputLabel(l10n.profileEmailReadOnly),
               _buildTextField(
                 _emailController,
-                'Enter your email',
+                l10n.profileEmailHint,
                 Icons.email_outlined,
                 readOnly: true,
               ),
 
               const SizedBox(height: 20),
 
-              _buildInputLabel('Location'),
+              _buildInputLabel(l10n.profileLocation),
               _buildTextField(
                 _locationController,
-                'City, Country',
+                l10n.profileLocationHint,
                 Icons.location_on_outlined,
               ),
 
               const SizedBox(height: 32),
 
               Text(
-                'Preferences',
+                l10n.preferences,
                 style: GoogleFonts.outfit(
                   color: _primaryText,
                   fontSize: 18,
@@ -235,15 +380,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: Column(
                   children: [
                     _buildSwitchTile(
-                      'Watering Reminders',
-                      'Get notified when it\'s time to water',
+                      l10n.notificationWateringTitle,
+                      l10n.notificationWateringSubtitle,
                       _wateringReminders,
                       (val) => setState(() => _wateringReminders = val),
                     ),
                     Divider(height: 1, color: _lightBg, indent: 64),
                     _buildSwitchTile(
-                      'Fertilizer Reminders',
-                      'Seasonal feeding alerts for your plants',
+                      l10n.notificationFertilizerTitle,
+                      l10n.notificationFertilizerSubtitle,
                       _fertilizerReminders,
                       (val) => setState(() => _fertilizerReminders = val),
                     ),
@@ -269,7 +414,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   child: _isSaving
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          'Save Changes',
+                          l10n.profileSaveChanges,
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 16,
@@ -305,6 +450,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     String hint,
     IconData icon, {
     bool readOnly = false,
+    TextInputType? keyboardType,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -315,6 +461,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       child: TextField(
         controller: controller,
         readOnly: readOnly,
+        keyboardType: keyboardType,
         style: GoogleFonts.inter(
           color: readOnly ? _textSecondary : _primaryText,
           fontSize: 15,

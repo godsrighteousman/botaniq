@@ -8,6 +8,7 @@ import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'core/theme/app_colors.dart';
 import 'core/locale/locale_provider.dart';
+import 'core/services/care_notification_service.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,6 +25,11 @@ void main() async {
   // Yalnızca SharedPreferences'tan oku — ağ beklemesi YOK (~5ms)
   final localeProvider = LocaleProvider();
   await localeProvider.loadSavedLocale();
+  try {
+    await CareNotificationService.instance.initialize();
+  } catch (error) {
+    debugPrint('Bakım bildirimleri başlatılamadı: $error');
+  }
 
   runApp(
     ChangeNotifierProvider<LocaleProvider>.value(

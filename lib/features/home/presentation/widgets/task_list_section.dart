@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../models/home_models.dart';
 import 'task_card.dart';
@@ -50,7 +51,7 @@ class TaskListSection extends StatelessWidget {
           const SizedBox(height: 14),
 
           if (tasks.isEmpty)
-            _buildEmptyTaskState()
+            _buildEmptyTaskState(context)
           else
             ...tasks.map(
               (task) => TaskCard(task: task, onTap: () => onTaskTap(task)),
@@ -59,7 +60,7 @@ class TaskListSection extends StatelessWidget {
           // ── Yarın bölümü ──
           if (showTomorrow && tomorrowTasks.isNotEmpty) ...[
             const SizedBox(height: 24),
-            _buildSectionHeader('Tomorrow'),
+            _buildSectionHeader(AppLocalizations.of(context)!.homeTomorrow),
             const SizedBox(height: 14),
             ...tomorrowTasks.map(
               (task) => TaskCard(task: task, onTap: () => onTaskTap(task)),
@@ -81,7 +82,8 @@ class TaskListSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyTaskState() {
+  Widget _buildEmptyTaskState(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
@@ -106,7 +108,7 @@ class TaskListSection extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'No tasks for this day!',
+            l10n.homeNoTasks,
             style: GoogleFonts.outfit(
               color: const Color(0xFF5C7165),
               fontSize: 16,
@@ -115,7 +117,7 @@ class TaskListSection extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Your plants are all taken care of 🌿',
+            l10n.homeAllCared,
             style: GoogleFonts.inter(
               color: const Color(0xFF7A8F82),
               fontSize: 13,

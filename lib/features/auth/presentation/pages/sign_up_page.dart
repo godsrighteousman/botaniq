@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -33,6 +34,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
@@ -55,7 +57,7 @@ class _SignUpPageState extends State<SignUpPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Create Account',
+                l10n.signUp,
                 style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontSize: 36,
@@ -65,7 +67,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Join us and start building your green sanctuary.',
+                l10n.signUpSubtitle,
                 style: GoogleFonts.inter(
                   color: AppColors.textSecondary,
                   fontSize: 16,
@@ -80,7 +82,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _firstNameController,
-                      hintText: 'First Name',
+                      hintText: l10n.firstName,
                       icon: Icons.person_outline,
                     ),
                   ),
@@ -88,7 +90,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _lastNameController,
-                      hintText: 'Last Name',
+                      hintText: l10n.lastName,
                       icon: Icons.person_outline,
                     ),
                   ),
@@ -99,7 +101,7 @@ class _SignUpPageState extends State<SignUpPage> {
               // Email Field
               _buildTextField(
                 controller: _emailController,
-                hintText: 'Email Address',
+                hintText: l10n.emailAddress,
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -108,7 +110,7 @@ class _SignUpPageState extends State<SignUpPage> {
               // Password Field
               _buildTextField(
                 controller: _passwordController,
-                hintText: 'Password',
+                hintText: l10n.password,
                 icon: Icons.lock_outline,
                 obscureText: _obscurePassword,
                 isPassword: true,
@@ -134,9 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                         if (email.isEmpty || password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please fill all fields.'),
-                            ),
+                            SnackBar(content: Text(l10n.fillAllFields)),
                           );
                           return;
                         }
@@ -185,7 +185,10 @@ class _SignUpPageState extends State<SignUpPage> {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Hata Detayı: $e', maxLines: 3),
+                                content: Text(
+                                  l10n.authError(e.toString()),
+                                  maxLines: 3,
+                                ),
                               ),
                             );
                           }
@@ -223,7 +226,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           )
                         : Text(
-                            'Sign Up',
+                            l10n.signUp,
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 18,
@@ -249,7 +252,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
-                      'Or sign up with',
+                      l10n.signUpWith,
                       style: GoogleFonts.inter(
                         color: AppColors.textSecondary,
                         fontSize: 14,
@@ -295,7 +298,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Already have an account? ',
+                    l10n.alreadyAccount,
                     style: GoogleFonts.inter(
                       color: AppColors.textSecondary,
                       fontSize: 14,
@@ -316,7 +319,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
-                      'Log In',
+                      l10n.login,
                       style: GoogleFonts.inter(
                         color: AppColors.primary,
                         fontSize: 14,

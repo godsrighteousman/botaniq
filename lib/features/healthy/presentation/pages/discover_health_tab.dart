@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 class DiscoverHealthTab extends StatelessWidget {
   const DiscoverHealthTab({super.key});
@@ -8,21 +9,23 @@ class DiscoverHealthTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       children: [
-        _buildSectionTitle('Trend Sağlık Tüyoları'),
+        _buildSectionTitle(l10n.healthTrendingTips),
         const SizedBox(height: 16),
         _buildTipCard(
-          title: 'Kışa Hazırlık: Nem Dengesini Korumak',
-          subtitle: 'Soğuk aylarda bitkilerinizi kaloriferin kuru havasından nasıl korursunuz?',
-          imageUrl: 'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&q=80&w=600',
+          title: l10n.healthHumidityArticleTitle,
+          subtitle: l10n.healthHumidityArticleSubtitle,
+          imageUrl:
+              'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&q=80&w=600',
         ),
         const SizedBox(height: 32),
-        _buildSectionTitle('Haftanın Hastası & Şifası'),
+        _buildSectionTitle(l10n.healthWeeklySpotlight),
         const SizedBox(height: 16),
-        _buildWeeklySpotlight(),
+        _buildWeeklySpotlight(context),
         const SizedBox(height: 100),
       ],
     );
@@ -39,7 +42,11 @@ class DiscoverHealthTab extends StatelessWidget {
     );
   }
 
-  Widget _buildTipCard({required String title, required String subtitle, required String imageUrl}) {
+  Widget _buildTipCard({
+    required String title,
+    required String subtitle,
+    required String imageUrl,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: _cardBg,
@@ -66,7 +73,11 @@ class DiscoverHealthTab extends StatelessWidget {
                 height: 160,
                 width: double.infinity,
                 color: const Color(0xFFF1F5F9),
-                child: const Icon(Icons.image_not_supported_outlined, color: Color(0xFF8B9E93), size: 40),
+                child: const Icon(
+                  Icons.image_not_supported_outlined,
+                  color: Color(0xFF8B9E93),
+                  size: 40,
+                ),
               ),
             ),
           ),
@@ -100,7 +111,8 @@ class DiscoverHealthTab extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklySpotlight() {
+  Widget _buildWeeklySpotlight(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -122,7 +134,11 @@ class DiscoverHealthTab extends StatelessWidget {
               color: Colors.white,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.star_rounded, color: Color(0xFF4FA976), size: 32),
+            child: const Icon(
+              Icons.star_rounded,
+              color: Color(0xFF4FA976),
+              size: 32,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -130,7 +146,7 @@ class DiscoverHealthTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Yaprak Biti İstilası',
+                  l10n.healthAphidTitle,
                   style: GoogleFonts.outfit(
                     color: const Color(0xFF2C3E35),
                     fontSize: 18,
@@ -139,7 +155,7 @@ class DiscoverHealthTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Erken evre müdahalesi ve doğal Neem Yağı kürü.',
+                  l10n.healthAphidSubtitle,
                   style: GoogleFonts.inter(
                     color: const Color(0xFF6E6E73),
                     fontSize: 13,

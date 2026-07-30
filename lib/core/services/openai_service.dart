@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OpenAIService {
@@ -9,20 +10,23 @@ class OpenAIService {
     String base64Image, {
     bool isMushroom = false,
   }) async {
+    final languageCode = await _languageCode();
+    final language = languageCode == 'en' ? 'English' : 'Türkçe';
     final prompt = isMushroom
-        ? 'Sen uzman bir mikologsun. Bu fotoğraftaki mantarın tam adını, '
+        ? 'Bu fotoğraftaki mantarın tam adını, '
               'türünü ve temel özelliklerini/yenilebilirliğini kısa bir özet '
               'olarak sadece şu JSON formatında dön: '
               '{"name":"Mantar Adı","species":"Bilimsel Türü",'
-              '"description":"Kısa bilgi","water_needs":"Nerede yetişir?",'
-              '"light_needs":"Zehirli mi/Yenilebilir mi?"}'
-        : 'Sen uzman bir botanikçisin. Bu fotoğraftaki bitkinin tam adını, '
+              '"description":"Kısa bilgi","water_needs":"Yetişme ortamı",'
+              '"light_needs":"Toksisite/Yenilebilirlik"}. Yanıt dili: $language.'
+        : 'Bu fotoğraftaki bitkinin tam adını, '
               'türünü ve temel bakım ihtiyaçlarını sadece şu JSON formatında '
               'dön: {"name":"Bitki Adı","species":"Bilimsel Türü",'
               '"description":"Kısa bilgi","water_needs":"Sulama ihtiyacı",'
               '"watering_interval_days":7,"light_needs":"Işık ihtiyacı"}. '
               'watering_interval_days değerini bu türe uygun pozitif tam sayı '
-              'olarak ver; emin değilsen uydurma kesinlik kullanma.';
+              'olarak ver; emin değilsen uydurma kesinlik kullanma. '
+              'Yanıt dili: $language.';
 
     try {
       final data = await _invoke({
@@ -30,6 +34,7 @@ class OpenAIService {
         'image_base64': base64Image,
         'image_mime_type': _imageMimeType(base64Image),
         'prompt': prompt,
+        'language_code': languageCode,
       });
       return _resultMap(data);
     } catch (error) {
@@ -43,7 +48,15 @@ class OpenAIService {
     String base64Image, {
     String? plantName,
   }) async {
-    final plantContext = plantName != null && plantName != 'Yeni Bitki'
+    final languageCode = await _languageCode();
+    final normalizedName = plantName?.trim() ?? '';
+    final plantContext =
+        normalizedName.isNotEmpty &&
+            ![
+              'yeni bitki',
+              'bilinmeyen bitki',
+              'unknown plant',
+            ].contains(normalizedName.toLowerCase())
         ? "Bu '$plantName' bitkisinin fotoğrafını analiz et."
         : 'Bu fotoğraftaki hasta bitkiyi analiz et.';
 
@@ -52,6 +65,7 @@ class OpenAIService {
         'mode': 'diagnose',
         'image_base64': base64Image,
         'image_mime_type': _imageMimeType(base64Image),
+        'language_code': languageCode,
         'prompt':
             '$plantContext Önce bitkiyi mümkün olan en doğru ortak adı ve '
             'bilimsel türüyle tanımla; emin değilsen bunu açıkça belirt ve '
@@ -75,6 +89,7 @@ class OpenAIService {
   static Future<String?> chatWithDoctor(
     List<Map<String, dynamic>> messages,
   ) async {
+    final languageCode = await _languageCode();
     final sanitizedMessages = messages.map((message) {
       final sanitized = Map<String, dynamic>.from(message);
       if (sanitized['image_url'] == 'photo') {
@@ -87,6 +102,7 @@ class OpenAIService {
       final data = await _invoke({
         'mode': 'chat',
         'messages': sanitizedMessages,
+        'language_code': languageCode,
       });
       return data['reply']?.toString();
     } catch (error) {
@@ -99,19 +115,65 @@ class OpenAIService {
   static Future<Map<String, dynamic>?> getPlantDetailsByName(
     String plantName,
   ) async {
+    final languageCode = await _languageCode();
+    final language = languageCode == 'en' ? 'English' : 'Türkçe';
     try {
       final data = await _invoke({
         'mode': 'details',
+        'language_code': languageCode,
         'prompt':
             "Bana '$plantName' adlı bitki/çiçek hakkında detaylı bilgi ver. "
             'Şunları içersin: description, ideal_climate, humidity, '
             'temperature_range, watering_protocol, feeding_protocol, '
-            'toxicity, difficulty, environment, sunlight. Yanıtı yalnızca '
-            'JSON objesi olarak ve Türkçe dön.',
+            'soil_protocol, care_protocol, toxicity, difficulty, environment, '
+            'sunlight. Yanıtı yalnızca JSON objesi olarak $language dilinde dön.',
       });
       return _resultMap(data);
     } catch (error) {
       debugPrint('Botaniq AI bitki detayları hatası: $error');
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> localizePlantDetails(
+    Map<String, dynamic> details,
+  ) async {
+    final languageCode = await _languageCode();
+    const translatableKeys = {
+      'name',
+      'description',
+      'difficulty',
+      'toxicity',
+      'environment',
+      'sunlight',
+      'light_needs',
+      'ideal_climate',
+      'humidity',
+      'temperature_range',
+      'watering_protocol',
+      'water_needs',
+      'soil_protocol',
+      'feeding_protocol',
+      'care_protocol',
+    };
+    final content = <String, dynamic>{};
+    for (final entry in details.entries) {
+      if (translatableKeys.contains(entry.key) && entry.value is String) {
+        final value = (entry.value as String).trim();
+        if (value.isNotEmpty) content[entry.key] = value;
+      }
+    }
+    if (content.isEmpty) return null;
+
+    try {
+      final data = await _invoke({
+        'mode': 'localize',
+        'language_code': languageCode,
+        'content': content,
+      });
+      return _resultMap(data);
+    } catch (error) {
+      debugPrint('Botaniq bitki içeriği yerelleştirme hatası: $error');
       return null;
     }
   }
@@ -170,5 +232,16 @@ class OpenAIService {
 
   static String _imageMimeType(String base64Image) {
     return base64Image.startsWith('iVBORw') ? 'png' : 'jpeg';
+  }
+
+  static Future<String> _languageCode() async {
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      final saved = preferences.getString('app_locale');
+      if (saved == 'en' || saved == 'tr') return saved!;
+    } catch (_) {}
+    final platformCode =
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    return platformCode == 'en' ? 'en' : 'tr';
   }
 }

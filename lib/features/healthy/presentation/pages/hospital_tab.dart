@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 import '../../../../core/services/sick_plant_service.dart';
 import 'ai_chat_page.dart';
 
@@ -63,6 +64,7 @@ class _HospitalTabState extends State<HospitalTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -88,7 +90,7 @@ class _HospitalTabState extends State<HospitalTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Bitki Kliniği',
+                      l10n.clinicTitle,
                       style: GoogleFonts.outfit(
                         color: const Color(0xFF2C3E35),
                         fontSize: 20,
@@ -105,7 +107,7 @@ class _HospitalTabState extends State<HospitalTab> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        '${_sickPlants.length} Hasta',
+                        l10n.clinicSickCount(_sickPlants.length),
                         style: GoogleFonts.inter(
                           color: const Color(0xFFEF7C56),
                           fontSize: 12,
@@ -131,6 +133,7 @@ class _HospitalTabState extends State<HospitalTab> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(48),
@@ -151,7 +154,7 @@ class _HospitalTabState extends State<HospitalTab> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Tüm Bitkileriniz Sağlıklı! 🌿',
+              l10n.clinicAllHealthy,
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 color: const Color(0xFF2C3E35),
@@ -161,7 +164,7 @@ class _HospitalTabState extends State<HospitalTab> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Klinikte hasta bitki bulunmuyor.\nBir bitkinin sağlığından şüphe duyarsanız,\nDoktor sekmesinden danışabilirsiniz.',
+              l10n.clinicEmpty,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 color: const Color(0xFF8B9E93),
@@ -176,10 +179,11 @@ class _HospitalTabState extends State<HospitalTab> {
   }
 
   Widget _buildPatientCard(Map<String, dynamic> plant) {
-    final name = plant['name'] ?? 'Bilinmeyen';
+    final l10n = AppLocalizations.of(context)!;
+    final name = plant['name'] ?? l10n.clinicUnknown;
     final species = (plant['species'] ?? '').toString();
-    final diagnosis = plant['diagnosis'] ?? 'Teşhis bekleniyor';
-    final prescription = plant['prescription'] ?? 'Tedavi belirlenmedi';
+    final diagnosis = plant['diagnosis'] ?? l10n.clinicPendingDiagnosis;
+    final prescription = plant['prescription'] ?? l10n.clinicNoTreatment;
     final urgency = plant['urgency'] ?? 'Orta';
     final recoveryProgress =
         (plant['recovery_progress'] as num?)?.toDouble() ?? 0.0;
@@ -204,13 +208,12 @@ class _HospitalTabState extends State<HospitalTab> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                AiChatPage(
-                  plantId: plantId,
-                  plantName: name,
-                  plantImageUrl: imageUrl,
-                  sickPlantId: sickPlantId,
-                ),
+            builder: (context) => AiChatPage(
+              plantId: plantId,
+              plantName: name,
+              plantImageUrl: imageUrl,
+              sickPlantId: sickPlantId,
+            ),
           ),
         ).then((_) => _loadSickPlants()); // Refresh on return
       },
@@ -277,7 +280,7 @@ class _HospitalTabState extends State<HospitalTab> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                urgency,
+                                _localizedUrgency(l10n, urgency.toString()),
                                 style: GoogleFonts.inter(
                                   color: urgencyColor,
                                   fontSize: 11,
@@ -332,7 +335,7 @@ class _HospitalTabState extends State<HospitalTab> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Reçete:',
+                        l10n.clinicPrescription,
                         style: GoogleFonts.inter(
                           color: const Color(0xFF8B9E93),
                           fontSize: 12,
@@ -357,7 +360,7 @@ class _HospitalTabState extends State<HospitalTab> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'İyileşme Durumu',
+                        l10n.clinicRecovery,
                         style: GoogleFonts.inter(
                           color: const Color(0xFF8B9E93),
                           fontSize: 12,
@@ -394,7 +397,7 @@ class _HospitalTabState extends State<HospitalTab> {
                             size: 18,
                           ),
                           label: Text(
-                            'İyileşti',
+                            l10n.clinicRecovered,
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
@@ -431,7 +434,7 @@ class _HospitalTabState extends State<HospitalTab> {
                           },
                           icon: const Icon(Icons.chat_rounded, size: 18),
                           label: Text(
-                            'Devam Et',
+                            l10n.clinicContinue,
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
@@ -466,7 +469,7 @@ class _HospitalTabState extends State<HospitalTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('🎉 Bitkiniz sağlığına kavuştu!'),
+            content: Text(AppLocalizations.of(context)!.clinicRecoveredSuccess),
             backgroundColor: _primaryGreen,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -478,6 +481,20 @@ class _HospitalTabState extends State<HospitalTab> {
       }
     } catch (e) {
       debugPrint("İyileşme kaydı hatası: $e");
+    }
+  }
+
+  String _localizedUrgency(AppLocalizations l10n, String urgency) {
+    switch (urgency.toLowerCase()) {
+      case 'kritik':
+      case 'critical':
+        return l10n.clinicUrgencyCritical;
+      case 'düşük':
+      case 'dusuk':
+      case 'low':
+        return l10n.clinicUrgencyLow;
+      default:
+        return l10n.clinicUrgencyMedium;
     }
   }
 }

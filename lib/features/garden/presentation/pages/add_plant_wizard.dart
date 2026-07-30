@@ -1,10 +1,11 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/services/schedule_service.dart';
 import '../../../../core/services/watering_schedule_service.dart';
+import '../../../../core/services/care_notification_service.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AddPlantWizard extends StatefulWidget {
   final Map<String, dynamic> plantData;
@@ -242,8 +243,10 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           'Schedule oluşturma hatası (görmezden gelindi): $scheduleErr',
         );
       }
+      await CareNotificationService.instance.refreshSchedules();
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -252,7 +255,9 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '${widget.plantData['name'] ?? 'Bitki'} bahçene eklendi! 🌿',
+                    l10n.wizardPlantAdded(
+                      widget.plantData['name'] ?? l10n.plantUnknown,
+                    ),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -303,6 +308,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _lightBg,
       appBar: AppBar(
@@ -326,7 +332,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
             onPressed: () =>
                 Navigator.of(context).popUntil((route) => route.isFirst),
             child: Text(
-              'Skip',
+              l10n.skip,
               style: GoogleFonts.inter(
                 color: _textSecondary,
                 fontWeight: FontWeight.w600,
@@ -375,6 +381,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildBottomButton() {
+    final l10n = AppLocalizations.of(context)!;
     bool canProceed = false;
     switch (_currentPage) {
       case 0:
@@ -425,7 +432,9 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                     ),
                   )
                 : Text(
-                    _currentPage == 6 ? 'Save & Add to Garden' : 'Continue',
+                    _currentPage == 6
+                        ? l10n.wizardSaveGarden
+                        : l10n.continueLabel,
                     style: GoogleFonts.inter(
                       color: canProceed ? Colors.white : Colors.grey[600],
                       fontSize: 16,
@@ -468,18 +477,43 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildRoomSelection() {
+    final l10n = AppLocalizations.of(context)!;
     final rooms = [
-      {'name': 'Living Room', 'icon': Icons.weekend_outlined},
-      {'name': 'Bedroom', 'icon': Icons.bed_outlined},
-      {'name': 'Kitchen', 'icon': Icons.countertops_outlined},
-      {'name': 'Office', 'icon': Icons.computer_outlined},
-      {'name': 'Bathroom', 'icon': Icons.bathtub_outlined},
-      {'name': 'Balcony', 'icon': Icons.balcony_outlined},
+      {
+        'name': 'Living Room',
+        'label': l10n.wizardLivingRoom,
+        'icon': Icons.weekend_outlined,
+      },
+      {
+        'name': 'Bedroom',
+        'label': l10n.wizardBedroom,
+        'icon': Icons.bed_outlined,
+      },
+      {
+        'name': 'Kitchen',
+        'label': l10n.wizardKitchen,
+        'icon': Icons.countertops_outlined,
+      },
+      {
+        'name': 'Office',
+        'label': l10n.wizardOffice,
+        'icon': Icons.computer_outlined,
+      },
+      {
+        'name': 'Bathroom',
+        'label': l10n.wizardBathroom,
+        'icon': Icons.bathtub_outlined,
+      },
+      {
+        'name': 'Balcony',
+        'label': l10n.wizardBalcony,
+        'icon': Icons.balcony_outlined,
+      },
     ];
 
     return _buildPageContainer(
-      'Where are your plants?',
-      'Categorize your plants by room to manage them easily.',
+      l10n.wizardRoomTitle,
+      l10n.wizardRoomSubtitle,
       GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -492,7 +526,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           final room = rooms[index];
           final isSelected = _selectedRoom == room['name'];
           return _buildChoiceCard(
-            title: room['name'] as String,
+            title: room['label'] as String,
             icon: room['icon'] as IconData,
             isSelected: isSelected,
             onTap: () => setState(() => _selectedRoom = room['name'] as String),
@@ -503,32 +537,37 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildLightSelection() {
+    final l10n = AppLocalizations.of(context)!;
     final lights = [
       {
         'name': 'Direct Sun',
-        'desc': 'Unfiltered sunlight straight on the plant',
+        'label': l10n.wizardDirectSun,
+        'desc': l10n.wizardDirectSunDescription,
         'icon': Icons.wb_sunny_outlined,
       },
       {
         'name': 'Bright Indirect',
-        'desc': 'Close to an east or west window',
+        'label': l10n.wizardBrightIndirect,
+        'desc': l10n.wizardBrightIndirectDescription,
         'icon': Icons.wb_twilight_outlined,
       },
       {
         'name': 'Medium Light',
-        'desc': 'A few feet away from a window',
+        'label': l10n.wizardMediumLight,
+        'desc': l10n.wizardMediumLightDescription,
         'icon': Icons.wb_cloudy_outlined,
       },
       {
         'name': 'Low Light',
-        'desc': 'Far from windows or artificial light',
+        'label': l10n.wizardLowLight,
+        'desc': l10n.wizardLowLightDescription,
         'icon': Icons.nights_stay_outlined,
       },
     ];
 
     return _buildPageContainer(
-      'How is the light in this spot?',
-      'Light is the most important factor for your plant\'s health.',
+      l10n.wizardLightTitle,
+      l10n.wizardLightSubtitle,
       ListView.builder(
         physics: const BouncingScrollPhysics(),
         itemCount: lights.length,
@@ -538,7 +577,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: _buildListChoiceCard(
-              title: light['name'] as String,
+              title: light['label'] as String,
               subtitle: light['desc'] as String,
               icon: light['icon'] as IconData,
               isSelected: isSelected,
@@ -552,9 +591,10 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildDistanceSelection() {
+    final l10n = AppLocalizations.of(context)!;
     return _buildPageContainer(
-      'Distance to window',
-      'Select the approximate distance from your plant to the nearest window.',
+      l10n.wizardDistanceTitle,
+      l10n.wizardDistanceSubtitle,
       Center(
         child: SizedBox(
           height: 300,
@@ -582,7 +622,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      _distances[index],
+                      _localizedDistance(l10n, _distances[index]),
                       style: GoogleFonts.outfit(
                         color: isSelected ? _accentGreen : Colors.grey[400],
                         fontSize: isSelected ? 24 : 20,
@@ -603,9 +643,10 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildHoursSelection() {
+    final l10n = AppLocalizations.of(context)!;
     return _buildPageContainer(
-      'Active hours',
-      'How many hours of direct or bright sunlight does this spot get?',
+      l10n.wizardActiveHoursTitle,
+      l10n.wizardActiveHoursSubtitle,
       Center(
         child: SizedBox(
           height: 300,
@@ -633,7 +674,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      _hours[index],
+                      _localizedHours(l10n, _hours[index]),
                       style: GoogleFonts.outfit(
                         color: isSelected ? _accentGreen : Colors.grey[400],
                         fontSize: isSelected ? 24 : 20,
@@ -654,6 +695,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildRepottedSelection() {
+    final l10n = AppLocalizations.of(context)!;
     final list = [
       'Recently (under 3 months)',
       '6 months ago',
@@ -663,8 +705,8 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
     ];
 
     return _buildPageContainer(
-      'When was this plant last repotted?',
-      'Fresh soil is crucial for happy plants.',
+      l10n.wizardRepottedTitle,
+      l10n.wizardRepottedSubtitle,
       ListView.builder(
         physics: const BouncingScrollPhysics(),
         itemCount: list.length,
@@ -673,7 +715,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _buildTextChoiceCard(
-              title: list[index],
+              title: _localizedRepotted(l10n, list[index]),
               isSelected: isSelected,
               onTap: () => setState(() => _selectedRepotted = list[index]),
             ),
@@ -684,16 +726,33 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildPotSelection() {
+    final l10n = AppLocalizations.of(context)!;
     final list = [
-      {'name': 'Plastic / Nursery', 'icon': Icons.shopping_bag_outlined},
-      {'name': 'Terracotta', 'icon': Icons.bento_outlined},
-      {'name': 'Ceramic / Glazed', 'icon': Icons.coffee_outlined},
-      {'name': 'Metal', 'icon': Icons.kitchen_outlined},
+      {
+        'name': 'Plastic / Nursery',
+        'label': l10n.wizardPlasticPot,
+        'icon': Icons.shopping_bag_outlined,
+      },
+      {
+        'name': 'Terracotta',
+        'label': l10n.wizardTerracottaPot,
+        'icon': Icons.bento_outlined,
+      },
+      {
+        'name': 'Ceramic / Glazed',
+        'label': l10n.wizardCeramicPot,
+        'icon': Icons.coffee_outlined,
+      },
+      {
+        'name': 'Metal',
+        'label': l10n.wizardMetalPot,
+        'icon': Icons.kitchen_outlined,
+      },
     ];
 
     return _buildPageContainer(
-      'What material is the pot in?',
-      'Pot material affects how quickly the soil dries out.',
+      l10n.wizardPotTitle,
+      l10n.wizardPotSubtitle,
       GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -705,7 +764,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         itemBuilder: (context, index) {
           final isSelected = _selectedPot == list[index]['name'];
           return _buildChoiceCard(
-            title: list[index]['name'] as String,
+            title: list[index]['label'] as String,
             icon: list[index]['icon'] as IconData,
             isSelected: isSelected,
             onTap: () =>
@@ -717,6 +776,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   }
 
   Widget _buildWateredSelection() {
+    final l10n = AppLocalizations.of(context)!;
     final list = [
       'Today',
       'Yesterday',
@@ -727,8 +787,8 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
     ];
 
     return _buildPageContainer(
-      'When did you last water this plant?',
-      'This helps us calculate the exact time for the next watering.',
+      l10n.wizardWateredTitle,
+      l10n.wizardWateredSubtitle,
       ListView.builder(
         physics: const BouncingScrollPhysics(),
         itemCount: list.length,
@@ -737,7 +797,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _buildTextChoiceCard(
-              title: list[index],
+              title: _localizedWatered(l10n, list[index]),
               isSelected: isSelected,
               onTap: () => setState(() => _selectedWatered = list[index]),
             ),
@@ -745,6 +805,37 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         },
       ),
     );
+  }
+
+  String _localizedDistance(AppLocalizations l10n, String value) {
+    return value == 'More than 5 m' ? l10n.wizardMoreThanFiveMeters : value;
+  }
+
+  String _localizedHours(AppLocalizations l10n, String value) {
+    if (value == '6+ hours') return l10n.wizardSixPlusHours;
+    final count = int.tryParse(value.split(' ').first) ?? 1;
+    return count == 1 ? l10n.wizardHour(count) : l10n.wizardHours(count);
+  }
+
+  String _localizedRepotted(AppLocalizations l10n, String value) {
+    return switch (value) {
+      'Recently (under 3 months)' => l10n.wizardRecently,
+      '6 months ago' => l10n.wizardSixMonthsAgo,
+      '1 year ago' => l10n.wizardOneYearAgo,
+      '2+ years ago' => l10n.wizardTwoYearsAgo,
+      _ => l10n.wizardDontKnow,
+    };
+  }
+
+  String _localizedWatered(AppLocalizations l10n, String value) {
+    return switch (value) {
+      'Today' => l10n.wizardToday,
+      'Yesterday' => l10n.wizardYesterday,
+      'A few days ago' => l10n.wizardFewDaysAgo,
+      'A week ago' => l10n.wizardWeekAgo,
+      'More than a week ago' => l10n.wizardMoreWeekAgo,
+      _ => l10n.wizardDontKnow,
+    };
   }
 
   // --- UI WIDGET COMPONENTS ---

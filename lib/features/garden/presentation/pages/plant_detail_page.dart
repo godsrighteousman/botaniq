@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'add_plant_wizard.dart';
 import '../../../../core/services/openai_service.dart';
 import '../../../../core/services/watering_schedule_service.dart';
+import '../../../../core/services/care_notification_service.dart';
+import 'package:botaniq/l10n/app_localizations.dart';
 
 class PlantDetailPage extends StatefulWidget {
   final Map<String, dynamic> plantData;
@@ -20,7 +24,8 @@ class PlantDetailPage extends StatefulWidget {
   State<PlantDetailPage> createState() => _PlantDetailPageState();
 }
 
-class _PlantDetailPageState extends State<PlantDetailPage> {
+class _PlantDetailPageState extends State<PlantDetailPage>
+    with TickerProviderStateMixin {
   final Color _accentGreen = const Color(0xFF86D5A6);
   final Color _lightBg = const Color(0xFFF9FAF9);
   final Color _cardBg = Colors.white;
@@ -34,12 +39,48 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   bool _isLoadingFertilize = false;
   late Map<String, dynamic> _localPlantData;
   bool _isLoadingDetails = false;
+  late final AnimationController _careAnimationController;
+  late final AnimationController _toastAnimationController;
+  _CareAnimationType? _careAnimationType;
+  OverlayEntry? _successToastEntry;
+  String? _localizedContentLanguage;
+  bool _isLocalizingContent = false;
 
   @override
   void initState() {
     super.initState();
     _localPlantData = Map<String, dynamic>.from(widget.plantData);
+    _careAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 950),
+    );
+    _toastAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    );
     _checkAndFetchDetails();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (_localizedContentLanguage != languageCode && !_isLocalizingContent) {
+      Future<void>.microtask(_localizeVisiblePlantContent);
+    }
+  }
+
+  Future<void> _localizeVisiblePlantContent() async {
+    if (!mounted || _isLocalizingContent) return;
+    final languageCode = Localizations.localeOf(context).languageCode;
+    _isLocalizingContent = true;
+    final localized = await OpenAIService.localizePlantDetails(_localPlantData);
+    if (!mounted) return;
+    setState(() {
+      if (localized != null) _localPlantData.addAll(localized);
+      _localizedContentLanguage = languageCode;
+      _isLocalizingContent = false;
+    });
   }
 
   Future<void> _checkAndFetchDetails() async {
@@ -60,8 +101,10 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           if (catData != null && mounted) {
             setState(() {
               _localPlantData.addAll(catData);
+              _localizedContentLanguage = null;
               _isLoadingDetails = false;
             });
+            await _localizeVisiblePlantContent();
             return;
           }
         } catch (e) {
@@ -86,8 +129,10 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           if (catData != null && mounted) {
             setState(() {
               _localPlantData.addAll(catData);
+              _localizedContentLanguage = null;
               _isLoadingDetails = false;
             });
+            await _localizeVisiblePlantContent();
             return;
           }
         }
@@ -106,8 +151,10 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
       if (details != null && mounted) {
         setState(() {
           _localPlantData.addAll(details);
+          _localizedContentLanguage = null;
           _isLoadingDetails = false;
         });
+        await _localizeVisiblePlantContent();
       } else if (mounted) {
         setState(() => _isLoadingDetails = false);
       }
@@ -116,7 +163,17 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
 
   @override
   void dispose() {
+    _successToastEntry?.remove();
+    _successToastEntry = null;
+    _toastAnimationController.dispose();
+    _careAnimationController.dispose();
     super.dispose();
+  }
+
+  void _playCareAnimation(_CareAnimationType type) {
+    if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) return;
+    setState(() => _careAnimationType = type);
+    _careAnimationController.forward(from: 0);
   }
 
   // ─── Water Now ───────────────────────────────────────────────────────────
@@ -163,19 +220,24 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
 
       if (mounted) {
         setState(() {
-          _localPlantData['last_watered_at'] = now
-              .toIso8601String()
-              .substring(0, 10);
+          _localPlantData['last_watered_at'] = now.toIso8601String().substring(
+            0,
+            10,
+          );
           _isWatered = true;
           _isLoadingWater = false;
         });
+        _playCareAnimation(_CareAnimationType.water);
         HapticFeedback.heavyImpact();
-        _showSuccessSnack('💧 Bitkini suladın! Harika iş!');
+        _showSuccessSnack(AppLocalizations.of(context)!.plantWaterSuccess);
+        CareNotificationService.instance.refreshSchedules();
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingWater = false);
-        _showErrorSnack('Sulama kaydedilemedi: $e');
+        _showErrorSnack(
+          AppLocalizations.of(context)!.plantWaterError(e.toString()),
+        );
       }
     }
   }
@@ -227,42 +289,139 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           _isFertilized = true;
           _isLoadingFertilize = false;
         });
+        _playCareAnimation(_CareAnimationType.fertilizer);
         HapticFeedback.heavyImpact();
-        _showSuccessSnack('🌱 Gübre verildi! Bitkin teşekkür eder!');
+        _showSuccessSnack(AppLocalizations.of(context)!.plantFertilizeSuccess);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingFertilize = false);
-        _showErrorSnack('Gübre kaydedilemedi: $e');
+        _showErrorSnack(
+          AppLocalizations.of(context)!.plantFertilizeError(e.toString()),
+        );
       }
     }
   }
 
   void _showSuccessSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                msg,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+    _successToastEntry?.remove();
+    _toastAnimationController.stop();
+    final overlay = Overlay.of(context);
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (overlayContext) {
+        return Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _toastAnimationController,
+              builder: (context, child) {
+                final timeline = _toastAnimationController.value;
+                final visibility = timeline < 0.16
+                    ? Curves.easeOutCubic.transform(timeline / 0.16)
+                    : timeline < 0.72
+                    ? 1.0
+                    : 1 -
+                          Curves.easeInCubic.transform(
+                            ((timeline - 0.72) / 0.28)
+                                .clamp(0.0, 1.0)
+                                .toDouble(),
+                          );
+                final scale = 0.86 + (0.14 * visibility);
+
+                return Center(
+                  child: Transform.scale(
+                    scale: scale,
+                    child: Opacity(
+                      opacity: visibility.clamp(0.0, 1.0).toDouble(),
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: Material(
+                color: Colors.transparent,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(26),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 330),
+                      margin: const EdgeInsets.symmetric(horizontal: 28),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 22,
+                        vertical: 18,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF20352A).withValues(alpha: 0.82),
+                        borderRadius: BorderRadius.circular(26),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.22),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.22),
+                            blurRadius: 34,
+                            offset: const Offset(0, 14),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF86D5A6,
+                              ).withValues(alpha: 0.22),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(
+                                  0xFF86D5A6,
+                                ).withValues(alpha: 0.55),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              color: Color(0xFFA8E7BE),
+                              size: 25,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Flexible(
+                            child: Text(
+                              msg,
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF4FA976),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
-      ),
+          ),
+        );
+      },
     );
+    _successToastEntry = entry;
+    overlay.insert(entry);
+    _toastAnimationController
+        .forward(from: 0)
+        .orCancel
+        .then((_) {
+          if (!identical(_successToastEntry, entry)) return;
+          entry.remove();
+          _successToastEntry = null;
+        })
+        .catchError((Object _) {});
   }
 
   void _showErrorSnack(String msg) {
@@ -277,55 +436,187 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     );
   }
 
+  Future<void> _confirmAndDeletePlant() async {
+    final l10n = AppLocalizations.of(context)!;
+    final plantId = _localPlantData['id']?.toString();
+    if (plantId == null || plantId.isEmpty) return;
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        icon: const Icon(
+          Icons.delete_outline_rounded,
+          color: Color(0xFFE96565),
+          size: 32,
+        ),
+        title: Text(
+          l10n.deletePlantTitle,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(
+            color: _primaryText,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          l10n.deletePlantMessage,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(color: _textSecondary, height: 1.45),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFE96565),
+            ),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.deletePlantAction),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete != true || !mounted) return;
+
+    try {
+      final client = Supabase.instance.client;
+      var deleted = false;
+      try {
+        final result = await client.rpc(
+          'delete_own_plant',
+          params: {'target_plant_id': plantId},
+        );
+        deleted = result == true;
+      } on PostgrestException catch (error) {
+        if (error.code != 'PGRST202' && error.code != '42883') rethrow;
+        final userId = client.auth.currentUser?.id;
+        if (userId == null) return;
+        await client
+            .from('sick_plants')
+            .delete()
+            .eq('plant_id', plantId)
+            .eq('user_id', userId);
+        final removed = await client
+            .from('plants')
+            .delete()
+            .eq('id', plantId)
+            .eq('user_id', userId)
+            .select('id');
+        deleted = removed.isNotEmpty;
+      }
+
+      if (!deleted) {
+        throw Exception(l10n.deletePlantNotFound);
+      }
+
+      await _removeOwnedPlantImage();
+      await CareNotificationService.instance.refreshSchedules();
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (error) {
+      if (!mounted) return;
+      _showErrorSnack(l10n.deletePlantError(error.toString()));
+    }
+  }
+
+  Future<void> _removeOwnedPlantImage() async {
+    final imageUrl = (_localPlantData['image_url'] ?? '').toString();
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    const marker = '/storage/v1/object/public/plant-images/';
+    final markerIndex = imageUrl.indexOf(marker);
+    if (userId == null || markerIndex < 0) return;
+
+    final encodedPath = imageUrl.substring(markerIndex + marker.length);
+    final path = Uri.decodeComponent(encodedPath.split('?').first);
+    if (!path.startsWith('${userId}_')) return;
+    try {
+      await Supabase.instance.client.storage.from('plant-images').remove([
+        path,
+      ]);
+    } catch (error) {
+      debugPrint('Silinen bitkinin görseli kaldırılamadı: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final String name =
         _localPlantData['custom_name'] ??
         _localPlantData['name'] ??
-        'Unknown Plant';
+        l10n.plantUnknown;
     final String species =
         _localPlantData['species'] ??
         _localPlantData['category'] ??
-        'Plant Species';
+        l10n.plantSpeciesFallback;
     final String imageUrl =
         (_localPlantData['image_url'] ?? _localPlantData['image'] ?? '')
             .toString();
-    final String difficulty = _localPlantData['difficulty'] ?? 'Medium';
+    final String difficulty =
+        _localPlantData['difficulty'] ?? l10n.plantDifficultyMedium;
 
     return Scaffold(
       backgroundColor: _lightBg,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(context, imageUrl, name),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeaderInfo(name, species),
-                  const SizedBox(height: 24),
-                  _buildCharacteristicsGrid(context, difficulty),
-                  const SizedBox(height: 32),
-                  _buildSectionTitle('Hakkında'),
-                  const SizedBox(height: 12),
-                  _buildAboutSection(),
-                  const SizedBox(height: 32),
-                  _buildSectionTitle('Konum & Ortam'),
-                  const SizedBox(height: 16),
-                  _buildPlacementSection(),
-                  const SizedBox(height: 32),
-                  _buildSectionTitle('Bakım Protokolü'),
-                  const SizedBox(height: 16),
-                  _buildCareRequirements(),
-                  if (widget.isFromGarden) ...[
-                    const SizedBox(height: 32),
-                    _buildSectionTitle('Son 10 Günlük Bakım Geçmişi'),
-                    const SizedBox(height: 16),
-                    _buildCareHistorySection(),
-                  ],
-                  const SizedBox(height: 120),
-                ],
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(context, imageUrl, name),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeaderInfo(name, species),
+                      const SizedBox(height: 24),
+                      _buildCharacteristicsGrid(context, difficulty),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle(l10n.plantAbout),
+                      const SizedBox(height: 12),
+                      _buildAboutSection(),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle(l10n.plantLocationEnvironment),
+                      const SizedBox(height: 16),
+                      _buildPlacementSection(),
+                      const SizedBox(height: 32),
+                      _buildSectionTitle(l10n.plantCareProtocol),
+                      const SizedBox(height: 16),
+                      _buildCareRequirements(),
+                      if (widget.isFromGarden) ...[
+                        const SizedBox(height: 32),
+                        _buildSectionTitle(l10n.plantCareHistory),
+                        const SizedBox(height: 16),
+                        _buildCareHistorySection(),
+                      ],
+                      const SizedBox(height: 120),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _careAnimationController,
+                builder: (context, child) {
+                  final type = _careAnimationType;
+                  if (type == null || !_careAnimationController.isAnimating) {
+                    return const SizedBox.shrink();
+                  }
+                  return CustomPaint(
+                    painter: _CareCelebrationPainter(
+                      progress: Curves.easeOutCubic.transform(
+                        _careAnimationController.value,
+                      ),
+                      type: type,
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -371,12 +662,14 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           child: IconButton(
             icon: Icon(
               widget.isFromGarden
-                  ? Icons.settings_outlined
+                  ? Icons.delete_outline_rounded
                   : Icons.favorite_border,
-              color: const Color(0xFF3B4D43),
+              color: widget.isFromGarden
+                  ? const Color(0xFFE96565)
+                  : const Color(0xFF3B4D43),
               size: 20,
             ),
-            onPressed: () {},
+            onPressed: widget.isFromGarden ? _confirmAndDeletePlant : null,
           ),
         ),
       ],
@@ -409,6 +702,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildHeaderInfo(String name, String species) {
+    final l10n = AppLocalizations.of(context)!;
     final healthStatus = (_localPlantData['health_status'] ?? '')
         .toString()
         .toLowerCase();
@@ -462,7 +756,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  isSick ? 'Klinikte' : 'Sağlıklı',
+                  isSick ? l10n.plantInClinic : l10n.plantHealthy,
                   style: GoogleFonts.inter(
                     color: healthColor,
                     fontSize: 13,
@@ -477,16 +771,18 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildCharacteristicsGrid(BuildContext context, String difficulty) {
+    final l10n = AppLocalizations.of(context)!;
     final double itemWidth = (MediaQuery.of(context).size.width - 48 - 16) / 2;
     final bool isToxicToPets = _localPlantData['is_toxic_to_pets'] == true;
     final String toxicity =
         _localPlantData['toxicity'] ??
-        (isToxicToPets ? 'Toxic to pets' : 'Non-toxic');
-    final String environment = _localPlantData['environment'] ?? 'Indoor';
+        (isToxicToPets ? l10n.plantToxicPets : l10n.plantNonToxic);
+    final String environment =
+        _localPlantData['environment'] ?? l10n.plantIndoor;
     final String sunlight =
         _localPlantData['sunlight'] ??
         _localPlantData['light_needs'] ??
-        'Bright Indirect';
+        l10n.plantBrightIndirect;
     return Wrap(
       spacing: 16,
       runSpacing: 16,
@@ -494,28 +790,28 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
         _buildCharacteristicBadge(
           itemWidth,
           Icons.speed_rounded,
-          'Zorluk Seviyesi',
+          l10n.plantDifficulty,
           difficulty,
           _accentGreen,
         ),
         _buildCharacteristicBadge(
           itemWidth,
           Icons.pets_rounded,
-          'Toksisite',
+          l10n.plantToxicity,
           toxicity,
           isToxicToPets ? Colors.redAccent : Colors.teal,
         ),
         _buildCharacteristicBadge(
           itemWidth,
           Icons.home_work_outlined,
-          'Yetişme Ortamı',
+          l10n.plantEnvironment,
           environment,
           Colors.purpleAccent,
         ),
         _buildCharacteristicBadge(
           itemWidth,
           Icons.wb_sunny_outlined,
-          'Işık İhtiyacı',
+          l10n.plantLightNeed,
           sunlight,
           Colors.orangeAccent,
         ),
@@ -590,14 +886,12 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildAboutSection() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoadingDetails) {
       return const Center(child: CircularProgressIndicator(strokeWidth: 2));
     }
     final String desc =
-        _localPlantData['description'] ??
-        'This plant is known for its beautiful foliage and easy-care nature. '
-            'It thrives in bright, indirect light and prefers its soil to dry out '
-            'slightly between waterings.';
+        _localPlantData['description'] ?? l10n.plantInfoUnavailable;
     return Text(
       desc,
       style: GoogleFonts.inter(
@@ -609,31 +903,33 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildPlacementSection() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoadingDetails) {
       return const Center(child: CircularProgressIndicator(strokeWidth: 2));
     }
     final String climate =
-        _localPlantData['ideal_climate'] ?? 'Warm & Humid (18°C - 24°C)';
+        _localPlantData['ideal_climate'] ?? l10n.plantInfoUnavailable;
     final String humidityStr =
-        _localPlantData['humidity'] ?? 'Moderate to High';
-    final String tempRange = _localPlantData['temperature_range'] ?? '18-24°C';
+        _localPlantData['humidity'] ?? l10n.plantInfoUnavailable;
+    final String tempRange =
+        _localPlantData['temperature_range'] ?? l10n.plantInfoUnavailable;
     return Column(
       children: [
         _buildCareTile(
           icon: Icons.thermostat_rounded,
-          title: 'İdeal İklim',
+          title: l10n.plantIdealClimate,
           subtitle: climate,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.water_outlined,
-          title: 'Nem Oranı',
+          title: l10n.plantHumidity,
           subtitle: humidityStr,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.landscape_rounded,
-          title: 'Sıcaklık Aralığı',
+          title: l10n.plantTemperatureRange,
           subtitle: tempRange,
         ),
       ],
@@ -641,49 +937,59 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildCareRequirements() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoadingDetails) {
       return const Center(child: CircularProgressIndicator(strokeWidth: 2));
     }
     final String waterProtocol =
         _localPlantData['watering_protocol'] ??
         _localPlantData['water_needs'] ??
-        'Water every 7-10 days. Allow the top inch of soil to dry out between waterings.';
+        l10n.plantInfoUnavailable;
     final String feedProtocol =
-        _localPlantData['feeding_protocol'] ??
-        'Fertilize monthly during spring/summer with balanced liquid fertilizer.';
+        _localPlantData['feeding_protocol'] ?? l10n.plantInfoUnavailable;
+    final String soilProtocol =
+        _localPlantData['soil_protocol'] ?? l10n.plantInfoUnavailable;
     final watering = WateringScheduleService.fromPlant(_localPlantData);
+    final interval = l10n.wateringInterval(watering.intervalDays);
     return Column(
       children: [
         _buildCareTile(
           icon: Icons.repeat_one_rounded,
-          title: 'Sulama Sıklığı',
-          subtitle: '${watering.intervalLabel} sulanmalı.',
+          title: l10n.plantWateringFrequency,
+          subtitle: l10n.plantWateringFrequencyValue(interval),
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.history_rounded,
-          title: 'Sonraki Sulama',
+          title: l10n.plantNextWatering,
           subtitle:
-              '${watering.lastWateredLabel}\n${watering.statusLabel}',
+              '${_localizedLastWatered(l10n, watering)}\n'
+              '${_localizedWateringStatus(l10n, watering)}',
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.water_drop_rounded,
-          title: 'Watering Protocol',
+          title: l10n.plantWateringProtocol,
           subtitle: waterProtocol,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
+          icon: Icons.grass_rounded,
+          title: l10n.plantSoilProtocol,
+          subtitle: soilProtocol,
+        ),
+        const SizedBox(height: 12),
+        _buildCareTile(
           icon: Icons.science_rounded,
-          title: 'Feeding Protocol',
+          title: l10n.plantFeedingProtocol,
           subtitle: feedProtocol,
         ),
         const SizedBox(height: 12),
         _buildCareTile(
           icon: Icons.content_cut_rounded,
-          title: 'Pruning & Cleaning',
+          title: l10n.plantPruningCleaning,
           subtitle:
-              'Wipe leaves monthly. Prune dead or yellowing leaves to encourage growth.',
+              _localPlantData['care_protocol'] ?? l10n.plantPruningFallback,
         ),
       ],
     );
@@ -742,8 +1048,34 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     );
   }
 
+  String _localizedWateringStatus(
+    AppLocalizations l10n,
+    PlantWateringSchedule watering,
+  ) {
+    if (watering.lastWateredAt == null) return l10n.wateringNeverDue;
+    if (watering.isOverdue) {
+      return l10n.wateringOverdue(watering.daysUntilDue.abs());
+    }
+    if (watering.isDueToday) return l10n.wateringDueToday;
+    if (watering.isDueTomorrow) return l10n.wateringDueTomorrow;
+    return l10n.wateringDueInDays(watering.daysUntilDue);
+  }
+
+  String _localizedLastWatered(
+    AppLocalizations l10n,
+    PlantWateringSchedule watering,
+  ) {
+    final date = watering.lastWateredAt;
+    if (date == null) return l10n.wateringNever;
+    final formatted =
+        '${date.day.toString().padLeft(2, '0')}.'
+        '${date.month.toString().padLeft(2, '0')}.${date.year}';
+    return l10n.wateringLastDate(formatted);
+  }
+
   // ─── Bottom Action Bar ────────────────────────────────────────────────────
   Widget _buildCareHistorySection() {
+    final l10n = AppLocalizations.of(context)!;
     if (!widget.isFromGarden) return const SizedBox.shrink();
     final plantId = _localPlantData['id']?.toString();
     if (plantId == null) return const SizedBox.shrink();
@@ -786,7 +1118,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Son 10 güne ait bakım geçmişi bulunmuyor.',
+                    l10n.plantHistoryEmpty,
                     style: GoogleFonts.inter(color: _textSecondary),
                   ),
                 ),
@@ -838,7 +1170,9 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isWater ? 'Sulama' : 'Gübreleme',
+                            isWater
+                                ? l10n.plantWateringTask
+                                : l10n.plantFertilizingTask,
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.w600,
                               color: _primaryText,
@@ -873,6 +1207,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
   }
 
   Widget _buildBottomActionBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(8),
@@ -893,7 +1228,9 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 // Sulama butonu
                 Expanded(
                   child: _buildCareButton(
-                    label: _isWatered ? 'Sulandı ✓' : 'Şimdi Sula',
+                    label: _isWatered
+                        ? l10n.plantWateredAction
+                        : l10n.plantWaterNowAction,
                     icon: _isWatered
                         ? Icons.check_circle_rounded
                         : Icons.water_drop_rounded,
@@ -907,7 +1244,9 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
                 // Gübre butonu
                 Expanded(
                   child: _buildCareButton(
-                    label: _isFertilized ? 'Gübre Verildi ✓' : 'Gübre Ver',
+                    label: _isFertilized
+                        ? l10n.plantFertilizedAction
+                        : l10n.plantFertilizeAction,
                     icon: _isFertilized
                         ? Icons.check_circle_rounded
                         : Icons.science_rounded,
@@ -923,7 +1262,7 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
               children: [
                 Expanded(
                   child: _buildCareButton(
-                    label: 'Bahçeme Ekle',
+                    label: l10n.plantAddGardenAction,
                     icon: Icons.add_rounded,
                     isDone: false,
                     isLoading: false,
@@ -1007,5 +1346,116 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
         ),
       ),
     );
+  }
+}
+
+enum _CareAnimationType { water, fertilizer }
+
+class _CareCelebrationPainter extends CustomPainter {
+  const _CareCelebrationPainter({required this.progress, required this.type});
+
+  final double progress;
+  final _CareAnimationType type;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final origin = Offset(
+      size.width * (type == _CareAnimationType.water ? 0.32 : 0.68),
+      size.height - 138,
+    );
+    final fade = (1 - progress).clamp(0.0, 1.0).toDouble();
+
+    if (type == _CareAnimationType.water) {
+      _paintWater(canvas, origin, fade);
+    } else {
+      _paintFertilizer(canvas, origin, fade);
+    }
+  }
+
+  void _paintWater(Canvas canvas, Offset origin, double fade) {
+    const colors = [Color(0xFF63B3FF), Color(0xFF3D8FE8), Color(0xFF9DD8FF)];
+    for (var index = 0; index < 24; index++) {
+      final lane = index - 11.5;
+      final phase = (progress + index * 0.035).clamp(0.0, 1.0).toDouble();
+      final horizontal = lane * 8.5 * phase;
+      final lift = (78 + (index % 5) * 20) * phase;
+      final gravity = 42 * phase * phase;
+      final center = origin + Offset(horizontal, -lift + gravity);
+      final radius = 2.8 + (index % 3) * 0.9;
+      final paint = Paint()
+        ..color = colors[index % colors.length].withValues(alpha: fade * 0.95);
+      canvas.drawCircle(center, radius, paint);
+      canvas.drawCircle(
+        center.translate(-radius * 0.35, -radius * 0.45),
+        radius * 0.35,
+        Paint()..color = Colors.white.withValues(alpha: fade * 0.75),
+      );
+    }
+
+    final ripplePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = const Color(0xFF4A90E2).withValues(alpha: fade * 0.65);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: origin,
+        width: 24 + 70 * progress,
+        height: 8 + 18 * progress,
+      ),
+      ripplePaint,
+    );
+  }
+
+  void _paintFertilizer(Canvas canvas, Offset origin, double fade) {
+    const dotColors = [
+      Color(0xFF8B5A2B),
+      Color(0xFFA66A32),
+      Color(0xFFD29A54),
+      Color(0xFF6F4524),
+    ];
+
+    for (var index = 0; index < 28; index++) {
+      final lane = index - 13.5;
+      final phase = (progress + index * 0.025).clamp(0.0, 1.0).toDouble();
+      final horizontal = lane * 7.5 * phase;
+      final lift = (68 + (index % 6) * 17) * phase;
+      final gravity = 50 * phase * phase;
+      final center = origin + Offset(horizontal, -lift + gravity);
+      canvas.drawCircle(
+        center,
+        2.5 + (index % 3) * 0.8,
+        Paint()
+          ..color = dotColors[index % dotColors.length].withValues(
+            alpha: fade * 0.9,
+          ),
+      );
+    }
+
+    for (var index = 0; index < 9; index++) {
+      final direction = index - 4;
+      final phase = (progress + index * 0.045).clamp(0.0, 1.0).toDouble();
+      final position =
+          origin +
+          Offset(
+            direction * 23 * phase,
+            -(84 + (index % 3) * 24) * phase + 48 * phase * phase,
+          );
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: '💩',
+          style: TextStyle(fontSize: (22 + (index % 3) * 4).toDouble()),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      textPainter.paint(
+        canvas,
+        position - Offset(textPainter.width / 2, textPainter.height / 2),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _CareCelebrationPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.type != type;
   }
 }
