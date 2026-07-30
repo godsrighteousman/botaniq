@@ -1,303 +1,167 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OpenAIService {
-  static const String _defaultApiKey = String.fromEnvironment('OPENAI_API_KEY');
-  static const String _apiUrl = 'https://api.openai.com/v1/chat/completions';
+  static const _functionName = 'analyze-plant';
 
-  /// Fotoğrafı Base64 formatında alıp tanımlama yapar
+  /// Fotoğrafı merkezi Botaniq AI entegrasyonu üzerinden tanımlar.
   static Future<Map<String, dynamic>?> identifyPlant(
     String base64Image, {
     bool isMushroom = false,
   }) async {
-    // Settings'ten özel key girilmişse onu kullan, yoksa defaultu kullan
-    String apiKey = _defaultApiKey;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedKey = prefs.getString('openai_api_key');
-      if (savedKey != null &&
-          savedKey.trim().isNotEmpty &&
-          savedKey.trim().startsWith('sk-')) {
-        apiKey = savedKey.trim();
-      }
-    } catch (e) {
-      debugPrint("SharedPreferences okuma hatası: $e");
-    }
-
-    debugPrint("OpenAI isteği gönderiliyor (Tanımlama)... Model: gpt-4o-mini");
-
-    final String mimeType = base64Image.startsWith('iVBORw') ? 'png' : 'jpeg';
+    final prompt = isMushroom
+        ? 'Sen uzman bir mikologsun. Bu fotoğraftaki mantarın tam adını, '
+              'türünü ve temel özelliklerini/yenilebilirliğini kısa bir özet '
+              'olarak sadece şu JSON formatında dön: '
+              '{"name":"Mantar Adı","species":"Bilimsel Türü",'
+              '"description":"Kısa bilgi","water_needs":"Nerede yetişir?",'
+              '"light_needs":"Zehirli mi/Yenilebilir mi?"}'
+        : 'Sen uzman bir botanikçisin. Bu fotoğraftaki bitkinin tam adını, '
+              'türünü ve temel bakım ihtiyaçlarını sadece şu JSON formatında '
+              'dön: {"name":"Bitki Adı","species":"Bilimsel Türü",'
+              '"description":"Kısa bilgi","water_needs":"Sulama ihtiyacı",'
+              '"light_needs":"Işık ihtiyacı"}';
 
     try {
-      final response = await http.post(
-        Uri.parse(_apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          "model": "gpt-4o-mini",
-          "messages": [
-            {
-              "role": "user",
-              "content": [
-                {
-                  "type": "text",
-                  "text": isMushroom
-                      ? "Sen uzman bir mikologsun. Bu fotoğraftaki mantarın tam adını, türünü ve temel özelliklerini/yenilebilirliğini (zehirli mi, nerede yetişir, yenilebilir mi vs.) kısa bir özet olarak JSON formatında dön. JSON formatı şöyle olsun:\n{\n  \"name\": \"Mantar Adı\",\n  \"species\": \"Bilimsel Türü\",\n  \"description\": \"Mantar hakkında kısa bilgi\",\n  \"water_needs\": \"Nerede yetişir?\",\n  \"light_needs\": \"Zehirli mi/Yenilebilir mi?\"\n}"
-                      : "Sen uzman bir botanikçisin. Bu fotoğraftaki bitkinin tam adını, türünü ve temel bakım ihtiyaçlarını (ışık, sulama, sıcaklık) kısa bir özet olarak JSON formatında dön. JSON formatı şöyle olsun:\n{\n  \"name\": \"Bitki Adı\",\n  \"species\": \"Bilimsel Türü\",\n  \"description\": \"Bitki hakkında kısa bilgi\",\n  \"water_needs\": \"Sulama ihtiyacı\",\n  \"light_needs\": \"Işık ihtiyacı\"\n}",
-                },
-                {
-                  "type": "image_url",
-                  "image_url": {
-                    "url": "data:image/$mimeType;base64,$base64Image",
-                    "detail": "low",
-                  },
-                },
-              ],
-            },
-          ],
-          "max_tokens": 500,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
-        final content = data['choices'][0]['message']['content'];
-        final cleanContent = content
-            .toString()
-            .replaceAll('```json', '')
-            .replaceAll('```', '')
-            .trim();
-
-        return Map<String, dynamic>.from(jsonDecode(cleanContent));
-      } else {
-        throw Exception(
-          'OpenAI Hatası: ${response.statusCode} - ${response.body}',
-        );
-      }
-    } catch (e) {
-      debugPrint("OpenAI İstek Hatası: $e");
+      final data = await _invoke({
+        'mode': 'identify',
+        'image_base64': base64Image,
+        'image_mime_type': _imageMimeType(base64Image),
+        'prompt': prompt,
+      });
+      return _resultMap(data);
+    } catch (error) {
+      debugPrint('Botaniq AI tanımlama hatası: $error');
       rethrow;
     }
   }
 
-  /// Hasta bitki fotoğrafını alıp teşhis ve tedavi reçetesi çıkarır
+  /// Hasta bitki fotoğrafını merkezi Botaniq AI entegrasyonuyla analiz eder.
   static Future<Map<String, dynamic>?> diagnosePlant(
     String base64Image, {
     String? plantName,
   }) async {
-    String apiKey = _defaultApiKey;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedKey = prefs.getString('openai_api_key');
-      if (savedKey != null &&
-          savedKey.trim().isNotEmpty &&
-          savedKey.trim().startsWith('sk-')) {
-        apiKey = savedKey.trim();
-      }
-    } catch (e) {
-      debugPrint("SharedPreferences okuma hatası: $e");
-    }
-
-    debugPrint("OpenAI isteği gönderiliyor (Teşhis)... Model: gpt-4o-mini");
-
-    final String mimeType = base64Image.startsWith('iVBORw') ? 'png' : 'jpeg';
     final plantContext = plantName != null && plantName != 'Yeni Bitki'
         ? "Bu '$plantName' bitkisinin fotoğrafını analiz et."
-        : "Bu fotoğraftaki hasta bitkiyi analiz et.";
+        : 'Bu fotoğraftaki hasta bitkiyi analiz et.';
 
     try {
-      final response = await http.post(
-        Uri.parse(_apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          "model": "gpt-4o-mini",
-          "messages": [
-            {
-              "role": "system",
-              "content":
-                  "Sen uzman bir bitki doktoru ve botanikçisin. Fotoğraftaki hasta bitkiyi analiz edip teşhis koymalısın. Sadece aşağıdaki JSON şablonunda cevap vermelisin ve markdown kod blokları kullanmamalısın.",
-            },
-            {
-              "role": "user",
-              "content": [
-                {
-                  "type": "text",
-                  "text":
-                      "$plantContext Hastalığını teşhis et ve tedavi önerisi sun. Yanıtını sadece şu JSON formatında dön:\n{\n  \"diagnosis\": \"Teşhis ve sorun açıklaması\",\n  \"prescription\": \"Tedavi için yapılması gereken reçete adımları\",\n  \"urgency\": \"Düşük\" veya \"Orta\" veya \"Kritik\",\n  \"care_tips\": [\"Bakım ipucu 1\", \"Bakım ipucu 2\"],\n  \"recovery_time\": \"Tahmini iyileşme süresi (örn: 2-3 hafta)\"\n}",
-                },
-                {
-                  "type": "image_url",
-                  "image_url": {
-                    "url": "data:image/$mimeType;base64,$base64Image",
-                    "detail": "low",
-                  },
-                },
-              ],
-            },
-          ],
-          "max_tokens": 800,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
-        final content = data['choices'][0]['message']['content'];
-        final cleanContent = content
-            .toString()
-            .replaceAll('```json', '')
-            .replaceAll('```', '')
-            .trim();
-
-        return Map<String, dynamic>.from(jsonDecode(cleanContent));
-      } else {
-        throw Exception(
-          'OpenAI Hatası: ${response.statusCode} - ${response.body}',
-        );
-      }
-    } catch (e) {
-      debugPrint("OpenAI Teşhis Hatası: $e");
+      final data = await _invoke({
+        'mode': 'diagnose',
+        'image_base64': base64Image,
+        'image_mime_type': _imageMimeType(base64Image),
+        'prompt':
+            '$plantContext Hastalığını teşhis et ve tedavi önerisini sadece '
+            'şu JSON formatında dön: {"diagnosis":"Teşhis ve sorun",'
+            '"prescription":"Tedavi adımları","urgency":"Düşük/Orta/Kritik",'
+            '"care_tips":["İpucu 1","İpucu 2"],'
+            '"recovery_time":"Tahmini iyileşme süresi"}',
+      });
+      return _resultMap(data);
+    } catch (error) {
+      debugPrint('Botaniq AI teşhis hatası: $error');
       rethrow;
     }
   }
 
-  /// Sohbet geçmişi ile doktora soru sorar
+  /// Sohbet geçmişini merkezi Botaniq AI entegrasyonuna gönderir.
   static Future<String?> chatWithDoctor(
     List<Map<String, dynamic>> messages,
   ) async {
-    String apiKey = _defaultApiKey;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedKey = prefs.getString('openai_api_key');
-      if (savedKey != null &&
-          savedKey.trim().isNotEmpty &&
-          savedKey.trim().startsWith('sk-')) {
-        apiKey = savedKey.trim();
+    final sanitizedMessages = messages.map((message) {
+      final sanitized = Map<String, dynamic>.from(message);
+      if (sanitized['image_url'] == 'photo') {
+        sanitized.remove('image_url');
       }
-    } catch (e) {
-      debugPrint("SharedPreferences okuma hatası: $e");
-    }
-
-    debugPrint("OpenAI sohbet isteği gönderiliyor... Model: gpt-4o-mini");
-
-    // Mesajları OpenAI API formatına dönüştür
-    final apiMessages = [
-      {
-        "role": "system",
-        "content":
-            "Sen uzman bir bitki doktoru ve botanikçisin. Kullanıcının bitki sağlığı, hastalıkları ve tedavisi hakkındaki sorularını yanıtla. Yanıtların Türkçe, samimi ve son derece pratik reçete çözümleri içersin.",
-      },
-      ...messages.map((m) {
-        final role = m['role'] == 'user' ? 'user' : 'assistant';
-        final content = m['content'] ?? '';
-        final imageUrl = m['image_url'];
-
-        if (imageUrl != null && imageUrl != 'photo') {
-          return {
-            "role": role,
-            "content": [
-              {"type": "text", "text": content},
-              {
-                "type": "image_url",
-                "image_url": {"url": imageUrl, "detail": "low"},
-              },
-            ],
-          };
-        }
-        return {"role": role, "content": content};
-      }),
-    ];
+      return sanitized;
+    }).toList();
 
     try {
-      final response = await http.post(
-        Uri.parse(_apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          "model": "gpt-4o-mini",
-          "messages": apiMessages,
-          "max_tokens": 1000,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
-        return data['choices'][0]['message']['content'] as String;
-      } else {
-        throw Exception(
-          'OpenAI Hatası: ${response.statusCode} - ${response.body}',
-        );
-      }
-    } catch (e) {
-      debugPrint("OpenAI Sohbet Hatası: $e");
+      final data = await _invoke({
+        'mode': 'chat',
+        'messages': sanitizedMessages,
+      });
+      return data['reply']?.toString();
+    } catch (error) {
+      debugPrint('Botaniq AI sohbet hatası: $error');
       rethrow;
     }
   }
 
-  /// Bitki ismi verildiğinde detaylı bakım bilgilerini getirir
+  /// Bitki adı için detaylı bakım bilgisini merkezi entegrasyondan getirir.
   static Future<Map<String, dynamic>?> getPlantDetailsByName(
     String plantName,
   ) async {
-    String apiKey = _defaultApiKey;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedKey = prefs.getString('openai_api_key');
-      if (savedKey != null &&
-          savedKey.trim().isNotEmpty &&
-          savedKey.trim().startsWith('sk-')) {
-        apiKey = savedKey.trim();
+      final data = await _invoke({
+        'mode': 'details',
+        'prompt':
+            "Bana '$plantName' adlı bitki/çiçek hakkında detaylı bilgi ver. "
+            'Şunları içersin: description, ideal_climate, humidity, '
+            'temperature_range, watering_protocol, feeding_protocol, '
+            'toxicity, difficulty, environment, sunlight. Yanıtı yalnızca '
+            'JSON objesi olarak ve Türkçe dön.',
+      });
+      return _resultMap(data);
+    } catch (error) {
+      debugPrint('Botaniq AI bitki detayları hatası: $error');
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>> _invoke(Map<String, dynamic> body) async {
+    late final FunctionResponse response;
+    try {
+      response = await Supabase.instance.client.functions.invoke(
+        _functionName,
+        body: body,
+      );
+    } on FunctionException catch (error) {
+      if (error.status == 404) {
+        throw Exception(
+          'Botaniq AI servisi Supabase projesinde bulunamadı. '
+          'analyze-plant Edge Function deploy edilmelidir.',
+        );
       }
-    } catch (e) {
-      debugPrint("SharedPreferences okuma hatası: $e");
+      if (error.status == 401 || error.status == 403) {
+        throw Exception(
+          'Botaniq AI oturumu doğrulanamadı. Lütfen tekrar giriş yapın.',
+        );
+      }
+
+      final details = error.details;
+      final message = details is Map
+          ? details['error']?.toString()
+          : details?.toString();
+      throw Exception(
+        message != null && message.isNotEmpty
+            ? message
+            : 'Botaniq AI servisine ulaşılamadı (${error.status}).',
+      );
     }
 
-    try {
-      final response = await http.post(
-        Uri.parse(_apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          "model": "gpt-4o-mini",
-          "messages": [
-            {
-              "role": "system",
-              "content":
-                  "Sen uzman bir botanikçisin ve bitki detayları sağlayan bir API'sin. Sadece JSON formatında cevap vermelisin.",
-            },
-            {
-              "role": "user",
-              "content":
-                  "Bana '$plantName' adlı bitki/çiçek hakkında detaylı bilgi ver. Şunları içersin: description, ideal_climate, humidity, temperature_range, watering_protocol, feeding_protocol, toxicity, difficulty, environment, sunlight. Lütfen yanıtını sadece bir JSON objesi olarak dön ve markdown kullanma. Çıktı dili Türkçe olsun.",
-            },
-          ],
-          "max_tokens": 800,
-          "temperature": 0.3,
-        }),
-      );
+    final rawData = response.data;
+    if (rawData is! Map) {
+      throw const FormatException('Botaniq AI geçersiz yanıt döndürdü.');
+    }
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
-        final content = data['choices'][0]['message']['content'];
-        final cleanContent = content
-            .toString()
-            .replaceAll('```json', '')
-            .replaceAll('```', '')
-            .trim();
-        return Map<String, dynamic>.from(jsonDecode(cleanContent));
-      }
-    } catch (e) {
-      debugPrint("OpenAI AI Plant Details fetch error: $e");
+    final data = Map<String, dynamic>.from(rawData);
+    final error = data['error'];
+    if (response.status < 200 || response.status >= 300 || error != null) {
+      throw Exception(error?.toString() ?? 'Botaniq AI isteği başarısız oldu.');
+    }
+    return data;
+  }
+
+  static Map<String, dynamic>? _resultMap(Map<String, dynamic> data) {
+    final result = data['result'];
+    if (result is Map) {
+      return Map<String, dynamic>.from(result);
     }
     return null;
+  }
+
+  static String _imageMimeType(String base64Image) {
+    return base64Image.startsWith('iVBORw') ? 'png' : 'jpeg';
   }
 }

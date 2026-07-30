@@ -42,19 +42,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get premium => 'Premium';
 
   @override
-  String get apiSettings => 'API Settings (AI)';
-
-  @override
-  String get apiKeyHint => 'sk-proj-... or sk-...';
-
-  @override
-  String get apiKeyDescription =>
-      'Enter your own OpenAI API Key to make API requests from your account. The API Key is stored locally on your device in encrypted form.';
-
-  @override
-  String get apiKeySaved => 'OpenAI API Key saved successfully.';
-
-  @override
   String get language => 'Language';
 
   @override
@@ -74,6 +61,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageChanged => 'Language changed successfully.';
+
+  @override
+  String get settingsSubtitle => 'Shape Botaniq around your own care rhythm.';
+
+  @override
+  String get settingsLocalPreference => 'Saved on this device';
+
+  @override
+  String get settingsDarkModeSubtitle =>
+      'A calmer palette for low-light moments';
+
+  @override
+  String get settingsAccountSubtitle => 'Identity, access and membership';
+
+  @override
+  String get settingsEditProfileSubtitle =>
+      'Name, location and care preferences';
+
+  @override
+  String get settingsPasswordSubtitle =>
+      'Send a secure reset link to your email';
+
+  @override
+  String get settingsSubscriptionSubtitle => 'Premium plan and billing details';
+
+  @override
+  String get settingsPasswordResetSent => 'Password reset email sent.';
+
+  @override
+  String get settingsComingSoon => 'This space is still growing.';
 
   @override
   String get homeGoodMorning => 'Hello,';
@@ -204,6 +221,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDeleteAccount => 'Delete Account';
+
+  @override
+  String get profileSubtitle =>
+      'Your garden story, progress and personal space.';
+
+  @override
+  String get profileGardenPassport => 'GARDEN PASSPORT';
+
+  @override
+  String get profileThisWeek => 'This week';
+
+  @override
+  String get profileQuietWeek =>
+      'A quiet week — your next care moment will appear here.';
+
+  @override
+  String get profileActiveWeek => 'Your care rhythm is alive and growing.';
+
+  @override
+  String get profileAppSettingsSubtitle => 'Language, units and AI connection';
+
+  @override
+  String get profileNotificationPrefsSubtitle =>
+      'Choose which care moments reach you';
+
+  @override
+  String get profileHelpCenterSubtitle => 'Answers and quick guidance';
+
+  @override
+  String get profileTermsSubtitle => 'Privacy, terms and policies';
+
+  @override
+  String get profileAccountActions => 'Account actions';
+
+  @override
+  String get profileSignOutQuestion => 'Are you sure you want to sign out?';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      'Account deletion needs a secure server-side confirmation. Your data has not been changed.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get continueAction => 'Continue';
 
   @override
   String get profileTitleNew => 'New Gardener 🌱';

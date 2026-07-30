@@ -34,18 +34,6 @@
   "premium": "Premium",
   "@premium": { "description": "Premium badge label" },
 
-  "apiSettings": "API Settings (AI)",
-  "@apiSettings": { "description": "API settings section header" },
-
-  "apiKeyHint": "sk-proj-... or sk-...",
-  "@apiKeyHint": { "description": "API key text field hint" },
-
-  "apiKeyDescription": "Enter your own OpenAI API Key to make API requests from your account. The API Key is stored locally on your device in encrypted form.",
-  "@apiKeyDescription": { "description": "API key explanation text" },
-
-  "apiKeySaved": "OpenAI API Key saved successfully.",
-  "@apiKeySaved": { "description": "Snackbar message after saving API key" },
-
   "language": "Language",
   "@language": { "description": "Language setting label" },
 
@@ -66,6 +54,15 @@
 
   "languageChanged": "Language changed successfully.",
   "@languageChanged": { "description": "Snackbar after changing language" },
+  "settingsSubtitle": "Shape Botaniq around your own care rhythm.",
+  "settingsLocalPreference": "Saved on this device",
+  "settingsDarkModeSubtitle": "A calmer palette for low-light moments",
+  "settingsAccountSubtitle": "Identity, access and membership",
+  "settingsEditProfileSubtitle": "Name, location and care preferences",
+  "settingsPasswordSubtitle": "Send a secure reset link to your email",
+  "settingsSubscriptionSubtitle": "Premium plan and billing details",
+  "settingsPasswordResetSent": "Password reset email sent.",
+  "settingsComingSoon": "This space is still growing.",
 
   "homeGoodMorning": "Hello,",
   "@homeGoodMorning": { "description": "Hello text" },
@@ -157,6 +154,20 @@
   "@profileSignOut": { "description": "Sign out item text" },
   "profileDeleteAccount": "Delete Account",
   "@profileDeleteAccount": { "description": "Delete account item text" },
+  "profileSubtitle": "Your garden story, progress and personal space.",
+  "profileGardenPassport": "GARDEN PASSPORT",
+  "profileThisWeek": "This week",
+  "profileQuietWeek": "A quiet week — your next care moment will appear here.",
+  "profileActiveWeek": "Your care rhythm is alive and growing.",
+  "profileAppSettingsSubtitle": "Language, units and AI connection",
+  "profileNotificationPrefsSubtitle": "Choose which care moments reach you",
+  "profileHelpCenterSubtitle": "Answers and quick guidance",
+  "profileTermsSubtitle": "Privacy, terms and policies",
+  "profileAccountActions": "Account actions",
+  "profileSignOutQuestion": "Are you sure you want to sign out?",
+  "profileDeleteAccountWarning": "Account deletion needs a secure server-side confirmation. Your data has not been changed.",
+  "cancel": "Cancel",
+  "continueAction": "Continue",
 
   "profileTitleNew": "New Gardener 🌱",
   "profileTitleSprout": "Sprout Friend 🌿",

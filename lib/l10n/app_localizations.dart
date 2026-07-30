@@ -164,30 +164,6 @@ abstract class AppLocalizations {
   /// **'Premium'**
   String get premium;
 
-  /// API settings section header
-  ///
-  /// In en, this message translates to:
-  /// **'API Settings (AI)'**
-  String get apiSettings;
-
-  /// API key text field hint
-  ///
-  /// In en, this message translates to:
-  /// **'sk-proj-... or sk-...'**
-  String get apiKeyHint;
-
-  /// API key explanation text
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your own OpenAI API Key to make API requests from your account. The API Key is stored locally on your device in encrypted form.'**
-  String get apiKeyDescription;
-
-  /// Snackbar message after saving API key
-  ///
-  /// In en, this message translates to:
-  /// **'OpenAI API Key saved successfully.'**
-  String get apiKeySaved;
-
   /// Language setting label
   ///
   /// In en, this message translates to:
@@ -229,6 +205,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language changed successfully.'**
   String get languageChanged;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape Botaniq around your own care rhythm.'**
+  String get settingsSubtitle;
+
+  /// No description provided for @settingsLocalPreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on this device'**
+  String get settingsLocalPreference;
+
+  /// No description provided for @settingsDarkModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A calmer palette for low-light moments'**
+  String get settingsDarkModeSubtitle;
+
+  /// No description provided for @settingsAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity, access and membership'**
+  String get settingsAccountSubtitle;
+
+  /// No description provided for @settingsEditProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, location and care preferences'**
+  String get settingsEditProfileSubtitle;
+
+  /// No description provided for @settingsPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a secure reset link to your email'**
+  String get settingsPasswordSubtitle;
+
+  /// No description provided for @settingsSubscriptionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium plan and billing details'**
+  String get settingsSubscriptionSubtitle;
+
+  /// No description provided for @settingsPasswordResetSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent.'**
+  String get settingsPasswordResetSent;
+
+  /// No description provided for @settingsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'This space is still growing.'**
+  String get settingsComingSoon;
 
   /// Hello text
   ///
@@ -487,6 +517,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete Account'**
   String get profileDeleteAccount;
+
+  /// No description provided for @profileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your garden story, progress and personal space.'**
+  String get profileSubtitle;
+
+  /// No description provided for @profileGardenPassport.
+  ///
+  /// In en, this message translates to:
+  /// **'GARDEN PASSPORT'**
+  String get profileGardenPassport;
+
+  /// No description provided for @profileThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get profileThisWeek;
+
+  /// No description provided for @profileQuietWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet week — your next care moment will appear here.'**
+  String get profileQuietWeek;
+
+  /// No description provided for @profileActiveWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Your care rhythm is alive and growing.'**
+  String get profileActiveWeek;
+
+  /// No description provided for @profileAppSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Language, units and AI connection'**
+  String get profileAppSettingsSubtitle;
+
+  /// No description provided for @profileNotificationPrefsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which care moments reach you'**
+  String get profileNotificationPrefsSubtitle;
+
+  /// No description provided for @profileHelpCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers and quick guidance'**
+  String get profileHelpCenterSubtitle;
+
+  /// No description provided for @profileTermsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy, terms and policies'**
+  String get profileTermsSubtitle;
+
+  /// No description provided for @profileAccountActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Account actions'**
+  String get profileAccountActions;
+
+  /// No description provided for @profileSignOutQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to sign out?'**
+  String get profileSignOutQuestion;
+
+  /// No description provided for @profileDeleteAccountWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion needs a secure server-side confirmation. Your data has not been changed.'**
+  String get profileDeleteAccountWarning;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @continueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueAction;
 
   /// No description provided for @profileTitleNew.
   ///

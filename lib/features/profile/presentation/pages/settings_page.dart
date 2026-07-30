@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/locale/locale_provider.dart';
+import 'edit_profile_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -14,232 +16,610 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final Color _accentGreen = const Color(0xFF86D5A6);
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _cardBg = Colors.white;
-  final Color _primaryText = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF8B9E93);
+  static const _background = Color(0xFFF5F9F6);
+  static const _surface = Colors.white;
+  static const _ink = Color(0xFF20352A);
+  static const _muted = Color(0xFF7A8F82);
+  static const _green = Color(0xFF0ED761);
+  static const _deepGreen = Color(0xFF174B32);
+  static const _softGreen = Color(0xFFDDF8E8);
+  static const _violet = Color(0xFF6C63D8);
+  static const _warm = Color(0xFFF4A950);
+
+  static const _darkModeKey = 'settings_dark_mode';
+  static const _metricSystemKey = 'settings_metric_system';
 
   bool _isDarkMode = false;
   bool _useMetricSystem = true;
-  late TextEditingController _apiKeyController;
+  bool _preferencesLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _apiKeyController = TextEditingController();
-    _loadApiKey();
+    _loadPreferences();
   }
 
-  Future<void> _loadApiKey() async {
+  Future<void> _loadPreferences() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final preferences = await SharedPreferences.getInstance();
+      // Eski sürümlerde kullanıcıdan alınmış olabilecek anahtarı temizle.
+      await preferences.remove('openai_api_key');
+      if (!mounted) {
+        return;
+      }
       setState(() {
-        _apiKeyController.text = prefs.getString('openai_api_key') ?? '';
+        _isDarkMode = preferences.getBool(_darkModeKey) ?? false;
+        _useMetricSystem = preferences.getBool(_metricSystemKey) ?? true;
+        _preferencesLoaded = true;
       });
-    } catch (e) {
-      debugPrint("API Key yükleme hatası: $e");
+    } catch (error) {
+      debugPrint('Ayarlar yüklenemedi: $error');
+      if (mounted) {
+        setState(() => _preferencesLoaded = true);
+      }
     }
   }
 
-  Future<void> _saveApiKey(String value) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('openai_api_key', value.trim());
-    } catch (e) {
-      debugPrint("API Key kaydetme hatası: $e");
+  Future<void> _setDarkMode(bool value) async {
+    setState(() => _isDarkMode = value);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_darkModeKey, value);
+  }
+
+  Future<void> _setMetricSystem(bool value) async {
+    setState(() => _useMetricSystem = value);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_metricSystemKey, value);
+  }
+
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
+
+  String _currentLanguageLabel(LocaleProvider provider) {
+    switch (provider.currentLanguageCode) {
+      case 'en':
+        return _l10n.english;
+      case 'tr':
+        return _l10n.turkish;
+      default:
+        return _l10n.systemLanguage;
     }
   }
 
   @override
-  void dispose() {
-    _apiKeyController.dispose();
-    super.dispose();
-  }
+  Widget build(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
 
-  // ─── Seçili dil koduna göre kullanıcıya gösterilecek label ───
-  String _currentLanguageLabel(LocaleProvider provider, AppLocalizations l10n) {
-    final code = provider.currentLanguageCode;
-    switch (code) {
-      case 'en':
-        return l10n.english;
-      case 'tr':
-        return l10n.turkish;
-      default:
-        return l10n.systemLanguage;
-    }
-  }
-
-  // ─── Dil seçim BottomSheet ───
-  void _showLanguageBottomSheet(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final provider = context.read<LocaleProvider>();
-    final currentCode = provider.currentLanguageCode;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) {
-        return Container(
-          decoration: BoxDecoration(
-            color: _cardBg,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 24,
-                offset: const Offset(0, -4),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Handle bar
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: _textSecondary.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
+    return Scaffold(
+      backgroundColor: _background,
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 44),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 18),
+                    _buildIntroCard(),
+                    const SizedBox(height: 28),
+                    _buildSectionHeading(
+                      _l10n.preferences,
+                      _l10n.settingsLocalPreference,
                     ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Başlık
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: _accentGreen.withOpacity(0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.translate_rounded,
-                          color: _accentGreen,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Text(
-                        l10n.selectLanguage,
-                        style: GoogleFonts.outfit(
-                          color: _primaryText,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Seçenekler
-                  _buildLanguageOption(
-                    context: context,
-                    title: l10n.systemLanguage,
-                    subtitle: _getSystemLocaleName(context),
-                    icon: Icons.phone_android_rounded,
-                    isSelected: currentCode == null,
-                    onTap: () {
-                      Navigator.pop(context);
-                      provider.setLocale(null);
-                      _showLanguageChangedSnack(context);
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  _buildLanguageOption(
-                    context: context,
-                    title: 'English',
-                    subtitle: 'English',
-                    icon: Icons.language_rounded,
-                    flagEmoji: '🇺🇸',
-                    isSelected: currentCode == 'en',
-                    onTap: () {
-                      Navigator.pop(context);
-                      provider.setLocale('en');
-                      _showLanguageChangedSnack(context);
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  _buildLanguageOption(
-                    context: context,
-                    title: 'Türkçe',
-                    subtitle: 'Turkish',
-                    icon: Icons.language_rounded,
-                    flagEmoji: '🇹🇷',
-                    isSelected: currentCode == 'tr',
-                    onTap: () {
-                      Navigator.pop(context);
-                      provider.setLocale('tr');
-                      _showLanguageChangedSnack(context);
-                    },
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    _buildPreferencesCard(localeProvider),
+                    const SizedBox(height: 26),
+                    _buildSectionHeading(
+                      _l10n.account,
+                      _l10n.settingsAccountSubtitle,
+                    ),
+                    const SizedBox(height: 10),
+                    _buildAccountCard(),
+                    const SizedBox(height: 90),
+                  ],
+                ),
               ),
             ),
           ),
-        );
-      },
-    );
-  }
-
-  /// Cihazın sistem dil adını okunabilir formatta döndürür.
-  String _getSystemLocaleName(BuildContext context) {
-    final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
-    switch (systemLocale.languageCode) {
-      case 'tr':
-        return 'Türkçe';
-      case 'en':
-        return 'English';
-      default:
-        return systemLocale.languageCode.toUpperCase();
-    }
-  }
-
-  void _showLanguageChangedSnack(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (l10n == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.languageChanged),
-        backgroundColor: const Color(0xFF4FA976),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       ),
     );
   }
 
-  // ─── BottomSheet dil seçenek kartı ───
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Material(
+          color: _surface,
+          borderRadius: BorderRadius.circular(17),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(17),
+            onTap: () => Navigator.pop(context),
+            child: const SizedBox(
+              width: 46,
+              height: 46,
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: _ink,
+                size: 18,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Text(
+          _l10n.settings,
+          style: GoogleFonts.outfit(
+            color: _ink,
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIntroCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 20, 18, 18),
+      decoration: BoxDecoration(
+        color: _deepGreen,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: _deepGreen.withValues(alpha: 0.16),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Positioned(
+            right: -10,
+            top: -18,
+            child: Transform.rotate(
+              angle: -0.2,
+              child: Icon(
+                Icons.spa_rounded,
+                size: 110,
+                color: _green.withValues(alpha: 0.14),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.tune_rounded,
+                  color: Colors.white,
+                  size: 21,
+                ),
+              ),
+              const SizedBox(height: 30),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: Text(
+                  _l10n.settingsSubtitle,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    height: 1.18,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _buildStatusDot(
+                    Icons.dark_mode_rounded,
+                    _isDarkMode,
+                    _violet,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildStatusDot(
+                    Icons.straighten_rounded,
+                    _useMetricSystem,
+                    _warm,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildStatusDot(
+                    Icons.translate_rounded,
+                    true,
+                    const Color(0xFF2D8BCB),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusDot(IconData icon, bool active, Color color) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: active
+            ? color.withValues(alpha: 0.22)
+            : Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: active
+              ? color.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Icon(
+        icon,
+        size: 16,
+        color: active ? Colors.white : Colors.white.withValues(alpha: 0.35),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeading(String title, String subtitle) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.outfit(
+                    color: _ink,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(color: _muted, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 7,
+            height: 7,
+            decoration: const BoxDecoration(
+              color: _green,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreferencesCard(LocaleProvider localeProvider) {
+    if (!_preferencesLoaded) {
+      return Container(
+        height: 196,
+        decoration: _cardDecoration(),
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(color: _green),
+      );
+    }
+
+    return _buildGroupCard([
+      _SettingsRow(
+        icon: Icons.dark_mode_outlined,
+        iconColor: _violet,
+        title: _l10n.darkMode,
+        subtitle: _l10n.settingsDarkModeSubtitle,
+        trailing: _GardenSwitch(
+          value: _isDarkMode,
+          activeColor: _violet,
+          onChanged: _setDarkMode,
+        ),
+      ),
+      _SettingsRow(
+        icon: Icons.straighten_rounded,
+        iconColor: _warm,
+        title: _l10n.metricSystem,
+        subtitle: _l10n.metricSystemSubtitle,
+        trailing: _GardenSwitch(
+          value: _useMetricSystem,
+          activeColor: _green,
+          onChanged: _setMetricSystem,
+        ),
+      ),
+      _SettingsRow(
+        icon: Icons.translate_rounded,
+        iconColor: const Color(0xFF2D8BCB),
+        title: _l10n.language,
+        subtitle: _l10n.languageSubtitle,
+        badge: _currentLanguageLabel(localeProvider),
+        onTap: () => _showLanguageBottomSheet(context),
+      ),
+    ]);
+  }
+
+  Widget _buildAccountCard() {
+    return _buildGroupCard([
+      _SettingsRow(
+        icon: Icons.person_outline_rounded,
+        iconColor: _deepGreen,
+        title: _l10n.editProfile,
+        subtitle: _l10n.settingsEditProfileSubtitle,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const EditProfilePage()),
+        ),
+      ),
+      _SettingsRow(
+        icon: Icons.lock_reset_rounded,
+        iconColor: _violet,
+        title: _l10n.changePassword,
+        subtitle: _l10n.settingsPasswordSubtitle,
+        onTap: _showPasswordResetConfirmation,
+      ),
+      _SettingsRow(
+        icon: Icons.diamond_outlined,
+        iconColor: _warm,
+        title: _l10n.subscriptionManagement,
+        subtitle: _l10n.settingsSubscriptionSubtitle,
+        badge: _l10n.premium,
+        onTap: () => _showSnack(_l10n.settingsComingSoon),
+      ),
+    ]);
+  }
+
+  Widget _buildGroupCard(List<_SettingsRow> rows) {
+    return Container(
+      decoration: _cardDecoration(),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var index = 0; index < rows.length; index++) ...[
+            _buildSettingsRow(rows[index]),
+            if (index != rows.length - 1)
+              const Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFEDF2EE),
+                indent: 74,
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsRow(_SettingsRow item) {
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: item.iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(item.icon, color: item.iconColor, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: GoogleFonts.inter(
+                    color: _ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  item.subtitle,
+                  style: GoogleFonts.inter(
+                    color: _muted,
+                    fontSize: 11,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (item.badge != null)
+            Container(
+              constraints: const BoxConstraints(maxWidth: 92),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+              decoration: BoxDecoration(
+                color: _background,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                item.badge!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  color: _deepGreen,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          if (item.trailing != null) item.trailing!,
+          if (item.onTap != null) ...[
+            const SizedBox(width: 6),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: _muted.withValues(alpha: 0.45),
+              size: 14,
+            ),
+          ],
+        ],
+      ),
+    );
+
+    if (item.onTap == null) {
+      return row;
+    }
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(onTap: item.onTap, child: row),
+    );
+  }
+
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: _surface,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: const Color(0xFFEAF0EB)),
+      boxShadow: [
+        BoxShadow(
+          color: _ink.withValues(alpha: 0.045),
+          blurRadius: 22,
+          offset: const Offset(0, 9),
+        ),
+      ],
+    );
+  }
+
+  void _showLanguageBottomSheet(BuildContext context) {
+    final provider = context.read<LocaleProvider>();
+    final currentCode = provider.currentLanguageCode;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => Container(
+        decoration: const BoxDecoration(
+          color: _surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD7E1DA),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: _softGreen,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.translate_rounded,
+                        color: _deepGreen,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 13),
+                    Text(
+                      _l10n.selectLanguage,
+                      style: GoogleFonts.outfit(
+                        color: _ink,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildLanguageOption(
+                  title: _l10n.systemLanguage,
+                  subtitle: _systemLocaleName(),
+                  icon: Icons.phone_android_rounded,
+                  selected: currentCode == null,
+                  onTap: () => _selectLanguage(sheetContext, provider, null),
+                ),
+                const SizedBox(height: 9),
+                _buildLanguageOption(
+                  title: 'English',
+                  subtitle: 'English',
+                  emoji: '🇺🇸',
+                  selected: currentCode == 'en',
+                  onTap: () => _selectLanguage(sheetContext, provider, 'en'),
+                ),
+                const SizedBox(height: 9),
+                _buildLanguageOption(
+                  title: 'Türkçe',
+                  subtitle: 'Turkish',
+                  emoji: '🇹🇷',
+                  selected: currentCode == 'tr',
+                  onTap: () => _selectLanguage(sheetContext, provider, 'tr'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLanguageOption({
-    required BuildContext context,
     required String title,
     required String subtitle,
-    required IconData icon,
-    String? flagEmoji,
-    required bool isSelected,
+    IconData? icon,
+    String? emoji,
+    required bool selected,
     required VoidCallback onTap,
   }) {
     return Material(
-      color: isSelected ? _accentGreen.withOpacity(0.08) : _lightBg,
-      borderRadius: BorderRadius.circular(16),
+      color: selected ? _softGreen : _background,
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
           child: Row(
             children: [
-              if (flagEmoji != null)
-                Text(flagEmoji, style: const TextStyle(fontSize: 24))
-              else
-                Icon(icon, color: _accentGreen, size: 24),
-              const SizedBox(width: 14),
+              SizedBox(
+                width: 30,
+                child: emoji != null
+                    ? Text(emoji, style: const TextStyle(fontSize: 22))
+                    : Icon(icon, color: _deepGreen, size: 22),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,20 +627,15 @@ class _SettingsPageState extends State<SettingsPage> {
                     Text(
                       title,
                       style: GoogleFonts.inter(
-                        color: _primaryText,
-                        fontSize: 16,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w500,
+                        color: _ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (subtitle != title)
                       Text(
                         subtitle,
-                        style: GoogleFonts.inter(
-                          color: _textSecondary,
-                          fontSize: 13,
-                        ),
+                        style: GoogleFonts.inter(color: _muted, fontSize: 11),
                       ),
                   ],
                 ),
@@ -270,17 +645,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
+                  color: selected ? _green : Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected
-                        ? _accentGreen
-                        : _textSecondary.withOpacity(0.3),
-                    width: isSelected ? 2 : 1.5,
+                    color: selected ? _green : const Color(0xFFCAD7CE),
+                    width: 1.5,
                   ),
-                  color: isSelected ? _accentGreen : Colors.transparent,
                 ),
-                child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white, size: 16)
+                child: selected
+                    ? const Icon(Icons.check_rounded, color: _ink, size: 16)
                     : null,
               ),
             ],
@@ -290,419 +663,215 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final localeProvider = context.watch<LocaleProvider>();
+  void _selectLanguage(
+    BuildContext sheetContext,
+    LocaleProvider provider,
+    String? languageCode,
+  ) {
+    Navigator.pop(sheetContext);
+    provider.setLocale(languageCode);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _showSnack(AppLocalizations.of(context)!.languageChanged);
+      }
+    });
+  }
 
-    return Scaffold(
-      backgroundColor: _lightBg,
-      appBar: AppBar(
-        backgroundColor: _lightBg,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color(0xFF2C3E35),
-            size: 20,
-          ),
-          onPressed: () => Navigator.pop(context),
+  String _systemLocaleName() {
+    final code = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    if (code == 'tr') {
+      return 'Türkçe';
+    }
+    if (code == 'en') {
+      return 'English';
+    }
+    return code.toUpperCase();
+  }
+
+  void _showPasswordResetConfirmation() {
+    final email = Supabase.instance.client.auth.currentUser?.email;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        padding: const EdgeInsets.fromLTRB(22, 14, 22, 24),
+        decoration: const BoxDecoration(
+          color: _surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
-        title: Text(
-          l10n.settings,
-          style: GoogleFonts.outfit(
-            color: const Color(0xFF2C3E35),
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ═══════════════════════════════════════
-                // PREFERENCES SECTION
-                // ═══════════════════════════════════════
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD7E1DA),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              const SizedBox(height: 22),
+              Container(
+                width: 58,
+                height: 58,
+                decoration: const BoxDecoration(
+                  color: _softGreen,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.mark_email_read_outlined,
+                  color: _deepGreen,
+                  size: 27,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _l10n.changePassword,
+                style: GoogleFonts.outfit(
+                  color: _ink,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _l10n.settingsPasswordSubtitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: _muted,
+                  fontSize: 13,
+                  height: 1.45,
+                ),
+              ),
+              if (email != null) ...[
+                const SizedBox(height: 8),
                 Text(
-                  l10n.preferences,
+                  email,
                   style: GoogleFonts.inter(
-                    color: _textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: _cardBg,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // ─── Dark Mode ───
-                      _buildSwitchTile(
-                        icon: Icons.dark_mode_outlined,
-                        title: l10n.darkMode,
-                        value: _isDarkMode,
-                        onChanged: (val) {
-                          setState(() {
-                            _isDarkMode = val;
-                          });
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: _lightBg,
-                        indent: 64,
-                        endIndent: 20,
-                      ),
-
-                      // ─── Metric System ───
-                      _buildSwitchTile(
-                        icon: Icons.straighten_rounded,
-                        title: l10n.metricSystem,
-                        subtitle: l10n.metricSystemSubtitle,
-                        value: _useMetricSystem,
-                        onChanged: (val) {
-                          setState(() {
-                            _useMetricSystem = val;
-                          });
-                        },
-                      ),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: _lightBg,
-                        indent: 64,
-                        endIndent: 20,
-                      ),
-
-                      // ─── Language Selector ───
-                      _buildActionTile(
-                        icon: Icons.translate_rounded,
-                        title: l10n.language,
-                        label: _currentLanguageLabel(localeProvider, l10n),
-                        onTap: () => _showLanguageBottomSheet(context),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // ═══════════════════════════════════════
-                // ACCOUNT SECTION
-                // ═══════════════════════════════════════
-                Text(
-                  l10n.account,
-                  style: GoogleFonts.inter(
-                    color: _textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: _cardBg,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildActionTile(
-                        icon: Icons.person_outline_rounded,
-                        title: l10n.editProfile,
-                      ),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: _lightBg,
-                        indent: 64,
-                        endIndent: 20,
-                      ),
-                      _buildActionTile(
-                        icon: Icons.lock_outline_rounded,
-                        title: l10n.changePassword,
-                      ),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: _lightBg,
-                        indent: 64,
-                        endIndent: 20,
-                      ),
-                      _buildActionTile(
-                        icon: Icons.payment_rounded,
-                        title: l10n.subscriptionManagement,
-                        label: l10n.premium,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // ═══════════════════════════════════════
-                // API SETTINGS SECTION
-                // ═══════════════════════════════════════
-                Text(
-                  l10n.apiSettings,
-                  style: GoogleFonts.inter(
-                    color: _textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: _cardBg,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: _lightBg,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.key,
-                              color: _accentGreen,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Text(
-                              'OpenAI API Key',
-                              style: GoogleFonts.inter(
-                                color: _primaryText,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _apiKeyController,
-                        obscureText: true,
-                        style: GoogleFonts.inter(
-                          color: _primaryText,
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: l10n.apiKeyHint,
-                          hintStyle: GoogleFonts.inter(
-                            color: _textSecondary.withOpacity(0.5),
-                          ),
-                          filled: true,
-                          fillColor: _lightBg,
-                          prefixIcon: const Icon(
-                            Icons.vpn_key_outlined,
-                            size: 18,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          suffixIcon: IconButton(
-                            icon: const Icon(
-                              Icons.save_rounded,
-                              color: Colors.green,
-                            ),
-                            onPressed: () {
-                              _saveApiKey(_apiKeyController.text);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.apiKeySaved),
-                                  backgroundColor: Colors.green,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        onChanged: _saveApiKey,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        l10n.apiKeyDescription,
-                        style: GoogleFonts.inter(
-                          color: _textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                    color: _deepGreen,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════
-  // REUSABLE TILE WIDGETS
-  // ═══════════════════════════════════════
-
-  Widget _buildSwitchTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: _lightBg, shape: BoxShape.circle),
-            child: Icon(icon, color: _accentGreen, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    color: _primaryText,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: _ink,
+                        side: const BorderSide(color: Color(0xFFDDE7E0)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(_l10n.cancel),
+                    ),
                   ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      color: _textSecondary,
-                      fontSize: 13,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: email == null
+                          ? null
+                          : () async {
+                              Navigator.pop(sheetContext);
+                              await _sendPasswordReset(email);
+                            },
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        backgroundColor: _deepGreen,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(_l10n.continueAction),
                     ),
                   ),
                 ],
-              ],
-            ),
+              ),
+            ],
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: Colors.white,
-            activeTrackColor: _accentGreen,
-            inactiveThumbColor: Colors.white,
-            inactiveTrackColor: const Color(0xFFE5E5EA),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildActionTile({
-    required IconData icon,
-    required String title,
-    String? label,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap ?? () {},
-      borderRadius: BorderRadius.circular(24),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: _lightBg,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: _accentGreen, size: 20),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: _primaryText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (label != null)
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _accentGreen.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF4FA976),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: _textSecondary.withOpacity(0.5),
-              size: 24,
-            ),
-          ],
+  Future<void> _sendPasswordReset(String email) async {
+    try {
+      await Supabase.instance.client.auth.resetPasswordForEmail(email);
+      if (mounted) {
+        _showSnack(_l10n.settingsPasswordResetSent);
+      }
+    } on AuthException catch (error) {
+      if (mounted) {
+        _showSnack(error.message);
+      }
+    }
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: _deepGreen,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
+      );
+  }
+}
+
+class _SettingsRow {
+  const _SettingsRow({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    this.trailing,
+    this.badge,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final Widget? trailing;
+  final String? badge;
+  final VoidCallback? onTap;
+}
+
+class _GardenSwitch extends StatelessWidget {
+  const _GardenSwitch({
+    required this.value,
+    required this.activeColor,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final Color activeColor;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      toggled: value,
+      child: Switch(
+        value: value,
+        onChanged: onChanged,
+        activeThumbColor: Colors.white,
+        activeTrackColor: activeColor,
+        inactiveThumbColor: Colors.white,
+        inactiveTrackColor: const Color(0xFFDCE5DF),
       ),
     );
   }

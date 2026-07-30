@@ -21,7 +21,8 @@ serve(async (req: Request) => {
             )
         }
 
-        const { image_base64, prompt, mode, messages } = await req.json();
+        const { image_base64, image_mime_type, prompt, mode, messages } = await req.json();
+        const imageMimeType = image_mime_type === 'png' ? 'png' : 'jpeg';
 
         let systemPrompt = '';
         let userContent: any[] = [];
@@ -37,7 +38,7 @@ serve(async (req: Request) => {
                 {
                     type: "image_url",
                     image_url: {
-                        url: `data:image/jpeg;base64,${image_base64}`,
+                        url: `data:image/${imageMimeType};base64,${image_base64}`,
                         detail: "low"
                     }
                 }
@@ -53,7 +54,7 @@ serve(async (req: Request) => {
                 {
                     type: "image_url",
                     image_url: {
-                        url: `data:image/jpeg;base64,${image_base64}`,
+                        url: `data:image/${imageMimeType};base64,${image_base64}`,
                         detail: "low"
                     }
                 }

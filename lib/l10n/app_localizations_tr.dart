@@ -42,19 +42,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get premium => 'Premium';
 
   @override
-  String get apiSettings => 'API Ayarları (Yapay Zeka)';
-
-  @override
-  String get apiKeyHint => 'sk-proj-... veya sk-...';
-
-  @override
-  String get apiKeyDescription =>
-      'Hesabınızdan API istekleri yapabilmek için kendi OpenAI API Key\'inizi girin. API Key şifreli olarak cihazınızda yerel saklanır.';
-
-  @override
-  String get apiKeySaved => 'OpenAI API Key başarıyla kaydedildi.';
-
-  @override
   String get language => 'Dil';
 
   @override
@@ -74,6 +61,38 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get languageChanged => 'Dil başarıyla değiştirildi.';
+
+  @override
+  String get settingsSubtitle =>
+      'Botaniq\'i kendi bakım ritmine göre şekillendir.';
+
+  @override
+  String get settingsLocalPreference => 'Bu cihazda saklanır';
+
+  @override
+  String get settingsDarkModeSubtitle =>
+      'Düşük ışıklı anlar için daha sakin bir palet';
+
+  @override
+  String get settingsAccountSubtitle => 'Kimlik, erişim ve üyelik';
+
+  @override
+  String get settingsEditProfileSubtitle => 'İsim, konum ve bakım tercihleri';
+
+  @override
+  String get settingsPasswordSubtitle =>
+      'E-postana güvenli sıfırlama bağlantısı gönder';
+
+  @override
+  String get settingsSubscriptionSubtitle =>
+      'Premium plan ve ödeme ayrıntıları';
+
+  @override
+  String get settingsPasswordResetSent =>
+      'Şifre sıfırlama e-postası gönderildi.';
+
+  @override
+  String get settingsComingSoon => 'Bu alan hâlâ büyüyor.';
 
   @override
   String get homeGoodMorning => 'Merhaba,';
@@ -205,6 +224,54 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profileDeleteAccount => 'Hesabı Sil';
+
+  @override
+  String get profileSubtitle => 'Bahçe hikâyen, gelişimin ve kişisel alanın.';
+
+  @override
+  String get profileGardenPassport => 'BAHÇE PASAPORTU';
+
+  @override
+  String get profileThisWeek => 'Bu hafta';
+
+  @override
+  String get profileQuietWeek =>
+      'Sakin bir hafta — sıradaki bakım anın burada belirecek.';
+
+  @override
+  String get profileActiveWeek =>
+      'Bakım ritmin canlı ve büyümeye devam ediyor.';
+
+  @override
+  String get profileAppSettingsSubtitle =>
+      'Dil, birimler ve yapay zekâ bağlantısı';
+
+  @override
+  String get profileNotificationPrefsSubtitle =>
+      'Hangi bakım anlarının sana ulaşacağını seç';
+
+  @override
+  String get profileHelpCenterSubtitle => 'Yanıtlar ve hızlı yönlendirmeler';
+
+  @override
+  String get profileTermsSubtitle => 'Gizlilik, koşullar ve politikalar';
+
+  @override
+  String get profileAccountActions => 'Hesap işlemleri';
+
+  @override
+  String get profileSignOutQuestion =>
+      'Hesabından çıkış yapmak istediğine emin misin?';
+
+  @override
+  String get profileDeleteAccountWarning =>
+      'Hesap silme işlemi güvenli bir sunucu onayı gerektirir. Verilerin değiştirilmedi.';
+
+  @override
+  String get cancel => 'İptal';
+
+  @override
+  String get continueAction => 'Devam et';
 
   @override
   String get profileTitleNew => 'Yeni Bahçıvan 🌱';
