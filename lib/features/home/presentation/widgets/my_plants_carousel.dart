@@ -66,7 +66,7 @@ class MyPlantsCarousel extends StatelessWidget {
 
         // Carousel
         SizedBox(
-          height: 230,
+          height: 258,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -183,6 +183,17 @@ class _PlantCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
+                  const SizedBox(height: 7),
+                  Text(
+                    plant.wateringDetails,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF7A8F82),
+                      fontSize: 9,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 10),
                   // Sulama durumu rozeti
                   Container(

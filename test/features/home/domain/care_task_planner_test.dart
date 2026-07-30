@@ -150,6 +150,26 @@ void main() {
       expect(tasks.single.dueDate, DateTime(2026, 7, 29));
     });
 
+    test('keeps an unfinished overdue watering in Today on the next day', () {
+      final tasks = CareTaskPlanner.buildWateringTasks(
+        plants: [
+          {
+            'id': 'still-due',
+            'custom_name': 'Still due',
+            'last_watered_at': '2026-07-24',
+            'watering_interval_days': 7,
+          },
+        ],
+        targetDate: DateTime(2026, 8, 1),
+        now: DateTime(2026, 8, 1, 9),
+      );
+
+      expect(tasks, hasLength(1));
+      expect(tasks.single.plantId, 'still-due');
+      expect(tasks.single.dueDate, DateTime(2026, 7, 31));
+      expect(tasks.single.isOverdueAt(DateTime(2026, 8, 1)), isTrue);
+    });
+
     test('keeps different plant IDs separate when names are the same', () {
       final derivedTasks = CareTaskPlanner.buildWateringTasks(
         plants: [

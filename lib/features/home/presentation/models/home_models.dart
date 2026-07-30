@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/services/watering_schedule_service.dart';
 
 /// Supabase care_tasks tablosundaki bir bakım görevi.
 class CareTask {
@@ -124,6 +125,7 @@ class PlantSummary {
   final String species;
   final String imageUrl;
   final String wateringStatus;
+  final String wateringDetails;
   final Color statusColor;
   final Map<String, dynamic> rawData;
 
@@ -133,60 +135,29 @@ class PlantSummary {
     required this.species,
     required this.imageUrl,
     required this.wateringStatus,
+    required this.wateringDetails,
     required this.statusColor,
     required this.rawData,
   });
 
   factory PlantSummary.fromPlantData(Map<String, dynamic> plant) {
-    final status = _computeWateringStatus(plant);
+    final schedule = WateringScheduleService.fromPlant(plant);
     return PlantSummary(
       id: plant['id']?.toString() ?? '',
       name: plant['custom_name'] ?? plant['name'] ?? '',
       species: plant['species'] ?? '',
       imageUrl: plant['image_url'] ?? '',
-      wateringStatus: status.label,
-      statusColor: status.color,
+      wateringStatus: schedule.statusLabel,
+      wateringDetails:
+          '${schedule.lastWateredLabel} • ${schedule.intervalLabel}',
+      statusColor: _statusColor(schedule),
       rawData: plant,
     );
   }
 
-  static _WateringInfo _computeWateringStatus(Map<String, dynamic> plant) {
-    final last = plant['last_watered_at'];
-    final interval = _positiveInterval(plant['watering_interval_days']);
-    if (last == null) return _WateringInfo('Water today', Colors.redAccent);
-    final lastDate = DateTime.tryParse(last.toString());
-    if (lastDate == null) return _WateringInfo('Water today', Colors.redAccent);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final next = DateTime(
-      lastDate.year,
-      lastDate.month,
-      lastDate.day,
-    ).add(Duration(days: interval));
-    final difference = next.difference(today).inDays;
-
-    if (difference < 0) {
-      return _WateringInfo('Needs water!', Colors.redAccent);
-    } else if (difference == 0) {
-      return _WateringInfo('Water today', Colors.redAccent);
-    } else if (difference == 1) {
-      return _WateringInfo('Water tomorrow', Colors.orangeAccent);
-    } else {
-      return _WateringInfo(
-        'Water in $difference days',
-        const Color(0xFF4FA976),
-      );
-    }
+  static Color _statusColor(PlantWateringSchedule schedule) {
+    if (schedule.isDue) return Colors.redAccent;
+    if (schedule.isDueTomorrow) return Colors.orangeAccent;
+    return const Color(0xFF4FA976);
   }
-
-  static int _positiveInterval(dynamic value) {
-    final parsed = value is num ? value.toInt() : int.tryParse('$value');
-    return parsed != null && parsed > 0 ? parsed : 7;
-  }
-}
-
-class _WateringInfo {
-  final String label;
-  final Color color;
-  const _WateringInfo(this.label, this.color);
 }

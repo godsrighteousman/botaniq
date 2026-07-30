@@ -175,7 +175,7 @@ async function handleImageAnalysis(
 
   const fallbackPrompt = isDiagnosis
     ? 'Şu JSON şemasında cevap ver: {"plant_name":"Ortak ad veya Tanımlanamayan Bitki","species":"Bilimsel tür veya Belirsiz","diagnosis":"Teşhis","prescription":"Tedavi adımları","urgency":"Düşük/Orta/Kritik","care_tips":["İpucu"],"recovery_time":"Tahmini süre"}'
-    : 'Şu JSON şemasında cevap ver: {"name":"Bitki adı","species":"Bilimsel tür","description":"Kısa bilgi","water_needs":"Sulama","light_needs":"Işık"}';
+    : 'Şu JSON şemasında cevap ver: {"name":"Bitki adı","species":"Bilimsel tür","description":"Kısa bilgi","water_needs":"Sulama","watering_interval_days":7,"light_needs":"Işık"}. watering_interval_days türe uygun pozitif tam sayı olmalı.';
 
   const messages: OpenAIMessage[] = [
     { role: "system", content: systemPrompt },

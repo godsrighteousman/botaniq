@@ -1,3 +1,4 @@
+import '../../../core/services/watering_schedule_service.dart';
 import '../presentation/models/home_models.dart';
 
 class CareTaskBuckets {
@@ -16,12 +17,11 @@ class CareTaskPlanner {
   const CareTaskPlanner._();
 
   static DateTime startOfLocalDay(DateTime value) {
-    final local = value.isUtc ? value.toLocal() : value;
-    return DateTime(local.year, local.month, local.day);
+    return WateringScheduleService.startOfLocalDay(value);
   }
 
   static bool isSameLocalDay(DateTime first, DateTime second) {
-    return startOfLocalDay(first) == startOfLocalDay(second);
+    return WateringScheduleService.isSameLocalDay(first, second);
   }
 
   /// Geçmiş ve bugün vadeli görevleri Today'e, ertesi gün vadeli görevleri
@@ -109,21 +109,11 @@ class CareTaskPlanner {
       final plantName = (plant['custom_name'] ?? plant['name'] ?? 'My Plant')
           .toString();
       final imageUrl = plant['image_url']?.toString() ?? '';
-      final lastWateredValue = plant['last_watered_at'];
-      final lastWatered = lastWateredValue == null
-          ? null
-          : DateTime.tryParse(lastWateredValue.toString());
-      final interval = _positiveInterval(plant['watering_interval_days']);
-      final dueDate = lastWatered == null
-          ? today
-          : DateTime(
-              lastWatered.year,
-              lastWatered.month,
-              lastWatered.day,
-            ).add(Duration(days: interval));
+      final schedule = WateringScheduleService.fromPlant(plant, now: now);
+      final dueDate = schedule.dueDate;
 
       final isDue = isToday
-          ? !dueDate.isAfter(today)
+          ? schedule.isDue
           : isSameLocalDay(dueDate, target);
       if (!isDue) continue;
 
@@ -164,11 +154,6 @@ class CareTaskPlanner {
   static String _dedupeKey(CareTask task) {
     final owner = task.plantId.isEmpty ? 'task:${task.id}' : task.plantId;
     return '$owner|${normalizedTaskType(task.taskType)}';
-  }
-
-  static int _positiveInterval(dynamic value) {
-    final parsed = value is num ? value.toInt() : int.tryParse('$value');
-    return parsed != null && parsed > 0 ? parsed : 7;
   }
 
   static List<CareTask> _sortByDueDate(Iterable<CareTask> tasks) {

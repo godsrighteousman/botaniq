@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'search_history_page.dart';
 import 'plant_detail_page.dart';
-import '../../../../core/services/schedule_service.dart';
+import '../../../../core/services/watering_schedule_service.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
 class GardenPage extends StatefulWidget {
@@ -53,16 +53,9 @@ class _GardenPageState extends State<GardenPage> {
 
   List<Map<String, dynamic>> get _filteredPlants {
     if (_selectedFilter == 'needsWater') {
-      return _plants.where((p) {
-        final last = p['last_watered_at'];
-        final interval = (p['watering_interval_days'] as int?) ?? 7;
-        if (last == null) return true;
-        final lastDate = DateTime.tryParse(last);
-        if (lastDate == null) return true;
-        final next = lastDate.add(Duration(days: interval));
-        return next.isBefore(DateTime.now()) ||
-            next.difference(DateTime.now()).inDays <= 1;
-      }).toList();
+      return _plants
+          .where((plant) => WateringScheduleService.fromPlant(plant).isDue)
+          .toList();
     }
     if (_selectedFilter == 'indoor') {
       return _plants
@@ -211,7 +204,7 @@ class _GardenPageState extends State<GardenPage> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 0.75,
+                            childAspectRatio: 0.68,
                           ),
                       physics: const BouncingScrollPhysics(),
                       itemCount: _filteredPlants.length,
@@ -257,30 +250,13 @@ class _GardenPageState extends State<GardenPage> {
     final imageUrl = (plant['image_url'] ?? '') as String;
     final healthStatus = (plant['health_status'] ?? '').toString().toLowerCase();
     final isSick = healthStatus == 'sick' || healthStatus == 'hasta';
-
-    // Sulama durumu hesapla
-    String status = 'Not watered yet';
-    Color statusColor = Colors.orange;
-    final lastWatered = plant['last_watered_at'];
-    final interval = (plant['watering_interval_days'] as int?) ?? 7;
-    if (lastWatered != null) {
-      final lastDate = DateTime.tryParse(lastWatered.toString());
-      if (lastDate != null) {
-        final label = ScheduleService.getNextWateringLabel(lastDate, interval);
-        status = label;
-        if (label.contains('Overdue') || label.contains('today')) {
-          statusColor = Colors.redAccent;
-        } else if (label.contains('tomorrow')) {
-          statusColor = Colors.orange;
-        } else {
-          statusColor = _accentGreen;
-        }
-      }
-    }
-    if (isSick) {
-      status = 'Hasta • Klinik takibinde';
-      statusColor = const Color(0xFFEF7C56);
-    }
+    final watering = WateringScheduleService.fromPlant(plant);
+    final status = watering.statusLabel;
+    final statusColor = watering.isDue
+        ? Colors.redAccent
+        : watering.isDueTomorrow
+        ? Colors.orange
+        : _accentGreen;
 
     return GestureDetector(
       onTap: () async {
@@ -382,6 +358,17 @@ class _GardenPageState extends State<GardenPage> {
                       fontSize: 12,
                     ),
                     maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${watering.lastWateredLabel} • ${watering.intervalLabel}',
+                    style: GoogleFonts.inter(
+                      color: _textSecondary,
+                      fontSize: 9,
+                      height: 1.25,
+                    ),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),

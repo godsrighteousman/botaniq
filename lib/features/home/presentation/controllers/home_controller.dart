@@ -212,8 +212,21 @@ class HomeController {
       debugPrint('Bakım görevleri yüklenemedi: $error');
     }
 
+    // Sulama için tek gerçek kaynak plants.last_watered_at + interval alanlarıdır.
+    // Önceden oluşturulmuş care_tasks sulama kayıtları yeni sulama tarihinden
+    // sonra eskimiş olabileceği için ekranda ayrıca kullanılmaz.
+    final databaseNonWaterTasks = dbTasks
+        .where(
+          (task) =>
+              CareTaskPlanner.normalizedTaskType(task.taskType) != 'water',
+        )
+        .toList();
+
     if (isToday) {
-      final buckets = CareTaskPlanner.bucketTodayAndTomorrow(dbTasks, now: now);
+      final buckets = CareTaskPlanner.bucketTodayAndTomorrow(
+        databaseNonWaterTasks,
+        now: now,
+      );
       final tomorrow = today.add(const Duration(days: 1));
       filteredTasks.value = CareTaskPlanner.mergeByPlantAndType(
         databaseTasks: buckets.today,
@@ -225,7 +238,7 @@ class HomeController {
       );
     } else {
       filteredTasks.value = CareTaskPlanner.mergeByPlantAndType(
-        databaseTasks: dbTasks,
+        databaseTasks: databaseNonWaterTasks,
         derivedTasks: _buildPlantWateringTasks(selected, now),
       );
       tomorrowTasks.value = [];
@@ -284,6 +297,18 @@ class HomeController {
 
           // Sanal görev için bakım geçmişi oluşturmak ikincil bir işlemdir.
           try {
+            await Supabase.instance.client
+                .from('care_tasks')
+                .update({
+                  'is_completed': true,
+                  'completed_at': nowUtc,
+                })
+                .eq('plant_id', task.plantId)
+                .eq('user_id', user.id)
+                .eq('task_type', 'water')
+                .eq('is_completed', false)
+                .lte('due_date', nowUtc);
+
             await Supabase.instance.client.from('care_tasks').insert({
               'plant_id': task.plantId,
               'user_id': user.id,

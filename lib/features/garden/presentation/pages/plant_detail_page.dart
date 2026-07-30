@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'add_plant_wizard.dart';
 import '../../../../core/services/openai_service.dart';
+import '../../../../core/services/watering_schedule_service.dart';
 
 class PlantDetailPage extends StatefulWidget {
   final Map<String, dynamic> plantData;
@@ -135,40 +136,36 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
           .update({'last_watered_at': now.toIso8601String().substring(0, 10)})
           .eq('id', plantId);
 
-      // 2. En yakın bekleyen sulama görevini tamamlandı yap veya yeni kayıt oluştur
-      final pendingTasks = await Supabase.instance.client
+      // 2. Bugüne kadar bekleyen eski sulama görevlerini kapat.
+      await Supabase.instance.client
           .from('care_tasks')
-          .select('id')
+          .update({
+            'is_completed': true,
+            'completed_at': now.toUtc().toIso8601String(),
+          })
           .eq('plant_id', plantId)
           .eq('task_type', 'water')
           .eq('is_completed', false)
-          .order('due_date')
-          .limit(1);
+          .lte('due_date', now.toUtc().toIso8601String());
 
-      if (pendingTasks.isNotEmpty) {
-        await Supabase.instance.client
-            .from('care_tasks')
-            .update({
-              'is_completed': true,
-              'completed_at': now.toIso8601String(),
-            })
-            .eq('id', pendingTasks.first['id']);
-      } else {
-        final userId = Supabase.instance.client.auth.currentUser?.id;
-        if (userId != null) {
-          await Supabase.instance.client.from('care_tasks').insert({
-            'plant_id': plantId,
-            'user_id': userId,
-            'task_type': 'water',
-            'due_date': now.toIso8601String(),
-            'is_completed': true,
-            'completed_at': now.toIso8601String(),
-          });
-        }
+      // 3. Gerçek sulama geçmişini kaydet.
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        await Supabase.instance.client.from('care_tasks').insert({
+          'plant_id': plantId,
+          'user_id': userId,
+          'task_type': 'water',
+          'due_date': now.toUtc().toIso8601String(),
+          'is_completed': true,
+          'completed_at': now.toUtc().toIso8601String(),
+        });
       }
 
       if (mounted) {
         setState(() {
+          _localPlantData['last_watered_at'] = now
+              .toIso8601String()
+              .substring(0, 10);
           _isWatered = true;
           _isLoadingWater = false;
         });
@@ -654,16 +651,20 @@ class _PlantDetailPageState extends State<PlantDetailPage> {
     final String feedProtocol =
         _localPlantData['feeding_protocol'] ??
         'Fertilize monthly during spring/summer with balanced liquid fertilizer.';
-    final String waterInterval =
-        _localPlantData['watering_interval_days'] != null
-        ? '${_localPlantData['watering_interval_days']} günde bir sulanmalı.'
-        : 'Genellikle 7-10 günde bir sulanmalı.';
+    final watering = WateringScheduleService.fromPlant(_localPlantData);
     return Column(
       children: [
         _buildCareTile(
           icon: Icons.repeat_one_rounded,
           title: 'Sulama Sıklığı',
-          subtitle: waterInterval,
+          subtitle: '${watering.intervalLabel} sulanmalı.',
+        ),
+        const SizedBox(height: 12),
+        _buildCareTile(
+          icon: Icons.history_rounded,
+          title: 'Sonraki Sulama',
+          subtitle:
+              '${watering.lastWateredLabel}\n${watering.statusLabel}',
         ),
         const SizedBox(height: 12),
         _buildCareTile(

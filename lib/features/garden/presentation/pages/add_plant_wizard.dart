@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/services/schedule_service.dart';
+import '../../../../core/services/watering_schedule_service.dart';
 
 class AddPlantWizard extends StatefulWidget {
   final Map<String, dynamic> plantData;
@@ -162,13 +163,16 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
       }
 
       // 3. plants tablosuna insert
+      final wateringIntervalDays = WateringScheduleService.positiveInterval(
+        widget.plantData['watering_interval_days'],
+      );
       final Map<String, dynamic> insertPayload = {
         'user_id': user.id,
         'custom_name': widget.plantData['name'] ?? 'My Plant',
         'species': widget.plantData['species'] ?? '',
         'image_url': imageUrl,
         'health_status': 'Healthy',
-        'watering_interval_days': 7,
+        'watering_interval_days': wateringIntervalDays,
       };
 
       if (catalogId != null) {
@@ -210,6 +214,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           'species': widget.plantData['species'] ?? '',
           'image_url': imageUrl,
           'health_status': 'Healthy',
+          'watering_interval_days': wateringIntervalDays,
         };
         if (catalogId != null) {
           basicPayload['catalog_id'] = catalogId;
@@ -230,8 +235,6 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         await ScheduleService.createInitialSchedules(
           plantId: plantId,
           userId: user.id,
-          wateringIntervalDays: 7,
-          lastWateredDate: lastWateredAt,
         );
         debugPrint('Bakım takvimi oluşturuldu.');
       } catch (scheduleErr) {

@@ -20,7 +20,9 @@ class OpenAIService {
               'türünü ve temel bakım ihtiyaçlarını sadece şu JSON formatında '
               'dön: {"name":"Bitki Adı","species":"Bilimsel Türü",'
               '"description":"Kısa bilgi","water_needs":"Sulama ihtiyacı",'
-              '"light_needs":"Işık ihtiyacı"}';
+              '"watering_interval_days":7,"light_needs":"Işık ihtiyacı"}. '
+              'watering_interval_days değerini bu türe uygun pozitif tam sayı '
+              'olarak ver; emin değilsen uydurma kesinlik kullanma.';
 
     try {
       final data = await _invoke({
