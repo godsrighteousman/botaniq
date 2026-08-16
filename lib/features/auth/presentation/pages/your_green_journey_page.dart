@@ -60,19 +60,9 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                  BackButton(
+                    color: Colors.black,
+                    style: IconButton.styleFrom(iconSize: 20),
                   ),
                   _buildProgressBar(),
                   const SizedBox(width: 48), // balance back button
@@ -261,8 +251,9 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
           image: DecorationImage(
             image: NetworkImage(level['image']!),
             fit: BoxFit.cover,
+            matchTextDirection: false,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.3),
+              Colors.black.withValues(alpha: 0.3),
               BlendMode.darken,
             ),
           ),
@@ -274,9 +265,9 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
                   stops: const [0.0, 0.8],
                 ),
               ),
@@ -287,7 +278,7 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: _accentGreen.withOpacity(0.6),
+                    color: _accentGreen.withValues(alpha: 0.6),
                     width: 2,
                   ),
                 ),

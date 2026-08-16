@@ -55,10 +55,18 @@ class TermsPage extends StatelessWidget {
               _buildParagraph(l10n.termsUseBody),
               _buildSectionTitle(l10n.termsPrivacyTitle),
               _buildParagraph(l10n.termsPrivacyBody),
+              _buildSectionTitle(l10n.termsContentTitle),
+              _buildParagraph(l10n.termsContentBody),
+              _buildSectionTitle(l10n.termsRetentionTitle),
+              _buildParagraph(l10n.termsRetentionBody),
               _buildSectionTitle(l10n.termsPlantTitle),
               _buildParagraph(l10n.termsPlantBody),
+              _buildSectionTitle(l10n.termsLiabilityTitle),
+              _buildParagraph(l10n.termsLiabilityBody),
               _buildSectionTitle(l10n.termsPremiumTitle),
               _buildParagraph(l10n.termsPremiumBody),
+              _buildSectionTitle(l10n.termsLawTitle),
+              _buildParagraph(l10n.termsLawBody),
               const SizedBox(height: 32),
               Center(
                 child: Text(

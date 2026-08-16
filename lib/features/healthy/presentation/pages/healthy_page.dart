@@ -124,7 +124,7 @@ class _HealthyPageState extends State<HealthyPage>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+            color: const Color(0xFFCBD5E1).withValues(alpha: 0.04 * 4),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -133,7 +133,7 @@ class _HealthyPageState extends State<HealthyPage>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: _primaryGreen.withOpacity(0.15),
+          color: _primaryGreen.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
         ),
         labelColor: _primaryGreen,

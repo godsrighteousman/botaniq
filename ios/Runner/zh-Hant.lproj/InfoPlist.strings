@@ -1,0 +1,5 @@
+"CFBundleDisplayName" = "Botaniq";
+"NSCameraUsageDescription" = "Botaniq 僅在掃描或拍攝植物時使用相機。";
+"NSPhotoLibraryUsageDescription" = "只有當您選擇個人資料或植物圖像時，Botaniq 才會使用您的照片庫。";
+"NSMicrophoneUsageDescription" = "Botaniq 僅當攝影機串流錄製有聲視訊時才使用麥克風。";
+"NSLocationWhenInUseUsageDescription" = "Botaniq 在應用程式開啟時使用您的位置來提供基於當地天氣的植物護理指導。";

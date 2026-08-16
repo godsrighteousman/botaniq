@@ -115,7 +115,7 @@ class _HomePageState extends State<HomePage> {
           borderRadius: BorderRadius.circular(26),
           boxShadow: [
             BoxShadow(
-              color: _accentGreen.withOpacity(0.4),
+              color: _accentGreen.withValues(alpha: 0.4),
               blurRadius: 18,
               offset: const Offset(0, 6),
             ),
@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 30,
             offset: const Offset(0, -2),
           ),
@@ -195,7 +195,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _currentIndex == index;
-    final color = isSelected ? _accentGreen : _textSecondary.withOpacity(0.6);
+    final color = isSelected ? _accentGreen : _textSecondary.withValues(alpha: 0.6);
 
     return GestureDetector(
       onTap: () async {
@@ -218,7 +218,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? _accentGreen.withOpacity(0.1)
+                    ? _accentGreen.withValues(alpha: 0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),

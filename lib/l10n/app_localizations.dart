@@ -5,8 +5,20 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_nl.dart';
+import 'app_localizations_pl.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
+import 'app_localizations_th.dart';
 import 'app_localizations_tr.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -94,8 +106,25 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('de'),
     Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('id'),
+    Locale('it'),
+    Locale('nl'),
+    Locale('nl', 'BE'),
+    Locale('nl', 'NL'),
+    Locale('pl'),
+    Locale('pt'),
+    Locale('pt', 'BR'),
+    Locale('ru'),
+    Locale('th'),
     Locale('tr'),
+    Locale('zh'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
   ];
 
   /// Application title
@@ -206,6 +235,78 @@ abstract class AppLocalizations {
   /// **'Language changed successfully.'**
   String get languageChanged;
 
+  /// No description provided for @languageSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search languages'**
+  String get languageSearchHint;
+
+  /// No description provided for @languageRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get languageRecommended;
+
+  /// No description provided for @languageWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language'**
+  String get languageWelcomeTitle;
+
+  /// No description provided for @languageWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the language you want to use in Botaniq. You can change it anytime.'**
+  String get languageWelcomeSubtitle;
+
+  /// No description provided for @languageUseSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Use device language'**
+  String get languageUseSystem;
+
+  /// No description provided for @preferenceSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Use system setting'**
+  String get preferenceSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeSelectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose appearance'**
+  String get themeSelectionTitle;
+
+  /// No description provided for @measurementMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get measurementMetric;
+
+  /// No description provided for @measurementImperial.
+  ///
+  /// In en, this message translates to:
+  /// **'Imperial'**
+  String get measurementImperial;
+
+  /// No description provided for @measurementSelectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose measurement system'**
+  String get measurementSelectionTitle;
+
   /// No description provided for @settingsSubtitle.
   ///
   /// In en, this message translates to:
@@ -260,11 +361,245 @@ abstract class AppLocalizations {
   /// **'This space is still growing.'**
   String get settingsComingSoon;
 
+  /// No description provided for @subscriptionPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Membership'**
+  String get subscriptionPageTitle;
+
+  /// No description provided for @subscriptionHeroEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'BOTANIQ PREMIUM'**
+  String get subscriptionHeroEyebrow;
+
+  /// No description provided for @subscriptionHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Smarter care for every plant'**
+  String get subscriptionHeroTitle;
+
+  /// No description provided for @subscriptionHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock every premium care tool and grow your green space with confidence.'**
+  String get subscriptionHeroSubtitle;
+
+  /// No description provided for @subscriptionBenefitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Premium'**
+  String get subscriptionBenefitsTitle;
+
+  /// No description provided for @subscriptionBenefitIdentification.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited plant identification and health analysis'**
+  String get subscriptionBenefitIdentification;
+
+  /// No description provided for @subscriptionBenefitCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalized care plans and reminders'**
+  String get subscriptionBenefitCare;
+
+  /// No description provided for @subscriptionBenefitInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert content and advanced care insights'**
+  String get subscriptionBenefitInsights;
+
+  /// No description provided for @subscriptionMonthlyPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get subscriptionMonthlyPlan;
+
+  /// No description provided for @subscriptionAnnualPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get subscriptionAnnualPlan;
+
+  /// No description provided for @subscriptionPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / month'**
+  String subscriptionPerMonth(String price);
+
+  /// No description provided for @subscriptionPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / year'**
+  String subscriptionPerYear(String price);
+
+  /// No description provided for @subscriptionBestValue.
+  ///
+  /// In en, this message translates to:
+  /// **'BEST VALUE'**
+  String get subscriptionBestValue;
+
+  /// No description provided for @subscriptionSavePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {percent}%'**
+  String subscriptionSavePercent(int percent);
+
+  /// No description provided for @subscriptionContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Premium'**
+  String get subscriptionContinue;
+
+  /// No description provided for @subscriptionRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get subscriptionRestorePurchases;
+
+  /// No description provided for @subscriptionRestoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring...'**
+  String get subscriptionRestoring;
+
+  /// No description provided for @subscriptionManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Subscription'**
+  String get subscriptionManage;
+
+  /// No description provided for @subscriptionActiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Premium membership is active'**
+  String get subscriptionActiveTitle;
+
+  /// No description provided for @subscriptionActiveSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You have access to every premium feature.'**
+  String get subscriptionActiveSubtitle;
+
+  /// No description provided for @subscriptionRenewsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews on {date}'**
+  String subscriptionRenewsOn(String date);
+
+  /// No description provided for @subscriptionExpiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Active until {date}'**
+  String subscriptionExpiresOn(String date);
+
+  /// No description provided for @subscriptionAutoRenewDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is charged to your Apple or Google account. The subscription renews automatically unless canceled at least 24 hours before the end of the current period. You can manage or cancel it anytime in your store account settings.'**
+  String get subscriptionAutoRenewDisclosure;
+
+  /// No description provided for @subscriptionTermsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get subscriptionTermsLink;
+
+  /// No description provided for @subscriptionPrivacyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get subscriptionPrivacyLink;
+
+  /// No description provided for @subscriptionPurchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Premium membership is now active.'**
+  String get subscriptionPurchaseSuccess;
+
+  /// No description provided for @subscriptionRestoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Premium membership was restored.'**
+  String get subscriptionRestoreSuccess;
+
+  /// No description provided for @subscriptionNothingToRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'No active membership was found for this store account.'**
+  String get subscriptionNothingToRestore;
+
+  /// No description provided for @subscriptionPaymentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment is awaiting store approval. Your membership will activate automatically once approved.'**
+  String get subscriptionPaymentPending;
+
+  /// No description provided for @subscriptionErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'The operation could not be completed. Please try again.'**
+  String get subscriptionErrorGeneric;
+
+  /// No description provided for @subscriptionErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your internet connection and try again.'**
+  String get subscriptionErrorNetwork;
+
+  /// No description provided for @subscriptionErrorNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This device or store account is not allowed to make purchases.'**
+  String get subscriptionErrorNotAllowed;
+
+  /// No description provided for @subscriptionErrorStore.
+  ///
+  /// In en, this message translates to:
+  /// **'The store could not be reached. Please try again shortly.'**
+  String get subscriptionErrorStore;
+
+  /// No description provided for @subscriptionMissingConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'The RevenueCat key is missing from this build.'**
+  String get subscriptionMissingConfiguration;
+
+  /// No description provided for @subscriptionUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions are available only in the iOS and Android apps.'**
+  String get subscriptionUnsupported;
+
+  /// No description provided for @subscriptionProductsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly and annual products could not be loaded. Check the RevenueCat offering configuration.'**
+  String get subscriptionProductsUnavailable;
+
+  /// No description provided for @subscriptionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get subscriptionRetry;
+
+  /// No description provided for @subscriptionFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get subscriptionFree;
+
   /// Hello text
   ///
   /// In en, this message translates to:
   /// **'Hello,'**
   String get homeGoodMorning;
+
+  /// Personalized greeting shown in the home header
+  ///
+  /// In en, this message translates to:
+  /// **'{greeting}, {name} 👋'**
+  String homePersonalGreeting(String greeting, String name);
 
   /// Empty garden text
   ///
@@ -587,7 +922,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileDeleteAccountWarning.
   ///
   /// In en, this message translates to:
-  /// **'Account deletion needs a secure server-side confirmation. Your data has not been changed.'**
+  /// **'Your account will be deleted: your personal information (name, email, profile photo) is permanently removed and your account is anonymized. This cannot be undone.'**
   String get profileDeleteAccountWarning;
 
   /// No description provided for @cancel.
@@ -935,7 +1270,7 @@ abstract class AppLocalizations {
   /// No description provided for @wateringOverdue.
   ///
   /// In en, this message translates to:
-  /// **'{days} days overdue'**
+  /// **'{days, plural, =0{Water today} one{1 day overdue} other{{days} days overdue}}'**
   String wateringOverdue(int days);
 
   /// No description provided for @wateringDueToday.
@@ -953,7 +1288,7 @@ abstract class AppLocalizations {
   /// No description provided for @wateringDueInDays.
   ///
   /// In en, this message translates to:
-  /// **'Water in {days} days'**
+  /// **'{days, plural, =0{Water today} one{Water in 1 day} other{Water in {days} days}}'**
   String wateringDueInDays(int days);
 
   /// No description provided for @plantUnknown.
@@ -1400,6 +1735,24 @@ abstract class AppLocalizations {
   /// **'Early intervention and a natural Neem Oil treatment.'**
   String get healthAphidSubtitle;
 
+  /// No description provided for @healthDiscoverLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover content could not be loaded right now. Pull down to try again.'**
+  String get healthDiscoverLoadError;
+
+  /// No description provided for @healthDiscoverEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no published discover content yet.'**
+  String get healthDiscoverEmpty;
+
+  /// No description provided for @healthDiscoverRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get healthDiscoverRetry;
+
   /// No description provided for @lightMeterTitle.
   ///
   /// In en, this message translates to:
@@ -1417,6 +1770,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Point the phone’s front camera toward\nthe plant’s position and light source.'**
   String get lightMeterInstruction;
+
+  /// No description provided for @lightMeterCameraEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate lux calculated from camera data'**
+  String get lightMeterCameraEstimate;
+
+  /// No description provided for @lightMeterStabilizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Stabilizing measurement'**
+  String get lightMeterStabilizing;
+
+  /// No description provided for @lightMeterStabilizingRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the phone steady for a few seconds while sudden exposure changes are filtered.'**
+  String get lightMeterStabilizingRecommendation;
+
+  /// No description provided for @lightMeterUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement unavailable'**
+  String get lightMeterUnavailable;
+
+  /// No description provided for @lightMeterUnavailableRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable camera permission and try this screen again.'**
+  String get lightMeterUnavailableRecommendation;
 
   /// No description provided for @lightLow.
   ///
@@ -3017,7 +3400,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsUpdated.
   ///
   /// In en, this message translates to:
-  /// **'Last updated: July 2026'**
+  /// **'Last updated: August 2026'**
   String get termsUpdated;
 
   /// No description provided for @termsUseTitle.
@@ -3029,44 +3412,92 @@ abstract class AppLocalizations {
   /// No description provided for @termsUseBody.
   ///
   /// In en, this message translates to:
-  /// **'By accessing or using Botaniq, you agree to these Terms of Use and applicable laws. If you do not agree, you may not use the service.'**
+  /// **'By accessing or using Botaniq, you agree to these Terms and all applicable laws. We may add, change, suspend, or discontinue any part of the service at any time, with or without notice, and may suspend or terminate accounts that violate these Terms or misuse the service. Continued use after changes take effect means you accept the updated Terms.'**
   String get termsUseBody;
 
   /// No description provided for @termsPrivacyTitle.
   ///
   /// In en, this message translates to:
-  /// **'2. User Privacy'**
+  /// **'2. Data We Collect and How We Use It'**
   String get termsPrivacyTitle;
 
   /// No description provided for @termsPrivacyBody.
   ///
   /// In en, this message translates to:
-  /// **'We collect only the personal data needed to provide tailored plant-care schedules. We do not sell your personal data to third parties.'**
+  /// **'To operate and improve Botaniq we collect and process the data you provide or generate while using it: account and profile details (name, email, sign-in identifiers), photos and images you capture or upload (including plant and camera photos), location, device and diagnostic information, notification tokens, usage and interaction data, and content you enter (notes, chat messages, support requests). This data is processed by us and by trusted service providers acting on our behalf — including cloud hosting/database, AI image- and text-analysis, authentication (Google/Apple sign-in), push notifications, and subscription/payment processing — solely to run, secure, support, and improve the service, personalize your experience, train and evaluate the app\'s plant-recognition and care features, prevent fraud and abuse, and meet legal obligations. By using Botaniq you consent to this processing and, where applicable law requires it, to the transfer of your data outside your country to those providers\' infrastructure. We do not sell your personal data.'**
   String get termsPrivacyBody;
+
+  /// No description provided for @termsContentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Your Content and License to Us'**
+  String get termsContentTitle;
+
+  /// No description provided for @termsContentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You keep ownership of the photos, notes, and other content you submit. By submitting content you grant us a worldwide, royalty-free, non-exclusive, sublicensable license to host, store, reproduce, analyze, and use it to operate, secure, and improve Botaniq (including improving plant identification, diagnosis, and other AI-assisted features), for as long as we hold the content. You are responsible for having the right to share whatever you upload.'**
+  String get termsContentBody;
+
+  /// No description provided for @termsRetentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Account Deletion and Data Retention'**
+  String get termsRetentionTitle;
+
+  /// No description provided for @termsRetentionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting account deletion in the app anonymizes your account: your name, email, and profile photo are permanently removed and cannot be reattached to your identity, while your sign-in and remaining app data stay linked to the same anonymized account so you can keep using it if you sign in again. We may retain data — including in anonymized, aggregated, or backup form — for as long as needed for security, fraud-prevention, legal, accounting, or dispute-resolution purposes, even after a deletion request, to the fullest extent permitted by applicable law.'**
+  String get termsRetentionBody;
 
   /// No description provided for @termsPlantTitle.
   ///
   /// In en, this message translates to:
-  /// **'3. Plant Data'**
+  /// **'5. Plant Data and AI Results'**
   String get termsPlantTitle;
 
   /// No description provided for @termsPlantBody.
   ///
   /// In en, this message translates to:
-  /// **'Plant-care, identification, and diagnosis information is provided for informational purposes. AI results may not always be correct, so observe your plant and seek an expert for serious risks.'**
+  /// **'Plant-care, identification, and diagnosis information — including AI-generated results — is provided for general informational purposes only and is not professional horticultural, agricultural, veterinary, or medical advice. AI results may be inaccurate or incomplete. You are solely responsible for decisions about your plants, pets, and household based on this information; observe your plant and consult a qualified expert for anything serious.'**
   String get termsPlantBody;
+
+  /// No description provided for @termsLiabilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'6. Disclaimers, Liability, and Indemnity'**
+  String get termsLiabilityTitle;
+
+  /// No description provided for @termsLiabilityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Botaniq is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we and our service providers are not liable for any indirect, incidental, special, or consequential damages, or for any loss of data, plants, or property arising from your use of the service, and our total liability for any claim is limited to the amount you paid us, if any, in the twelve months before the claim. You agree to indemnify and hold us harmless from claims arising from your use of the service, your content, or your violation of these Terms or applicable law.'**
+  String get termsLiabilityBody;
 
   /// No description provided for @termsPremiumTitle.
   ///
   /// In en, this message translates to:
-  /// **'4. Premium Subscriptions'**
+  /// **'7. Premium Subscriptions'**
   String get termsPremiumTitle;
 
   /// No description provided for @termsPremiumBody.
   ///
   /// In en, this message translates to:
-  /// **'Premium subscriptions are billed according to your app-store agreement. You may cancel at any time; partial billing periods are not refundable.'**
+  /// **'Your monthly or annual Premium subscription is charged to your Apple or Google account after purchase confirmation. It renews automatically unless canceled at least 24 hours before the current period ends. You can manage or cancel it in your store account settings. Refund requests are handled under the applicable store policy.'**
   String get termsPremiumBody;
+
+  /// No description provided for @termsLawTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'8. Governing Law and Changes'**
+  String get termsLawTitle;
+
+  /// No description provided for @termsLawBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These Terms are governed by the laws of the jurisdiction in which we operate, without regard to conflict-of-law principles, and any dispute will be resolved under that jurisdiction\'s applicable procedures to the fullest extent permitted by law. We may update these Terms and our data practices at any time by posting the revised version in the app.'**
+  String get termsLawBody;
 
   /// No description provided for @termsClosing.
   ///
@@ -3121,20 +3552,94 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'tr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'ar',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'id',
+    'it',
+    'nl',
+    'pl',
+    'pt',
+    'ru',
+    'th',
+    'tr',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+script codes are specified.
+  switch (locale.languageCode) {
+    case 'zh':
+      {
+        switch (locale.scriptCode) {
+          case 'Hans':
+            return AppLocalizationsZhHans();
+          case 'Hant':
+            return AppLocalizationsZhHant();
+        }
+        break;
+      }
+  }
+
+  // Lookup logic when language+country codes are specified.
+  switch (locale.languageCode) {
+    case 'nl':
+      {
+        switch (locale.countryCode) {
+          case 'BE':
+            return AppLocalizationsNlBe();
+          case 'NL':
+            return AppLocalizationsNlNl();
+        }
+        break;
+      }
+    case 'pt':
+      {
+        switch (locale.countryCode) {
+          case 'BR':
+            return AppLocalizationsPtBr();
+        }
+        break;
+      }
+  }
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'id':
+      return AppLocalizationsId();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'nl':
+      return AppLocalizationsNl();
+    case 'pl':
+      return AppLocalizationsPl();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'th':
+      return AppLocalizationsTh();
     case 'tr':
       return AppLocalizationsTr();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

@@ -231,8 +231,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       appBar: AppBar(
         backgroundColor: _lightBg,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: _primaryText),
+        leading: BackButton(
+          color: _primaryText,
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -262,17 +262,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: _accentGreen.withOpacity(0.2),
+                          color: _accentGreen.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                           image: _selectedAvatarBytes != null
                               ? DecorationImage(
                                   image: MemoryImage(_selectedAvatarBytes!),
                                   fit: BoxFit.cover,
+                                  matchTextDirection: false,
                                 )
                               : _avatarUrl.isNotEmpty
                               ? DecorationImage(
                                   image: NetworkImage(_avatarUrl),
                                   fit: BoxFit.cover,
+                                  matchTextDirection: false,
                                 )
                               : null,
                         ),
@@ -285,9 +287,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               )
                             : null,
                       ),
-                      Positioned(
+                      PositionedDirectional(
                         bottom: 0,
-                        right: 0,
+                        end: 0,
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: const BoxDecoration(
@@ -349,6 +351,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 l10n.profileEmailHint,
                 Icons.email_outlined,
                 readOnly: true,
+                forceLtr: true,
               ),
 
               const SizedBox(height: 20),
@@ -433,7 +436,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildInputLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 4),
+      padding: const EdgeInsetsDirectional.only(bottom: 8, start: 4),
       child: Text(
         text,
         style: GoogleFonts.inter(
@@ -451,6 +454,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     IconData icon, {
     bool readOnly = false,
     TextInputType? keyboardType,
+    bool forceLtr = false,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -462,6 +466,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
+        textDirection: forceLtr ? TextDirection.ltr : null,
         style: GoogleFonts.inter(
           color: readOnly ? _textSecondary : _primaryText,
           fontSize: 15,

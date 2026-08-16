@@ -21,7 +21,9 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
     final now = DateTime.now();
-    final greeting = _getGreeting(AppLocalizations.of(context)!, now);
+    final l10n = AppLocalizations.of(context)!;
+    final greeting = _getGreeting(l10n, now);
+    final displayName = userName.isEmpty ? l10n.appTitle : userName;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -31,7 +33,7 @@ class HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '$greeting, $userName 👋',
+                l10n.homePersonalGreeting(greeting, displayName),
                 style: GoogleFonts.outfit(
                   color: const Color(0xFF1B3A2A),
                   fontSize: 26,
@@ -90,12 +92,12 @@ class _ActionButton extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.85),
+          color: Colors.white.withValues(alpha: 0.85),
           shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF0ED761).withOpacity(0.12)),
+          border: Border.all(color: const Color(0xFF0ED761).withValues(alpha: 0.12)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0ED761).withOpacity(0.06),
+              color: const Color(0xFF0ED761).withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),

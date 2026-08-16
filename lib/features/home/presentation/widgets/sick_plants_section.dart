@@ -57,7 +57,7 @@ class SickPlantsSection extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEF7C56).withOpacity(0.1),
+                  color: const Color(0xFFEF7C56).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -83,7 +83,7 @@ class SickPlantsSection extends StatelessWidget {
             clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(horizontal: 4),
             itemCount: sickPlants.length,
-            separatorBuilder: (_, _a) => const SizedBox(width: 14),
+            separatorBuilder: (_, a) => const SizedBox(width: 14),
             itemBuilder: (context, index) {
               final plant = sickPlants[index];
               return _SickPlantCard(
@@ -147,12 +147,12 @@ class _SickPlantCard extends StatelessWidget {
         width: 250,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.85),
+          color: Colors.white.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: urgencyColor.withOpacity(0.2), width: 1),
+          border: Border.all(color: urgencyColor.withValues(alpha: 0.2), width: 1),
           boxShadow: [
             BoxShadow(
-              color: urgencyColor.withOpacity(0.05),
+              color: urgencyColor.withValues(alpha: 0.05),
               blurRadius: 16,
               offset: const Offset(0, 6),
             ),
@@ -174,7 +174,7 @@ class _SickPlantCard extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: urgencyColor.withOpacity(0.1),
+                        color: urgencyColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Center(
@@ -217,7 +217,7 @@ class _SickPlantCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: urgencyColor.withOpacity(0.12),
+                          color: urgencyColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(

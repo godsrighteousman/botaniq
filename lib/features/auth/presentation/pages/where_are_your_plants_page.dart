@@ -68,19 +68,9 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                  BackButton(
+                    color: Colors.black,
+                    style: IconButton.styleFrom(iconSize: 20),
                   ),
                   // (Skip is already at the bottom)
                   const SizedBox(width: 20),
@@ -248,8 +238,9 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
           image: DecorationImage(
             image: NetworkImage(location['image']),
             fit: BoxFit.cover,
+            matchTextDirection: false,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.15),
+              Colors.black.withValues(alpha: 0.15),
               BlendMode.darken,
             ),
           ),
@@ -257,9 +248,9 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
         child: Stack(
           children: [
             // Internal glassmorphism container at the bottom
-            Positioned(
-              left: 12,
-              right: 12,
+            PositionedDirectional(
+              start: 12,
+              end: 12,
               bottom: 12,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
@@ -273,13 +264,13 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.white.withOpacity(0.85)
-                          : Colors.white.withOpacity(0.7),
+                          ? Colors.white.withValues(alpha: 0.85)
+                          : Colors.white.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
                         color: isSelected
-                            ? _accentGreen.withOpacity(0.8)
-                            : Colors.black.withOpacity(0.1),
+                            ? _accentGreen.withValues(alpha: 0.8)
+                            : Colors.black.withValues(alpha: 0.1),
                         width: 1,
                       ),
                     ),
@@ -289,7 +280,7 @@ class _WhereAreYourPlantsPageState extends State<WhereAreYourPlantsPage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(

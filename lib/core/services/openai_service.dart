@@ -1,6 +1,17 @@
-import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../locale/locale_provider.dart';
+
+class BotaniqAiException implements Exception {
+  const BotaniqAiException(this.code, {this.status});
+
+  final String code;
+  final int? status;
+
+  @override
+  String toString() => 'BotaniqAiException($code)';
+}
 
 class OpenAIService {
   static const _functionName = 'analyze-plant';
@@ -10,23 +21,16 @@ class OpenAIService {
     String base64Image, {
     bool isMushroom = false,
   }) async {
-    final languageCode = await _languageCode();
-    final language = languageCode == 'en' ? 'English' : 'Türkçe';
+    final localeTag = await _localeTag();
     final prompt = isMushroom
-        ? 'Bu fotoğraftaki mantarın tam adını, '
-              'türünü ve temel özelliklerini/yenilebilirliğini kısa bir özet '
-              'olarak sadece şu JSON formatında dön: '
-              '{"name":"Mantar Adı","species":"Bilimsel Türü",'
-              '"description":"Kısa bilgi","water_needs":"Yetişme ortamı",'
-              '"light_needs":"Toksisite/Yenilebilirlik"}. Yanıt dili: $language.'
-        : 'Bu fotoğraftaki bitkinin tam adını, '
-              'türünü ve temel bakım ihtiyaçlarını sadece şu JSON formatında '
-              'dön: {"name":"Bitki Adı","species":"Bilimsel Türü",'
-              '"description":"Kısa bilgi","water_needs":"Sulama ihtiyacı",'
-              '"watering_interval_days":7,"light_needs":"Işık ihtiyacı"}. '
-              'watering_interval_days değerini bu türe uygun pozitif tam sayı '
-              'olarak ver; emin değilsen uydurma kesinlik kullanma. '
-              'Yanıt dili: $language.';
+        ? 'Identify the mushroom only from visible evidence. Return JSON with '
+              'name, species, description, water_needs, and light_needs. '
+              'Clearly express uncertainty and never imply that visual '
+              'identification proves edibility.'
+        : 'Identify the plant only from visible evidence. Return JSON with '
+              'name, species, description, water_needs, '
+              'watering_interval_days, and light_needs. Use a positive integer '
+              'for watering_interval_days and clearly express uncertainty.';
 
     try {
       final data = await _invoke({
@@ -34,7 +38,7 @@ class OpenAIService {
         'image_base64': base64Image,
         'image_mime_type': _imageMimeType(base64Image),
         'prompt': prompt,
-        'language_code': languageCode,
+        'language_code': localeTag,
       });
       return _resultMap(data);
     } catch (error) {
@@ -48,7 +52,7 @@ class OpenAIService {
     String base64Image, {
     String? plantName,
   }) async {
-    final languageCode = await _languageCode();
+    final localeTag = await _localeTag();
     final normalizedName = plantName?.trim() ?? '';
     final plantContext =
         normalizedName.isNotEmpty &&
@@ -57,26 +61,23 @@ class OpenAIService {
               'bilinmeyen bitki',
               'unknown plant',
             ].contains(normalizedName.toLowerCase())
-        ? "Bu '$plantName' bitkisinin fotoğrafını analiz et."
-        : 'Bu fotoğraftaki hasta bitkiyi analiz et.';
+        ? "The user labels this plant '$plantName'. Preserve that user-entered "
+              'label; do not translate or replace it.'
+        : 'Assess the plant shown in the photo.';
 
     try {
       final data = await _invoke({
         'mode': 'diagnose',
         'image_base64': base64Image,
         'image_mime_type': _imageMimeType(base64Image),
-        'language_code': languageCode,
+        'language_code': localeTag,
         'prompt':
-            '$plantContext Önce bitkiyi mümkün olan en doğru ortak adı ve '
-            'bilimsel türüyle tanımla; emin değilsen bunu açıkça belirt ve '
-            'uydurma isim kullanma. Hastalığını teşhis et ve tedavi önerisini '
-            'sadece şu JSON formatında dön: '
-            '{"plant_name":"Bitkinin ortak adı veya Tanımlanamayan Bitki",'
-            '"species":"Bilimsel tür veya Belirsiz",'
-            '"diagnosis":"Teşhis ve sorun",'
-            '"prescription":"Tedavi adımları","urgency":"Düşük/Orta/Kritik",'
-            '"care_tips":["İpucu 1","İpucu 2"],'
-            '"recovery_time":"Tahmini iyileşme süresi"}',
+            '$plantContext Identify the plant when the visual evidence is '
+            'sufficient. Give a cautious, non-definitive health assessment and '
+            'safe care steps. Return JSON with nullable plant_name and species, '
+            'localized diagnosis, prescription, care_tips and recovery_time, '
+            'plus urgency_code as exactly low, medium, or critical. State when '
+            'professional or local expert assessment is appropriate.',
       });
       return _resultMap(data);
     } catch (error) {
@@ -89,7 +90,7 @@ class OpenAIService {
   static Future<String?> chatWithDoctor(
     List<Map<String, dynamic>> messages,
   ) async {
-    final languageCode = await _languageCode();
+    final localeTag = await _localeTag();
     final sanitizedMessages = messages.map((message) {
       final sanitized = Map<String, dynamic>.from(message);
       if (sanitized['image_url'] == 'photo') {
@@ -102,7 +103,7 @@ class OpenAIService {
       final data = await _invoke({
         'mode': 'chat',
         'messages': sanitizedMessages,
-        'language_code': languageCode,
+        'language_code': localeTag,
       });
       return data['reply']?.toString();
     } catch (error) {
@@ -115,18 +116,17 @@ class OpenAIService {
   static Future<Map<String, dynamic>?> getPlantDetailsByName(
     String plantName,
   ) async {
-    final languageCode = await _languageCode();
-    final language = languageCode == 'en' ? 'English' : 'Türkçe';
+    final localeTag = await _localeTag();
     try {
       final data = await _invoke({
         'mode': 'details',
-        'language_code': languageCode,
+        'language_code': localeTag,
         'prompt':
-            "Bana '$plantName' adlı bitki/çiçek hakkında detaylı bilgi ver. "
-            'Şunları içersin: description, ideal_climate, humidity, '
+            "Provide evidence-based care information for '$plantName'. "
+            'Return only a JSON object containing description, ideal_climate, humidity, '
             'temperature_range, watering_protocol, feeding_protocol, '
             'soil_protocol, care_protocol, toxicity, difficulty, environment, '
-            'sunlight. Yanıtı yalnızca JSON objesi olarak $language dilinde dön.',
+            'and sunlight. Express uncertainty instead of inventing details.',
       });
       return _resultMap(data);
     } catch (error) {
@@ -138,9 +138,8 @@ class OpenAIService {
   static Future<Map<String, dynamic>?> localizePlantDetails(
     Map<String, dynamic> details,
   ) async {
-    final languageCode = await _languageCode();
+    final localeTag = await _localeTag();
     const translatableKeys = {
-      'name',
       'description',
       'difficulty',
       'toxicity',
@@ -168,7 +167,7 @@ class OpenAIService {
     try {
       final data = await _invoke({
         'mode': 'localize',
-        'language_code': languageCode,
+        'language_code': localeTag,
         'content': content,
       });
       return _resultMap(data);
@@ -187,37 +186,35 @@ class OpenAIService {
       );
     } on FunctionException catch (error) {
       if (error.status == 404) {
-        throw Exception(
-          'Botaniq AI servisi Supabase projesinde bulunamadı. '
-          'analyze-plant Edge Function deploy edilmelidir.',
-        );
+        throw BotaniqAiException('function_not_deployed', status: error.status);
       }
       if (error.status == 401 || error.status == 403) {
-        throw Exception(
-          'Botaniq AI oturumu doğrulanamadı. Lütfen tekrar giriş yapın.',
+        throw BotaniqAiException(
+          'authentication_required',
+          status: error.status,
         );
       }
 
       final details = error.details;
-      final message = details is Map
-          ? details['error']?.toString()
-          : details?.toString();
-      throw Exception(
-        message != null && message.isNotEmpty
-            ? message
-            : 'Botaniq AI servisine ulaşılamadı (${error.status}).',
+      final code = details is Map ? details['error_code']?.toString() : null;
+      throw BotaniqAiException(
+        code?.isNotEmpty == true ? code! : 'service_unavailable',
+        status: error.status,
       );
     }
 
     final rawData = response.data;
     if (rawData is! Map) {
-      throw const FormatException('Botaniq AI geçersiz yanıt döndürdü.');
+      throw const BotaniqAiException('invalid_response');
     }
 
     final data = Map<String, dynamic>.from(rawData);
-    final error = data['error'];
-    if (response.status < 200 || response.status >= 300 || error != null) {
-      throw Exception(error?.toString() ?? 'Botaniq AI isteği başarısız oldu.');
+    final errorCode = data['error_code'] ?? data['error'];
+    if (response.status < 200 || response.status >= 300 || errorCode != null) {
+      throw BotaniqAiException(
+        errorCode?.toString() ?? 'request_failed',
+        status: response.status,
+      );
     }
     return data;
   }
@@ -225,7 +222,9 @@ class OpenAIService {
   static Map<String, dynamic>? _resultMap(Map<String, dynamic> data) {
     final result = data['result'];
     if (result is Map) {
-      return Map<String, dynamic>.from(result);
+      return Map<String, dynamic>.from(result)
+        ..['_response_locale'] = data['response_locale']
+        ..['_fallback_used'] = data['fallback_used'] == true;
     }
     return null;
   }
@@ -234,14 +233,5 @@ class OpenAIService {
     return base64Image.startsWith('iVBORw') ? 'png' : 'jpeg';
   }
 
-  static Future<String> _languageCode() async {
-    try {
-      final preferences = await SharedPreferences.getInstance();
-      final saved = preferences.getString('app_locale');
-      if (saved == 'en' || saved == 'tr') return saved!;
-    } catch (_) {}
-    final platformCode =
-        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-    return platformCode == 'en' ? 'en' : 'tr';
-  }
+  static Future<String> _localeTag() => LocaleProvider.preferredLocaleTag();
 }

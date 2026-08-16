@@ -1,0 +1,5 @@
+"CFBundleDisplayName" = "Botaniq";
+"NSCameraUsageDescription" = "Botaniq utilizza la fotocamera solo quando scansioni o fotografi una pianta.";
+"NSPhotoLibraryUsageDescription" = "Botaniq utilizza la tua libreria di foto solo quando scegli un profilo o un'immagine di pianta.";
+"NSMicrophoneUsageDescription" = "Botaniq utilizza il microfono solo quando un flusso di telecamera registra video con audio.";
+"NSLocationWhenInUseUsageDescription" = "Botaniq utilizza la tua posizione mentre l'app è aperta per fornire indicazioni sulla cura delle piante basate sul meteo locale.";

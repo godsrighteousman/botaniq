@@ -22,15 +22,15 @@ class EmptyGardenCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF0ED761).withOpacity(0.10),
-            const Color(0xFF0ABF55).withOpacity(0.04),
-            const Color(0xFFE8F5EE).withOpacity(0.3),
+            const Color(0xFF0ED761).withValues(alpha: 0.10),
+            const Color(0xFF0ABF55).withValues(alpha: 0.04),
+            const Color(0xFFE8F5EE).withValues(alpha: 0.3),
           ],
           stops: const [0.0, 0.5, 1.0],
         ),
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
-          color: const Color(0xFF0ED761).withOpacity(0.15),
+          color: const Color(0xFF0ED761).withValues(alpha: 0.15),
         ),
       ),
       child: Column(
@@ -45,7 +45,7 @@ class EmptyGardenCard extends StatelessWidget {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF0ED761).withOpacity(0.06),
+                  color: const Color(0xFF0ED761).withValues(alpha: 0.06),
                 ),
               ),
               // İç ikon container
@@ -57,7 +57,7 @@ class EmptyGardenCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0ED761).withOpacity(0.15),
+                      color: const Color(0xFF0ED761).withValues(alpha: 0.15),
                       blurRadius: 30,
                       offset: const Offset(0, 8),
                     ),
@@ -153,7 +153,7 @@ class EmptyGardenCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0ED761).withOpacity(0.3),
+                      color: const Color(0xFF0ED761).withValues(alpha: 0.3),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),

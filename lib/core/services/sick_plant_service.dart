@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../locale/locale_provider.dart';
 import 'care_notification_service.dart';
 
 /// Keeps the clinic record and the matching garden plant in sync.
@@ -8,22 +9,33 @@ class SickPlantService {
 
   static SupabaseClient get _client => Supabase.instance.client;
 
-  static String normalizeUrgency(Object? value) {
+  static String urgencyCode(Object? value) {
     final urgency = (value ?? '').toString().trim().toLowerCase();
-    if (urgency.contains('krit') ||
+    if (urgency == 'critical' ||
+        urgency.contains('krit') ||
         urgency.contains('crit') ||
         urgency.contains('yüksek') ||
         urgency.contains('yuksek') ||
         urgency.contains('high') ||
         urgency.contains('urgent')) {
-      return 'Kritik';
+      return 'critical';
     }
-    if (urgency.contains('düş') ||
+    if (urgency == 'low' ||
+        urgency.contains('düş') ||
         urgency.contains('dus') ||
         urgency.contains('low')) {
-      return 'Düşük';
+      return 'low';
     }
-    return 'Orta';
+    return 'medium';
+  }
+
+  /// Legacy display value retained for older database constraints/clients.
+  static String normalizeUrgency(Object? value) {
+    return switch (urgencyCode(value)) {
+      'critical' => 'Kritik',
+      'low' => 'Düşük',
+      _ => 'Orta',
+    };
   }
 
   static Future<Map<String, dynamic>> saveDiagnosis({
@@ -43,18 +55,22 @@ class SickPlantService {
     final normalizedPlantId = _nonEmpty(plantId);
     final normalizedImageUrl = _nonEmpty(imageUrl);
     final normalizedSpecies = _nonEmpty(species);
+    final localeTag = await LocaleProvider.preferredLocaleTag();
+    final stableUrgency = urgencyCode(urgency);
     final payload = <String, dynamic>{
       'user_id': user.id,
       'name': plantName.trim().isEmpty ? 'Bilinmeyen Bitki' : plantName.trim(),
       'diagnosis': diagnosis,
       'prescription': prescription,
-      'urgency': normalizeUrgency(urgency),
+      'urgency': normalizeUrgency(stableUrgency),
+      'urgency_code': stableUrgency,
+      'diagnosis_locale': localeTag,
       'recovery_progress': 0.0,
       'status': 'active',
       'updated_at': DateTime.now().toUtc().toIso8601String(),
-      if (normalizedSpecies != null) 'species': normalizedSpecies,
-      if (normalizedPlantId != null) 'plant_id': normalizedPlantId,
-      if (normalizedImageUrl != null) 'image_url': normalizedImageUrl,
+      'species': ?normalizedSpecies,
+      'plant_id': ?normalizedPlantId,
+      'image_url': ?normalizedImageUrl,
     };
 
     Map<String, dynamic>? existing;
@@ -70,20 +86,32 @@ class SickPlantService {
           .maybeSingle();
     }
 
-    final Map<String, dynamic> record;
-    if (existing != null) {
-      record = await _client
-          .from('sick_plants')
-          .update(payload)
-          .eq('id', existing['id'])
-          .select()
-          .single();
-    } else {
-      record = await _client
-          .from('sick_plants')
-          .insert(payload)
-          .select()
-          .single();
+    Future<Map<String, dynamic>> persist(Map<String, dynamic> values) async {
+      if (existing != null) {
+        return _client
+            .from('sick_plants')
+            .update(values)
+            .eq('id', existing['id'])
+            .select()
+            .single();
+      }
+      return _client.from('sick_plants').insert(values).select().single();
+    }
+
+    Map<String, dynamic> record;
+    try {
+      record = await persist(payload);
+    } on PostgrestException catch (error) {
+      final schemaIsOlder =
+          error.code == '42703' ||
+          error.code == 'PGRST204' ||
+          error.message.contains('urgency_code') ||
+          error.message.contains('diagnosis_locale');
+      if (!schemaIsOlder) rethrow;
+      final legacyPayload = Map<String, dynamic>.from(payload)
+        ..remove('urgency_code')
+        ..remove('diagnosis_locale');
+      record = await persist(legacyPayload);
     }
 
     if (normalizedPlantId != null) {

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
+import '../../../../core/services/auth_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../localization/presentation/widgets/language_picker_sheet.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'where_are_your_plants_page.dart'; // The next step after signup onboarding
 import 'login_page.dart';
@@ -40,14 +42,25 @@ class _SignUpPageState extends State<SignUpPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.white,
-            size: 20,
-          ),
+        leading: BackButton(
+          color: Colors.white,
+          style: IconButton.styleFrom(iconSize: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            tooltip: l10n.selectLanguage,
+            onPressed: () async {
+              await showAndApplyLanguagePicker(context);
+            },
+            icon: const Icon(
+              Icons.translate_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -104,6 +117,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintText: l10n.emailAddress,
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                forceLtr: true,
               ),
               const SizedBox(height: 20),
 
@@ -114,6 +128,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 icon: Icons.lock_outline,
                 obscureText: _obscurePassword,
                 isPassword: true,
+                forceLtr: true,
                 onToggleVisibility: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;
@@ -130,7 +145,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     : () async {
                         FocusScope.of(context).unfocus();
                         final email = _emailController.text.trim();
-                        final password = _passwordController.text.trim();
+                        final password = _passwordController.text;
                         final firstName = _firstNameController.text.trim();
                         final lastName = _lastNameController.text.trim();
 
@@ -175,20 +190,12 @@ class _SignUpPageState extends State<SignUpPage> {
                               );
                             }
                           }
-                        } on AuthException catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text(e.message)));
-                          }
-                        } catch (e) {
+                        } catch (error) {
+                          debugPrint('Email sign-up failed: $error');
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  l10n.authError(e.toString()),
-                                  maxLines: 3,
-                                ),
+                                content: Text(l10n.subscriptionErrorGeneric),
                               ),
                             );
                           }
@@ -203,13 +210,13 @@ class _SignUpPageState extends State<SignUpPage> {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppColors.primary, Color(0xFF4FA976)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                     ),
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
+                        color: AppColors.primary.withValues(alpha: 0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -245,7 +252,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 children: [
                   Expanded(
                     child: Divider(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       thickness: 1,
                     ),
                   ),
@@ -261,7 +268,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   Expanded(
                     child: Divider(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       thickness: 1,
                     ),
                   ),
@@ -277,7 +284,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       icon: Icons.g_mobiledata,
                       iconSize: 32,
                       label: 'Google',
-                      onTap: () {},
+                      onTap: _isLoading ? () {} : _nativeGoogleSignIn,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -285,7 +292,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: _buildSocialLoginButton(
                       icon: Icons.apple,
                       label: 'Apple',
-                      onTap: () {},
+                      onTap: _isLoading ? () {} : _nativeAppleSignIn,
                     ),
                   ),
                 ],
@@ -337,6 +344,39 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  Future<void> _nativeGoogleSignIn() {
+    return _runSocialSignIn(AuthService.instance.signInWithGoogle);
+  }
+
+  Future<void> _nativeAppleSignIn() {
+    return _runSocialSignIn(AuthService.instance.signInWithApple);
+  }
+
+  Future<void> _runSocialSignIn(Future<bool> Function() signIn) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _isLoading = true);
+    try {
+      final didSignIn = await signIn();
+      if (didSignIn && mounted) {
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).popUntil((route) => route.isFirst);
+      }
+    } catch (error) {
+      debugPrint('Social sign-up failed: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.subscriptionErrorGeneric)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -345,17 +385,19 @@ class _SignUpPageState extends State<SignUpPage> {
     bool isPassword = false,
     VoidCallback? onToggleVisibility,
     TextInputType keyboardType = TextInputType.text,
+    bool forceLtr = false,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
+        textDirection: forceLtr ? TextDirection.ltr : null,
         style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           hintText: hintText,
@@ -401,9 +443,9 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Container(
         height: 60,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

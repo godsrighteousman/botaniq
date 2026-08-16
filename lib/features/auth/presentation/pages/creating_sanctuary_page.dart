@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
-import '../../../home/presentation/pages/home_page.dart';
-
 class CreatingSanctuaryPage extends StatefulWidget {
   const CreatingSanctuaryPage({super.key});
 
@@ -54,21 +52,15 @@ class _CreatingSanctuaryPageState extends State<CreatingSanctuaryPage>
       }
     });
 
-    // Navigate to Home after 4.5 seconds
+    // Reveal the authenticated root after the setup animation. The auth gate
+    // already owns HomePage, so adding another HomePage route would break
+    // logout by leaving an authenticated-looking page above the gate.
     Timer(const Duration(milliseconds: 4500), () {
       if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const HomePage(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-            transitionDuration: const Duration(milliseconds: 800),
-          ),
-          (route) => false, // Remove all previous routes
-        );
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).popUntil((route) => route.isFirst);
       }
     });
   }
@@ -107,10 +99,10 @@ class _CreatingSanctuaryPageState extends State<CreatingSanctuaryPage>
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _accentGreen.withOpacity(0.1),
+                        color: _accentGreen.withValues(alpha: 0.1),
                         boxShadow: [
                           BoxShadow(
-                            color: _accentGreen.withOpacity(0.3),
+                            color: _accentGreen.withValues(alpha: 0.3),
                             blurRadius: 40,
                             spreadRadius: 10,
                           ),

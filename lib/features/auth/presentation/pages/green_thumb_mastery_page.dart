@@ -68,19 +68,9 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                  BackButton(
+                    color: Colors.black,
+                    style: IconButton.styleFrom(iconSize: 20),
                   ),
                   _buildProgressBar(),
                 ],
@@ -215,7 +205,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
           Container(
             width: i == 2 ? 16 : 6,
             height: 6,
-            margin: const EdgeInsets.only(left: 4),
+            margin: const EdgeInsetsDirectional.only(start: 4),
             decoration: BoxDecoration(
               color: i == 2 ? _accentGreen : const Color(0xFFE5E5EA),
               borderRadius: BorderRadius.circular(3),
@@ -245,7 +235,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? _cardBg.withOpacity(0.8) : _cardBg,
+          color: isSelected ? _cardBg.withValues(alpha: 0.8) : _cardBg,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected ? _accentGreen : Colors.transparent,
@@ -263,6 +253,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
+                matchTextDirection: false,
               ),
             ),
             const SizedBox(width: 16),
@@ -288,7 +279,7 @@ class _GreenThumbMasteryPageState extends State<GreenThumbMasteryPage> {
                       ),
                       if (isSelected)
                         Container(
-                          margin: const EdgeInsets.only(left: 8),
+                          margin: const EdgeInsetsDirectional.only(start: 8),
                           width: 20,
                           height: 20,
                           decoration: BoxDecoration(

@@ -1,6 +1,7 @@
 import 'package:botaniq/core/locale/locale_provider.dart';
 import 'package:botaniq/features/profile/presentation/pages/profile_page.dart';
 import 'package:botaniq/features/profile/presentation/pages/settings_page.dart';
+import 'package:botaniq/features/subscription/presentation/controllers/subscription_controller.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -47,28 +48,36 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('settings persist local switches without a user API field', (
+  testWidgets('settings persist theme and measurement preferences', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({
       'openai_api_key': 'legacy-user-key',
+      'settings_timezone': 'UTC',
     });
+    final localeProvider = LocaleProvider();
+    await localeProvider.loadSavedLocale();
     await _setPhoneViewport(tester);
-    await tester.pumpWidget(_testApp(const SettingsPage()));
+    await tester.pumpWidget(
+      _testApp(const SettingsPage(), localeProvider: localeProvider),
+    );
     await tester.pumpAndSettle();
 
-    final switches = find.byType(Switch);
-    expect(switches, findsNWidgets(2));
-    await tester.tap(switches.first);
+    await tester.tap(find.text('Karanlık Mod'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Koyu'));
     await tester.pumpAndSettle();
 
     var preferences = await SharedPreferences.getInstance();
-    expect(preferences.getBool('settings_dark_mode'), isTrue);
-    await tester.tap(switches.at(1));
+    expect(preferences.getString('settings_theme_mode'), 'dark');
+
+    await tester.tap(find.text('Metrik Sistem'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('İngiliz birimleri'));
     await tester.pumpAndSettle();
 
     preferences = await SharedPreferences.getInstance();
-    expect(preferences.getBool('settings_metric_system'), isFalse);
+    expect(preferences.getString('settings_measurement_system'), 'imperial');
     expect(preferences.getString('openai_api_key'), isNull);
     expect(find.text('OpenAI API Key'), findsNothing);
     expect(find.byType(TextField), findsNothing);
@@ -76,9 +85,14 @@ void main() {
   });
 }
 
-Widget _testApp(Widget home) {
-  return ChangeNotifierProvider(
-    create: (_) => LocaleProvider(),
+Widget _testApp(Widget home, {LocaleProvider? localeProvider}) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider(
+        create: (_) => localeProvider ?? LocaleProvider(),
+      ),
+      ChangeNotifierProvider(create: (_) => SubscriptionController()),
+    ],
     child: MaterialApp(
       locale: const Locale('tr'),
       supportedLocales: AppLocalizations.supportedLocales,

@@ -103,7 +103,7 @@ class _HospitalTabState extends State<HospitalTab> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEF7C56).withOpacity(0.1),
+                        color: const Color(0xFFEF7C56).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -143,7 +143,7 @@ class _HospitalTabState extends State<HospitalTab> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: _primaryGreen.withOpacity(0.1),
+                color: _primaryGreen.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -223,7 +223,7 @@ class _HospitalTabState extends State<HospitalTab> {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFCBD5E1).withOpacity(0.16),
+              color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -241,7 +241,7 @@ class _HospitalTabState extends State<HospitalTab> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: urgencyColor.withOpacity(0.1),
+                      color: urgencyColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Icon(
@@ -276,7 +276,7 @@ class _HospitalTabState extends State<HospitalTab> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: urgencyColor.withOpacity(0.1),
+                                color: urgencyColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -406,7 +406,7 @@ class _HospitalTabState extends State<HospitalTab> {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: _primaryGreen,
                             side: BorderSide(
-                              color: _primaryGreen.withOpacity(0.3),
+                              color: _primaryGreen.withValues(alpha: 0.3),
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),

@@ -94,7 +94,6 @@ class HomeController {
         user.userMetadata?['username'] ??
         '';
     String resolvedName = rawName.toString().trim();
-    if (resolvedName.isEmpty) resolvedName = 'Bahçıvan';
     userName.value = resolvedName;
 
     plants.value = _rawPlants.map(PlantSummary.fromPlantData).toList();

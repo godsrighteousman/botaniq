@@ -68,19 +68,9 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
             children: [
               const SizedBox(height: 16),
               // Back Button
-              IconButton(
-                onPressed: () {
-                  if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  }
-                },
-                icon: const Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.black,
-                  size: 20,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              BackButton(
+                color: Colors.black,
+                style: IconButton.styleFrom(iconSize: 20),
               ),
               const SizedBox(height: 32),
 
@@ -266,14 +256,14 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected
-                ? itemColor.withOpacity(0.5)
+                ? itemColor.withValues(alpha: 0.5)
                 : const Color(0xFFE5E5EA),
             width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: itemColor.withOpacity(0.15),
+                    color: itemColor.withValues(alpha: 0.15),
                     blurRadius: 20,
                     spreadRadius: 2,
                     offset: const Offset(0, 0),
@@ -291,7 +281,7 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: itemColor.withOpacity(0.15),
+                    color: itemColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(goal['icon'], color: itemColor, size: 32),
@@ -309,9 +299,9 @@ class _WhatCanWeHelpPageState extends State<WhatCanWeHelpPage> {
                 ),
               ],
             ),
-            Positioned(
+            PositionedDirectional(
               top: 0,
-              right: 0,
+              end: 0,
               child: Container(
                 width: 20,
                 height: 20,

@@ -1,4 +1,4 @@
-package com.example.botaniq
+package com.farukertas.botaniq
 
 import io.flutter.embedding.android.FlutterActivity
 

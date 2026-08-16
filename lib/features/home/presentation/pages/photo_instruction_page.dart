@@ -110,7 +110,7 @@ class PhotoInstructionPage extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+                    color: const Color(0xFFCBD5E1).withValues(alpha: 0.04 * 4),
                     blurRadius: 16,
                     offset: const Offset(0, 2),
                   ),
@@ -146,7 +146,7 @@ class PhotoInstructionPage extends StatelessWidget {
           width: 160,
           height: 160,
           decoration: BoxDecoration(
-            color: _accentGreen.withOpacity(0.1),
+            color: _accentGreen.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
         ),
@@ -155,7 +155,7 @@ class PhotoInstructionPage extends StatelessWidget {
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: _accentGreen.withOpacity(0.2),
+            color: _accentGreen.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
         ),
@@ -168,7 +168,7 @@ class PhotoInstructionPage extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: _accentGreen.withOpacity(0.3),
+                color: _accentGreen.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -214,8 +214,8 @@ class PhotoInstructionPage extends StatelessWidget {
         ? const Color(0xFF4FA976)
         : const Color(0xFFE96565);
     final statusBgColor = isCorrect
-        ? const Color(0xFF4FA976).withOpacity(0.15)
-        : const Color(0xFFE96565).withOpacity(0.15);
+        ? const Color(0xFF4FA976).withValues(alpha: 0.15)
+        : const Color(0xFFE96565).withValues(alpha: 0.15);
     final iconData = isCorrect ? Icons.check_rounded : Icons.close_rounded;
 
     return Container(
@@ -224,7 +224,7 @@ class PhotoInstructionPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+            color: const Color(0xFFCBD5E1).withValues(alpha: 0.04 * 4),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -293,7 +293,7 @@ class PhotoInstructionPage extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
             ),
-            shadowColor: _primaryText.withOpacity(0.4),
+            shadowColor: _primaryText.withValues(alpha: 0.4),
           ),
           child: Text(
             AppLocalizations.of(context)!.photoOpenCamera,

@@ -1,9 +1,10 @@
 import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../onboarding/presentation/pages/onboarding_page.dart';
+import '../../../../core/services/auth_service.dart';
 import 'edit_profile_page.dart';
 import 'notifications_settings_page.dart';
 import 'settings_page.dart';
@@ -28,7 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
   static const _danger = Color(0xFFE96565);
 
   int _selectedTabIndex = 0;
-  String _fullName = 'Bahçıvan';
+  String _fullName = '';
   String _nickname = '';
   String _email = '';
   String _avatarUrl = '';
@@ -175,14 +176,11 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     }
 
-    final localeCode = Localizations.localeOf(context).languageCode;
-    const turkishDays = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-    const englishDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final localeName = Localizations.localeOf(context).toString();
     final labels = <String>[];
     for (var index = 0; index < 7; index++) {
       final day = startOfPeriod.add(Duration(days: index));
-      final source = localeCode == 'tr' ? turkishDays : englishDays;
-      labels.add(source[day.weekday - 1]);
+      labels.add(DateFormat.E(localeName).format(day));
     }
 
     var maxCount = 1;
@@ -521,7 +519,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _fullName,
+                            _fullName.isEmpty
+                                ? _l10n.profileTitleNew
+                                : _fullName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.outfit(
@@ -1225,14 +1225,22 @@ class _ProfilePageState extends State<ProfilePage> {
           FilledButton(
             onPressed: () async {
               Navigator.pop(dialogContext);
-              await Supabase.instance.client.auth.signOut();
-              if (!context.mounted) {
-                return;
+              try {
+                await AuthService.instance.signOut();
+                if (!context.mounted) {
+                  return;
+                }
+                Navigator.of(
+                  context,
+                  rootNavigator: true,
+                ).popUntil((route) => route.isFirst);
+              } catch (error) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(_l10n.authError(error.toString()))),
+                  );
+                }
               }
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const OnboardingPage()),
-                (_) => false,
-              );
             },
             style: FilledButton.styleFrom(
               backgroundColor: _deepGreen,
@@ -1275,9 +1283,51 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
-          FilledButton.tonal(
+          TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(_l10n.continueAction),
+            child: Text(_l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              // Aynen _showSignOutDialog'daki gibi: önce onay diyaloğunu
+              // kapat, sonra tek bir popUntil ile köke dön. Aradaki ayrı bir
+              // yükleniyor diyaloğu ekstra bir Navigator.pop gerektirir ve
+              // bu, ekranın "kilitlenmiş" görünmesine yol açan sıra
+              // hatalarına çok açıktır — bu yüzden kullanmıyoruz.
+              Navigator.pop(dialogContext);
+              try {
+                // Sunucu tarafında (service-role) kullanıcının kendi
+                // JWT'sinden doğruladığı kimliği anonimleştirir:
+                // isim/e-posta/avatar temizlenir, Auth hesabı ve mevcut
+                // verileri (bitkiler vb.) olduğu gibi kalır — aynı kişi
+                // tekrar giriş yaptığında aynı hesabı anonim olarak bulur.
+                final response = await Supabase.instance.client.functions
+                    .invoke('delete-account');
+                if (response.status != 200) {
+                  throw Exception(response.data?['message'] ?? response.status);
+                }
+
+                await AuthService.instance.signOut();
+                if (!context.mounted) {
+                  return;
+                }
+                Navigator.of(
+                  context,
+                  rootNavigator: true,
+                ).popUntil((route) => route.isFirst);
+              } catch (error) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(_l10n.authError(error.toString()))),
+                  );
+                }
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: _danger,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(_l10n.profileDeleteAccount),
           ),
         ],
       ),

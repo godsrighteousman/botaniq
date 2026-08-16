@@ -136,7 +136,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+                        color: const Color(0xFFCBD5E1).withValues(alpha: 0.04 * 4),
                         blurRadius: 20,
                         offset: const Offset(0, 4),
                       ),
@@ -193,7 +193,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+                        color: const Color(0xFFCBD5E1).withValues(alpha: 0.04 * 4),
                         blurRadius: 20,
                         offset: const Offset(0, 4),
                       ),
@@ -258,7 +258,7 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: iconColor, size: 20),

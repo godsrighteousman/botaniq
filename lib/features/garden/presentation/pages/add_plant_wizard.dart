@@ -85,13 +85,17 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
     setState(() => _isSaving = true);
 
     try {
-      // 0. Kullanıcı kaydını garantile (önce users, sonra profiles tablosunu dene)
+      // 0. Kullanıcı kaydını garantile (önce users, sonra profiles tablosunu dene).
+      // ignoreDuplicates: satır zaten varsa DOKUNMA. Aksi halde her bitki
+      // eklemede Auth'taki gerçek e-posta/isim buraya geri yazılır ve
+      // hesap anonimleştirmesi (bkz. delete-account edge function) bir
+      // sonraki bitki eklemede sessizce geri alınmış olur.
       try {
         await Supabase.instance.client.from('users').upsert({
           'id': user.id,
           'email': user.email ?? '',
           'full_name': user.userMetadata?['full_name'] ?? '',
-        }, onConflict: 'id');
+        }, onConflict: 'id', ignoreDuplicates: true);
         debugPrint('Users upsert başarılı.');
       } catch (usersErr) {
         debugPrint('Users upsert hatası, profiles deneniyor: $usersErr');
@@ -101,7 +105,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
             'email': user.email ?? '',
             'full_name': user.userMetadata?['full_name'] ?? '',
             'updated_at': DateTime.now().toIso8601String(),
-          }, onConflict: 'id');
+          }, onConflict: 'id', ignoreDuplicates: true);
         } catch (profileErr) {
           debugPrint('Profiles upsert de atlandı: $profileErr');
         }
@@ -146,12 +150,16 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
       try {
         final String searchName = widget.plantData['name'] ?? '';
         final String searchSpecies = widget.plantData['species'] ?? '';
-        if (searchName.isNotEmpty || searchSpecies.isNotEmpty) {
-          // İsim veya türe göre eşleşen bir katalog kaydı bulalım
+        // plant_catalog tablosunda yalnızca `species` sütunu var; `name` yok.
+        // Tür bilgisi boşsa görünen isme göre eşleştirmeyi dene.
+        final String searchTerm = searchSpecies.isNotEmpty
+            ? searchSpecies
+            : searchName;
+        if (searchTerm.isNotEmpty) {
           final catRes = await Supabase.instance.client
               .from('plant_catalog')
               .select('id')
-              .or('species.ilike.%$searchSpecies%,name.ilike.%$searchName%')
+              .ilike('species', '%$searchTerm%')
               .limit(1)
               .maybeSingle();
 
@@ -181,14 +189,18 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
       }
 
       if (_selectedRoom != null) insertPayload['room'] = _selectedRoom;
-      if (_selectedLight != null)
+      if (_selectedLight != null) {
         insertPayload['light_condition'] = _selectedLight;
-      if (_selectedDistance != null)
+      }
+      if (_selectedDistance != null) {
         insertPayload['distance_to_window'] = _selectedDistance;
-      if (_selectedHours != null)
+      }
+      if (_selectedHours != null) {
         insertPayload['sunlight_hours'] = _selectedHours;
-      if (_selectedRepotted != null)
+      }
+      if (_selectedRepotted != null) {
         insertPayload['last_repotted'] = _selectedRepotted;
+      }
       if (_selectedPot != null) insertPayload['pot_type'] = _selectedPot;
       if (lastWateredAt != null) {
         insertPayload['last_watered_at'] = lastWateredAt
@@ -279,19 +291,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
     } catch (e, stack) {
       debugPrint('Kaydetme hatası: $e\n$stack');
       if (mounted) {
-        String errorMsg = e.toString();
-        if (errorMsg.contains('42703') || errorMsg.contains('column')) {
-          errorMsg =
-              '⚠️ Veritabanı şeması eksik. Supabase\'de fix_plants_schema.sql dosyasını çalıştırın.';
-        } else if (errorMsg.contains('23503') ||
-            errorMsg.contains('foreign key')) {
-          errorMsg =
-              '⚠️ Kullanıcı profili bulunamadı. Çıkış yapıp tekrar giriş deneyin.';
-        } else if (errorMsg.contains('42501') ||
-            errorMsg.contains('permission denied')) {
-          errorMsg =
-              '⚠️ İzin hatası. Supabase RLS politikalarını kontrol edin.';
-        }
+        final errorMsg = AppLocalizations.of(context)!.subscriptionErrorGeneric;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMsg),
@@ -617,7 +617,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? _accentGreen.withOpacity(0.1)
+                          ? _accentGreen.withValues(alpha: 0.1)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -669,7 +669,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? _accentGreen.withOpacity(0.1)
+                          ? _accentGreen.withValues(alpha: 0.1)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -851,7 +851,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? _accentGreen.withOpacity(0.1) : Colors.white,
+          color: isSelected ? _accentGreen.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? _accentGreen : Colors.transparent,
@@ -860,7 +860,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           boxShadow: [
             if (!isSelected)
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -903,7 +903,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? _accentGreen.withOpacity(0.1) : Colors.white,
+          color: isSelected ? _accentGreen.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? _accentGreen : Colors.transparent,
@@ -912,7 +912,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           boxShadow: [
             if (!isSelected)
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -973,7 +973,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? _accentGreen.withOpacity(0.1) : Colors.white,
+          color: isSelected ? _accentGreen.withValues(alpha: 0.1) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? _accentGreen : Colors.transparent,
@@ -982,7 +982,7 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
           boxShadow: [
             if (!isSelected)
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

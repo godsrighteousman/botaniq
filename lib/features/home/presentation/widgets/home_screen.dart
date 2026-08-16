@@ -3,7 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/locale/locale_provider.dart';
+import '../../../../core/measurement/measurement_formatter.dart';
+import '../../domain/care_task_planner.dart';
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
 import 'home_header.dart';
@@ -199,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: const Color(0xFFE8F5EE)),
       ),
@@ -321,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 18),
@@ -421,6 +425,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showTaskDetails(BuildContext context, CareTask task) {
     if (task.isCompleted) return;
     final l10n = AppLocalizations.of(context)!;
+    final measurements = MeasurementFormatter(
+      preference: context.read<LocaleProvider>().measurementPreference,
+      formattingLocale: l10n.localeName,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -470,7 +478,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          task.plantName,
+                          task.plantName.isEmpty
+                              ? l10n.plantUnknown
+                              : task.plantName,
                           style: GoogleFonts.outfit(
                             color: const Color(0xFF1B3A2A),
                             fontSize: 22,
@@ -486,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0ED761).withOpacity(0.1),
+                                color: const Color(0xFF0ED761).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -508,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 decoration: BoxDecoration(
                                   color: const Color(
                                     0xFFFF6B6B,
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -532,7 +542,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Talimatlar
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Text(
                   l10n.homeInstructions,
                   style: GoogleFonts.outfit(
@@ -544,9 +554,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
               Align(
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: Text(
-                  task.instruction,
+                  task.instruction.isNotEmpty
+                      ? task.instruction
+                      : CareTaskPlanner.normalizedTaskType(task.taskType) ==
+                            'water'
+                      ? l10n.homeWateringNotification
+                      : l10n.scheduleCareFallback,
                   style: GoogleFonts.inter(
                     color: const Color(0xFF5C7165),
                     fontSize: 14,
@@ -576,7 +591,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        l10n.homeRequiredAmount(task.amount),
+                        l10n.homeRequiredAmount(
+                          measurements.displayLegacyAmount(task.amount),
+                        ),
                         style: GoogleFonts.inter(
                           color: const Color(0xFF1B3A2A),
                           fontSize: 15,

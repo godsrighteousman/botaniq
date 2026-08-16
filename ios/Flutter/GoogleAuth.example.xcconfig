@@ -1,0 +1,5 @@
+// Copy this file to GoogleAuth.local.xcconfig and fill the public OAuth IDs.
+// Never add an OAuth client secret to the iOS application.
+GOOGLE_IOS_CLIENT_ID=
+GOOGLE_WEB_CLIENT_ID=
+GOOGLE_REVERSED_CLIENT_ID=

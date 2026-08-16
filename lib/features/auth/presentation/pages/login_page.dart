@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
+import '../../../../core/services/auth_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../localization/presentation/widgets/language_picker_sheet.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
-import '../../../home/presentation/pages/home_page.dart'; // To navigate properly upon login
 import 'sign_up_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -39,14 +37,25 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.white,
-            size: 20,
-          ),
+        leading: BackButton(
+          color: Colors.white,
+          style: IconButton.styleFrom(iconSize: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            tooltip: l10n.selectLanguage,
+            onPressed: () async {
+              await showAndApplyLanguagePicker(context);
+            },
+            icon: const Icon(
+              Icons.translate_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -81,6 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                 hintText: l10n.emailAddress,
                 icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                forceLtr: true,
               ),
               const SizedBox(height: 24),
 
@@ -91,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                 icon: Icons.lock_outline,
                 obscureText: _obscurePassword,
                 isPassword: true,
+                forceLtr: true,
                 onToggleVisibility: () {
                   setState(() {
                     _obscurePassword = !_obscurePassword;
@@ -101,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // Forgot Password
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
                   onPressed: () {},
                   style: TextButton.styleFrom(
@@ -128,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                     : () async {
                         FocusScope.of(context).unfocus();
                         final email = _emailController.text.trim();
-                        final password = _passwordController.text.trim();
+                        final password = _passwordController.text;
 
                         if (email.isEmpty || password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -147,23 +158,13 @@ class _LoginPageState extends State<LoginPage> {
                               )
                               .timeout(const Duration(seconds: 10));
 
-                          if (mounted) {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomePage(),
-                              ),
-                              (route) => false,
-                            );
-                          }
-                        } catch (e) {
+                          _finishAuthentication();
+                        } catch (error) {
+                          debugPrint('Email sign-in failed: $error');
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  l10n.authError(e.toString()),
-                                  maxLines: 3,
-                                ),
+                                content: Text(l10n.subscriptionErrorGeneric),
                               ),
                             );
                           }
@@ -178,13 +179,13 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppColors.primary, Color(0xFF4FA976)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
                     ),
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
+                        color: AppColors.primary.withValues(alpha: 0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -212,71 +213,61 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              if (kDebugMode) ...[
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() => _isLoading = true);
+                          try {
+                            final timestamp =
+                                DateTime.now().millisecondsSinceEpoch;
+                            final devEmail = 'dev_$timestamp@botaniq.test';
+                            final devPassword = 'DevPassword123!';
 
-              // Skip Button for Developer
-              TextButton(
-                onPressed: _isLoading
-                    ? null
-                    : () async {
-                        setState(() => _isLoading = true);
-                        try {
-                          final timestamp =
-                              DateTime.now().millisecondsSinceEpoch;
-                          final devEmail = 'dev_$timestamp@botaniq.test';
-                          final devPassword = 'DevPassword123!';
+                            final AuthResponse res = await Supabase
+                                .instance
+                                .client
+                                .auth
+                                .signUp(email: devEmail, password: devPassword);
 
-                          final AuthResponse res = await Supabase
-                              .instance
-                              .client
-                              .auth
-                              .signUp(email: devEmail, password: devPassword);
+                            if (res.user != null) {
+                              await Supabase.instance.client
+                                  .from('users')
+                                  .insert({
+                                    'id': res.user!.id,
+                                    'full_name': 'Developer',
+                                    'email': devEmail,
+                                  });
+                            }
 
-                          if (res.user != null) {
-                            await Supabase.instance.client
-                                .from('users')
-                                .insert({
-                                  'id': res.user!.id,
-                                  'full_name': 'Developer',
-                                  'email': devEmail,
-                                });
-                          }
-
-                          if (mounted) {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomePage(),
-                              ),
-                              (route) => false,
-                            );
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  l10n.authError(e.toString()),
-                                  maxLines: 3,
+                            _finishAuthentication();
+                          } catch (error) {
+                            debugPrint('Developer sign-in failed: $error');
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.subscriptionErrorGeneric),
                                 ),
-                              ),
-                            );
+                              );
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() => _isLoading = false);
+                            }
                           }
-                        } finally {
-                          if (mounted) {
-                            setState(() => _isLoading = false);
-                          }
-                        }
-                      },
-                child: Text(
-                  l10n.developerSession,
-                  style: GoogleFonts.outfit(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
+                        },
+                  child: Text(
+                    l10n.developerSession,
+                    style: GoogleFonts.outfit(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
-              ),
+              ],
 
               const SizedBox(height: 48),
 
@@ -285,7 +276,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   Expanded(
                     child: Divider(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       thickness: 1,
                     ),
                   ),
@@ -301,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Expanded(
                     child: Divider(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       thickness: 1,
                     ),
                   ),
@@ -381,41 +372,16 @@ class _LoginPageState extends State<LoginPage> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     try {
-      /// TODO: Get these IDs from Google Cloud Console
-      const webClientId = 'MY_WEB_CLIENT_ID.apps.googleusercontent.com';
-      const iosClientId = 'MY_IOS_CLIENT_ID.apps.googleusercontent.com';
-
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: iosClientId,
-        serverClientId: webClientId,
-      );
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) return;
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
-
-      if (accessToken == null) throw 'No Access Token found.';
-      if (idToken == null) throw 'No ID Token found.';
-
-      await Supabase.instance.client.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
-      );
-
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
+      final didSignIn = await AuthService.instance.signInWithGoogle();
+      if (didSignIn) {
+        _finishAuthentication();
       }
     } catch (e) {
+      debugPrint('Google sign-in failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.authError(e.toString()))));
+        ).showSnackBar(SnackBar(content: Text(l10n.subscriptionErrorGeneric)));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -426,42 +392,30 @@ class _LoginPageState extends State<LoginPage> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isLoading = true);
     try {
-      final rawNonce = Supabase.instance.client.auth.generateRawNonce();
-      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
-
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: hashedNonce,
-      );
-
-      final idToken = credential.identityToken;
-      if (idToken == null) throw const AuthException('Id Token missing');
-
-      await Supabase.instance.client.auth.signInWithIdToken(
-        provider: OAuthProvider.apple,
-        idToken: idToken,
-        nonce: rawNonce,
-      );
-
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
+      final didSignIn = await AuthService.instance.signInWithApple();
+      if (didSignIn) {
+        _finishAuthentication();
       }
-    } catch (e) {
+    } catch (error) {
+      debugPrint('Apple sign-in failed: $error');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.authError(e.toString()))));
+        ).showSnackBar(SnackBar(content: Text(l10n.subscriptionErrorGeneric)));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _finishAuthentication() {
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).popUntil((route) => route.isFirst);
   }
 
   Widget _buildTextField({
@@ -472,17 +426,19 @@ class _LoginPageState extends State<LoginPage> {
     bool isPassword = false,
     VoidCallback? onToggleVisibility,
     TextInputType keyboardType = TextInputType.text,
+    bool forceLtr = false,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
+        textDirection: forceLtr ? TextDirection.ltr : null,
         style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           hintText: hintText,
@@ -528,9 +484,9 @@ class _LoginPageState extends State<LoginPage> {
       child: Container(
         height: 60,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

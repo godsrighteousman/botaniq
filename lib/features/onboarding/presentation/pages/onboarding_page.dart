@@ -4,6 +4,7 @@ import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/pages/login_options_page.dart';
+import '../../../localization/presentation/widgets/language_picker_sheet.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -77,28 +78,37 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    final pageCount = _onboardingData(AppLocalizations.of(context)!).length;
+    if (_currentPage < pageCount - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const LoginOptionsPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-        ),
-      );
+      _openLoginOptions();
     }
+  }
+
+  void _openLoginOptions() {
+    // Keep the root auth gate in the navigator. Social/email sign-in pages
+    // return to the first route after creating a session; replacing this route
+    // would leave LoginOptionsPage as the root even though auth succeeded.
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const LoginOptionsPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final onboardingData = _onboardingData(l10n);
+    final isCompact = MediaQuery.sizeOf(context).height < 740;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: Stack(
@@ -114,7 +124,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             itemCount: onboardingData.length,
             itemBuilder: (context, index) {
               final data = onboardingData[index];
-              return _buildPageContent(data);
+              return _buildPageContent(data, isCompact: isCompact);
             },
           ),
 
@@ -126,70 +136,68 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 vertical: 16.0,
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(11),
+                          child: Image.asset(
+                            'assets/images/botaniq_app_icon_v2.png',
+                            width: 38,
+                            height: 38,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'BOTANIQ',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.italic,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context);
-                          }
+                        tooltip: l10n.selectLanguage,
+                        onPressed: () async {
+                          await showAndApplyLanguagePicker(context);
                         },
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 20,
+                        style: IconButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.white.withValues(alpha: 0.12),
+                          minimumSize: const Size.square(44),
                         ),
-                        padding: const EdgeInsets.only(right: 12),
-                        constraints: const BoxConstraints(),
+                        icon: const Icon(Icons.translate_rounded, size: 20),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.eco,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'BOTANIQ',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          letterSpacing: 1.5,
+                      const SizedBox(width: 4),
+                      TextButton(
+                        onPressed: _openLoginOptions,
+                        child: Text(
+                          l10n.skip,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginOptionsPage(),
-                        ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      l10n.skip,
-                      style: GoogleFonts.inter(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -202,13 +210,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
+              padding: EdgeInsets.fromLTRB(24, 0, 24, isCompact ? 22 : 38),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withOpacity(0.0),
-                    Colors.black.withOpacity(0.8),
-                    Colors.black.withOpacity(1.0),
+                    Colors.black.withValues(alpha: 0.0),
+                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 1.0),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -224,20 +232,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
                         onboardingData.length,
-                        (index) => Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _currentPage == index ? 24 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: _currentPage == index
-                                ? AppColors.primary
-                                : Colors.white.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(4),
+                        (index) => GestureDetector(
+                          onTap: () => _pageController.animateToPage(
+                            index,
+                            duration: const Duration(milliseconds: 280),
+                            curve: Curves.easeOutCubic,
+                          ),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 240),
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: _currentPage == index ? 28 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _currentPage == index
+                                  ? AppColors.primary
+                                  : Colors.white.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: isCompact ? 18 : 26),
 
                     // CTA Button
                     SizedBox(
@@ -275,15 +291,27 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: isCompact ? 14 : 20),
 
                     // Social Proof (Avatars)
                     if (_currentPage == 0) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _AvatarStack(),
-                          const SizedBox(width: 12),
+                          Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.14),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.groups_2_outlined,
+                              color: AppColors.primary,
+                              size: 17,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
                           Text(
                             l10n.onboardingCommunity,
                             style: GoogleFonts.inter(
@@ -298,7 +326,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         l10n.onboardingAgreement,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
-                          color: AppColors.textSecondary.withOpacity(0.6),
+                          color: AppColors.textSecondary.withValues(alpha: 0.6),
                           fontSize: 10,
                           height: 1.5,
                           letterSpacing: 0.5,
@@ -315,7 +343,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Widget _buildPageContent(Map<String, dynamic> data) {
+  Widget _buildPageContent(
+    Map<String, dynamic> data, {
+    required bool isCompact,
+  }) {
     return Stack(
       children: [
         // Background Image
@@ -327,9 +358,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withOpacity(0.1),
-                  Colors.black.withOpacity(0.6),
-                  Colors.black.withOpacity(0.95),
+                  Colors.black.withValues(alpha: 0.1),
+                  Colors.black.withValues(alpha: 0.6),
+                  Colors.black.withValues(alpha: 0.95),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -342,14 +373,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
         // Content
         SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
+            padding: EdgeInsets.fromLTRB(24, 70, 24, isCompact ? 180 : 210),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Spacer(flex: 3),
+                const Spacer(),
 
                 // AI Badge
                 Container(
@@ -382,14 +410,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: isCompact ? 14 : 20),
 
                 // Title Statement
                 Text.rich(
                   TextSpan(
                     text: data['title'],
                     style: GoogleFonts.outfit(
-                      fontSize: 48,
+                      fontSize: isCompact ? 38 : 46,
                       height: 1.1,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -403,19 +431,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: isCompact ? 10 : 14),
 
                 // Subtitle
                 Text(
                   data['subtitle'],
                   style: GoogleFonts.inter(
-                    fontSize: 16,
-                    color: AppColors.textMain.withOpacity(0.9),
+                    fontSize: isCompact ? 14 : 16,
+                    color: AppColors.textMain.withValues(alpha: 0.9),
                     height: 1.5,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: isCompact ? 14 : 20),
 
                 // Feature Cards Row
                 SingleChildScrollView(
@@ -434,9 +462,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     }).toList(),
                   ),
                 ),
-
-                // Give space for the bottom controls
-                const Spacer(flex: 2),
               ],
             ),
           ),
@@ -464,7 +489,7 @@ class _FeatureChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.chipBackground,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -480,44 +505,6 @@ class _FeatureChip extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AvatarStack extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 76,
-      height: 28,
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            child: _buildAvatar('https://i.pravatar.cc/100?img=15'),
-          ),
-          Positioned(
-            left: 24,
-            child: _buildAvatar('https://i.pravatar.cc/100?img=22'),
-          ),
-          Positioned(
-            left: 48,
-            child: _buildAvatar('https://i.pravatar.cc/100?img=5'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatar(String url) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.darkBackground, width: 2),
-        image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover),
       ),
     );
   }

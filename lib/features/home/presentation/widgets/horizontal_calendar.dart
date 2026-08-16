@@ -50,20 +50,20 @@ class HorizontalCalendar extends StatelessWidget {
                         colors: [Color(0xFF0ED761), Color(0xFF0ABF55)],
                       )
                     : null,
-                color: isSelected ? null : Colors.white.withOpacity(0.7),
+                color: isSelected ? null : Colors.white.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
                   color: isSelected
                       ? Colors.transparent
                       : isToday
-                      ? const Color(0xFF0ED761).withOpacity(0.4)
+                      ? const Color(0xFF0ED761).withValues(alpha: 0.4)
                       : const Color(0xFFE8F5EE),
                   width: isToday && !isSelected ? 1.5 : 1,
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: const Color(0xFF0ED761).withOpacity(0.35),
+                          color: const Color(0xFF0ED761).withValues(alpha: 0.35),
                           blurRadius: 14,
                           spreadRadius: 1,
                           offset: const Offset(0, 6),
@@ -71,7 +71,7 @@ class HorizontalCalendar extends StatelessWidget {
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
+                          color: Colors.black.withValues(alpha: 0.03),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -84,7 +84,7 @@ class HorizontalCalendar extends StatelessWidget {
                     DateFormat('EEE', localeName).format(date).toUpperCase(),
                     style: GoogleFonts.inter(
                       color: isSelected
-                          ? Colors.white.withOpacity(0.85)
+                          ? Colors.white.withValues(alpha: 0.85)
                           : const Color(0xFF7A8F82),
                       fontSize: 11,
                       fontWeight: FontWeight.w600,

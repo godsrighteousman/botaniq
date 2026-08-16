@@ -63,6 +63,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageChanged => 'Language changed successfully.';
 
   @override
+  String get languageSearchHint => 'Search languages';
+
+  @override
+  String get languageRecommended => 'Recommended';
+
+  @override
+  String get languageWelcomeTitle => 'Choose your language';
+
+  @override
+  String get languageWelcomeSubtitle =>
+      'Select the language you want to use in Botaniq. You can change it anytime.';
+
+  @override
+  String get languageUseSystem => 'Use device language';
+
+  @override
+  String get preferenceSystem => 'Use system setting';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeSelectionTitle => 'Choose appearance';
+
+  @override
+  String get measurementMetric => 'Metric';
+
+  @override
+  String get measurementImperial => 'Imperial';
+
+  @override
+  String get measurementSelectionTitle => 'Choose measurement system';
+
+  @override
   String get settingsSubtitle => 'Shape Botaniq around your own care rhythm.';
 
   @override
@@ -93,7 +130,152 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsComingSoon => 'This space is still growing.';
 
   @override
+  String get subscriptionPageTitle => 'Premium Membership';
+
+  @override
+  String get subscriptionHeroEyebrow => 'BOTANIQ PREMIUM';
+
+  @override
+  String get subscriptionHeroTitle => 'Smarter care for every plant';
+
+  @override
+  String get subscriptionHeroSubtitle =>
+      'Unlock every premium care tool and grow your green space with confidence.';
+
+  @override
+  String get subscriptionBenefitsTitle => 'Everything in Premium';
+
+  @override
+  String get subscriptionBenefitIdentification =>
+      'Unlimited plant identification and health analysis';
+
+  @override
+  String get subscriptionBenefitCare => 'Personalized care plans and reminders';
+
+  @override
+  String get subscriptionBenefitInsights =>
+      'Expert content and advanced care insights';
+
+  @override
+  String get subscriptionMonthlyPlan => 'Monthly';
+
+  @override
+  String get subscriptionAnnualPlan => 'Annual';
+
+  @override
+  String subscriptionPerMonth(String price) {
+    return '$price / month';
+  }
+
+  @override
+  String subscriptionPerYear(String price) {
+    return '$price / year';
+  }
+
+  @override
+  String get subscriptionBestValue => 'BEST VALUE';
+
+  @override
+  String subscriptionSavePercent(int percent) {
+    return 'Save $percent%';
+  }
+
+  @override
+  String get subscriptionContinue => 'Unlock Premium';
+
+  @override
+  String get subscriptionRestorePurchases => 'Restore Purchases';
+
+  @override
+  String get subscriptionRestoring => 'Restoring...';
+
+  @override
+  String get subscriptionManage => 'Manage Subscription';
+
+  @override
+  String get subscriptionActiveTitle => 'Your Premium membership is active';
+
+  @override
+  String get subscriptionActiveSubtitle =>
+      'You have access to every premium feature.';
+
+  @override
+  String subscriptionRenewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String subscriptionExpiresOn(String date) {
+    return 'Active until $date';
+  }
+
+  @override
+  String get subscriptionAutoRenewDisclosure =>
+      'Payment is charged to your Apple or Google account. The subscription renews automatically unless canceled at least 24 hours before the end of the current period. You can manage or cancel it anytime in your store account settings.';
+
+  @override
+  String get subscriptionTermsLink => 'Terms of Use';
+
+  @override
+  String get subscriptionPrivacyLink => 'Privacy Policy';
+
+  @override
+  String get subscriptionPurchaseSuccess =>
+      'Your Premium membership is now active.';
+
+  @override
+  String get subscriptionRestoreSuccess =>
+      'Your Premium membership was restored.';
+
+  @override
+  String get subscriptionNothingToRestore =>
+      'No active membership was found for this store account.';
+
+  @override
+  String get subscriptionPaymentPending =>
+      'The payment is awaiting store approval. Your membership will activate automatically once approved.';
+
+  @override
+  String get subscriptionErrorGeneric =>
+      'The operation could not be completed. Please try again.';
+
+  @override
+  String get subscriptionErrorNetwork =>
+      'Check your internet connection and try again.';
+
+  @override
+  String get subscriptionErrorNotAllowed =>
+      'This device or store account is not allowed to make purchases.';
+
+  @override
+  String get subscriptionErrorStore =>
+      'The store could not be reached. Please try again shortly.';
+
+  @override
+  String get subscriptionMissingConfiguration =>
+      'The RevenueCat key is missing from this build.';
+
+  @override
+  String get subscriptionUnsupported =>
+      'Subscriptions are available only in the iOS and Android apps.';
+
+  @override
+  String get subscriptionProductsUnavailable =>
+      'Monthly and annual products could not be loaded. Check the RevenueCat offering configuration.';
+
+  @override
+  String get subscriptionRetry => 'Try Again';
+
+  @override
+  String get subscriptionFree => 'Free';
+
+  @override
   String get homeGoodMorning => 'Hello,';
+
+  @override
+  String homePersonalGreeting(String greeting, String name) {
+    return '$greeting, $name 👋';
+  }
 
   @override
   String get homeEmptyGarden => 'Your garden is empty';
@@ -260,7 +442,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDeleteAccountWarning =>
-      'Account deletion needs a secure server-side confirmation. Your data has not been changed.';
+      'Your account will be deleted: your personal information (name, email, profile photo) is permanently removed and your account is anonymized. This cannot be undone.';
 
   @override
   String get cancel => 'Cancel';
@@ -457,7 +639,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String wateringOverdue(int days) {
-    return '$days days overdue';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days overdue',
+      one: '1 day overdue',
+      zero: 'Water today',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -468,7 +657,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String wateringDueInDays(int days) {
-    return 'Water in $days days';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Water in $days days',
+      one: 'Water in 1 day',
+      zero: 'Water today',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -712,6 +908,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Early intervention and a natural Neem Oil treatment.';
 
   @override
+  String get healthDiscoverLoadError =>
+      'Discover content could not be loaded right now. Pull down to try again.';
+
+  @override
+  String get healthDiscoverEmpty =>
+      'There is no published discover content yet.';
+
+  @override
+  String get healthDiscoverRetry => 'Try Again';
+
+  @override
   String get lightMeterTitle => 'Light Meter';
 
   @override
@@ -720,6 +927,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get lightMeterInstruction =>
       'Point the phone’s front camera toward\nthe plant’s position and light source.';
+
+  @override
+  String get lightMeterCameraEstimate =>
+      'Approximate lux calculated from camera data';
+
+  @override
+  String get lightMeterStabilizing => 'Stabilizing measurement';
+
+  @override
+  String get lightMeterStabilizingRecommendation =>
+      'Hold the phone steady for a few seconds while sudden exposure changes are filtered.';
+
+  @override
+  String get lightMeterUnavailable => 'Measurement unavailable';
+
+  @override
+  String get lightMeterUnavailableRecommendation =>
+      'Enable camera permission and try this screen again.';
 
   @override
   String get lightLow => 'Low Light (Shade)';
@@ -1593,35 +1818,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsTitle => 'Terms & Policies';
 
   @override
-  String get termsUpdated => 'Last updated: July 2026';
+  String get termsUpdated => 'Last updated: August 2026';
 
   @override
   String get termsUseTitle => '1. Terms of Use';
 
   @override
   String get termsUseBody =>
-      'By accessing or using Botaniq, you agree to these Terms of Use and applicable laws. If you do not agree, you may not use the service.';
+      'By accessing or using Botaniq, you agree to these Terms and all applicable laws. We may add, change, suspend, or discontinue any part of the service at any time, with or without notice, and may suspend or terminate accounts that violate these Terms or misuse the service. Continued use after changes take effect means you accept the updated Terms.';
 
   @override
-  String get termsPrivacyTitle => '2. User Privacy';
+  String get termsPrivacyTitle => '2. Data We Collect and How We Use It';
 
   @override
   String get termsPrivacyBody =>
-      'We collect only the personal data needed to provide tailored plant-care schedules. We do not sell your personal data to third parties.';
+      'To operate and improve Botaniq we collect and process the data you provide or generate while using it: account and profile details (name, email, sign-in identifiers), photos and images you capture or upload (including plant and camera photos), location, device and diagnostic information, notification tokens, usage and interaction data, and content you enter (notes, chat messages, support requests). This data is processed by us and by trusted service providers acting on our behalf — including cloud hosting/database, AI image- and text-analysis, authentication (Google/Apple sign-in), push notifications, and subscription/payment processing — solely to run, secure, support, and improve the service, personalize your experience, train and evaluate the app\'s plant-recognition and care features, prevent fraud and abuse, and meet legal obligations. By using Botaniq you consent to this processing and, where applicable law requires it, to the transfer of your data outside your country to those providers\' infrastructure. We do not sell your personal data.';
 
   @override
-  String get termsPlantTitle => '3. Plant Data';
+  String get termsContentTitle => '3. Your Content and License to Us';
+
+  @override
+  String get termsContentBody =>
+      'You keep ownership of the photos, notes, and other content you submit. By submitting content you grant us a worldwide, royalty-free, non-exclusive, sublicensable license to host, store, reproduce, analyze, and use it to operate, secure, and improve Botaniq (including improving plant identification, diagnosis, and other AI-assisted features), for as long as we hold the content. You are responsible for having the right to share whatever you upload.';
+
+  @override
+  String get termsRetentionTitle => '4. Account Deletion and Data Retention';
+
+  @override
+  String get termsRetentionBody =>
+      'Requesting account deletion in the app anonymizes your account: your name, email, and profile photo are permanently removed and cannot be reattached to your identity, while your sign-in and remaining app data stay linked to the same anonymized account so you can keep using it if you sign in again. We may retain data — including in anonymized, aggregated, or backup form — for as long as needed for security, fraud-prevention, legal, accounting, or dispute-resolution purposes, even after a deletion request, to the fullest extent permitted by applicable law.';
+
+  @override
+  String get termsPlantTitle => '5. Plant Data and AI Results';
 
   @override
   String get termsPlantBody =>
-      'Plant-care, identification, and diagnosis information is provided for informational purposes. AI results may not always be correct, so observe your plant and seek an expert for serious risks.';
+      'Plant-care, identification, and diagnosis information — including AI-generated results — is provided for general informational purposes only and is not professional horticultural, agricultural, veterinary, or medical advice. AI results may be inaccurate or incomplete. You are solely responsible for decisions about your plants, pets, and household based on this information; observe your plant and consult a qualified expert for anything serious.';
 
   @override
-  String get termsPremiumTitle => '4. Premium Subscriptions';
+  String get termsLiabilityTitle => '6. Disclaimers, Liability, and Indemnity';
+
+  @override
+  String get termsLiabilityBody =>
+      'Botaniq is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we and our service providers are not liable for any indirect, incidental, special, or consequential damages, or for any loss of data, plants, or property arising from your use of the service, and our total liability for any claim is limited to the amount you paid us, if any, in the twelve months before the claim. You agree to indemnify and hold us harmless from claims arising from your use of the service, your content, or your violation of these Terms or applicable law.';
+
+  @override
+  String get termsPremiumTitle => '7. Premium Subscriptions';
 
   @override
   String get termsPremiumBody =>
-      'Premium subscriptions are billed according to your app-store agreement. You may cancel at any time; partial billing periods are not refundable.';
+      'Your monthly or annual Premium subscription is charged to your Apple or Google account after purchase confirmation. It renews automatically unless canceled at least 24 hours before the current period ends. You can manage or cancel it in your store account settings. Refund requests are handled under the applicable store policy.';
+
+  @override
+  String get termsLawTitle => '8. Governing Law and Changes';
+
+  @override
+  String get termsLawBody =>
+      'These Terms are governed by the laws of the jurisdiction in which we operate, without regard to conflict-of-law principles, and any dispute will be resolved under that jurisdiction\'s applicable procedures to the fullest extent permitted by law. We may update these Terms and our data practices at any time by posting the revised version in the app.';
 
   @override
   String get termsClosing => 'Enjoy peace of mind and happier plants.';

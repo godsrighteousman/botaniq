@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'search_history_page.dart';
 import 'plant_detail_page.dart';
@@ -115,7 +116,7 @@ class _GardenPageState extends State<GardenPage> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: _accentGreen.withOpacity(0.3),
+                            color: _accentGreen.withValues(alpha: 0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -175,7 +176,7 @@ class _GardenPageState extends State<GardenPage> {
                             Icon(
                               Icons.local_florist_outlined,
                               size: 56,
-                              color: _accentGreen.withOpacity(0.5),
+                              color: _accentGreen.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -279,7 +280,7 @@ class _GardenPageState extends State<GardenPage> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFCBD5E1).withOpacity(0.16),
+              color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -320,7 +321,7 @@ class _GardenPageState extends State<GardenPage> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.14),
+                                color: Colors.black.withValues(alpha: 0.14),
                                 blurRadius: 8,
                                 offset: const Offset(0, 3),
                               ),
@@ -430,9 +431,7 @@ class _GardenPageState extends State<GardenPage> {
   ) {
     final date = watering.lastWateredAt;
     if (date == null) return l10n.wateringNever;
-    final formatted =
-        '${date.day.toString().padLeft(2, '0')}.'
-        '${date.month.toString().padLeft(2, '0')}.${date.year}';
+    final formatted = DateFormat.yMd(l10n.localeName).format(date);
     return l10n.wateringLastDate(formatted);
   }
 }

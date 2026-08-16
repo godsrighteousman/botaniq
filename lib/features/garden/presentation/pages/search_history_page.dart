@@ -133,7 +133,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF6B6B).withOpacity(0.1),
+                  color: const Color(0xFFFF6B6B).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -163,7 +163,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                 ),
                 padding: const EdgeInsets.all(24),
                 itemCount: _historyList.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
+                separatorBuilder: (_, _) => const SizedBox(height: 14),
                 itemBuilder: (context, index) {
                   final item = _historyList[index];
                   return _HistoryCard(
@@ -188,7 +188,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
               width: 90,
               height: 90,
               decoration: BoxDecoration(
-                color: _accentGreen.withOpacity(0.1),
+                color: _accentGreen.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.history_rounded, color: _accentGreen, size: 44),
@@ -251,7 +251,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0ED761).withOpacity(0.1),
+                      color: const Color(0xFF0ED761).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Center(
@@ -388,7 +388,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF0ED761).withOpacity(0.3),
+                          color: const Color(0xFF0ED761).withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -517,7 +517,7 @@ class _HistoryCard extends StatelessWidget {
           border: Border.all(color: const Color(0xFFE8F5EE)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -529,7 +529,7 @@ class _HistoryCard extends StatelessWidget {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: const Color(0xFF0ED761).withOpacity(0.08),
+                color: const Color(0xFF0ED761).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Center(

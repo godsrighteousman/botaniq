@@ -2,7 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' as fw show TextDirection;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'add_plant_wizard.dart';
 import '../../../../core/services/openai_service.dart';
@@ -120,10 +122,11 @@ class _PlantDetailPageState extends State<PlantDetailPage>
             _localPlantData['species'] ??
             '';
         if (name.isNotEmpty) {
+          // plant_catalog tablosunda yalnızca `species` sütunu var; `name` yok.
           final catData = await Supabase.instance.client
               .from('plant_catalog')
               .select()
-              .or('name.ilike.%$name%,species.ilike.%$name%')
+              .ilike('species', '%$name%')
               .limit(1)
               .maybeSingle();
           if (catData != null && mounted) {
@@ -637,26 +640,23 @@ class _PlantDetailPageState extends State<PlantDetailPage>
       pinned: true,
       elevation: 0,
       backgroundColor: _cardBg,
-      leading: GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color(0xFF3B4D43),
-            size: 18,
-          ),
+      leading: Container(
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.9),
+          shape: BoxShape.circle,
+        ),
+        child: BackButton(
+          color: const Color(0xFF3B4D43),
+          style: IconButton.styleFrom(iconSize: 18, padding: EdgeInsets.zero),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       actions: [
         Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             shape: BoxShape.circle,
           ),
           child: IconButton(
@@ -678,19 +678,23 @@ class _PlantDetailPageState extends State<PlantDetailPage>
           fit: StackFit.expand,
           children: [
             imageUrl.isNotEmpty
-                ? Image.network(imageUrl, fit: BoxFit.cover)
-                : Container(color: _accentGreen.withOpacity(0.2)),
-            Positioned(
+                ? Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    matchTextDirection: false,
+                  )
+                : Container(color: _accentGreen.withValues(alpha: 0.2)),
+            PositionedDirectional(
               bottom: 0,
-              left: 0,
-              right: 0,
+              start: 0,
+              end: 0,
               height: 80,
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
-                    colors: [Colors.black.withOpacity(0.3), Colors.transparent],
+                    colors: [Colors.black.withValues(alpha: 0.3), Colors.transparent],
                   ),
                 ),
               ),
@@ -743,7 +747,7 @@ class _PlantDetailPageState extends State<PlantDetailPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: healthColor.withOpacity(0.15),
+              color: healthColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -834,7 +838,7 @@ class _PlantDetailPageState extends State<PlantDetailPage>
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.16),
+            color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -846,7 +850,7 @@ class _PlantDetailPageState extends State<PlantDetailPage>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -1067,9 +1071,7 @@ class _PlantDetailPageState extends State<PlantDetailPage>
   ) {
     final date = watering.lastWateredAt;
     if (date == null) return l10n.wateringNever;
-    final formatted =
-        '${date.day.toString().padLeft(2, '0')}.'
-        '${date.month.toString().padLeft(2, '0')}.${date.year}';
+    final formatted = DateFormat.yMd(l10n.localeName).format(date);
     return l10n.wateringLastDate(formatted);
   }
 
@@ -1097,8 +1099,8 @@ class _PlantDetailPageState extends State<PlantDetailPage>
         }
         if (snapshot.hasError) {
           return Text(
-            'Error loading history: ${snapshot.error}',
-            style: TextStyle(color: Colors.red),
+            l10n.subscriptionErrorGeneric,
+            style: const TextStyle(color: Colors.red),
           );
         }
 
@@ -1150,8 +1152,8 @@ class _PlantDetailPageState extends State<PlantDetailPage>
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: isWater
-                            ? const Color(0xFF4A90E2).withOpacity(0.1)
-                            : const Color(0xFF4FA976).withOpacity(0.1),
+                            ? const Color(0xFF4A90E2).withValues(alpha: 0.1)
+                            : const Color(0xFF4FA976).withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -1180,7 +1182,9 @@ class _PlantDetailPageState extends State<PlantDetailPage>
                           ),
                           if (completedAt != null)
                             Text(
-                              '${completedAt.day}/${completedAt.month}/${completedAt.year} ${completedAt.hour.toString().padLeft(2, '0')}:${completedAt.minute.toString().padLeft(2, '0')}',
+                              DateFormat.yMd(
+                                l10n.localeName,
+                              ).add_Hm().format(completedAt),
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: _textSecondary,
@@ -1216,7 +1220,7 @@ class _PlantDetailPageState extends State<PlantDetailPage>
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.32),
+            color: const Color(0xFFCBD5E1).withValues(alpha: 0.32),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -1302,7 +1306,7 @@ class _PlantDetailPageState extends State<PlantDetailPage>
       curve: Curves.easeInOut,
       height: 56,
       decoration: BoxDecoration(
-        color: isDone ? doneColor.withOpacity(0.12) : _primaryText,
+        color: isDone ? doneColor.withValues(alpha: 0.12) : _primaryText,
         borderRadius: BorderRadius.circular(28),
         border: isDone ? Border.all(color: doneColor, width: 2) : null,
       ),
@@ -1445,7 +1449,7 @@ class _CareCelebrationPainter extends CustomPainter {
           text: '💩',
           style: TextStyle(fontSize: (22 + (index % 3) * 4).toDouble()),
         ),
-        textDirection: TextDirection.ltr,
+        textDirection: fw.TextDirection.ltr,
       )..layout();
       textPainter.paint(
         canvas,

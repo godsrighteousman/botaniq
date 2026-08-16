@@ -97,7 +97,7 @@ class TaskListSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF0ED761).withOpacity(0.08),
+              color: const Color(0xFF0ED761).withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: const Icon(

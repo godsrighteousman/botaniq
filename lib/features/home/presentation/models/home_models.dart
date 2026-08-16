@@ -49,10 +49,10 @@ class CareTask {
     return CareTask(
       id: id,
       plantId: row['plant_id']?.toString() ?? plant['id']?.toString() ?? '',
-      plantName: plant['custom_name'] ?? plant['name'] ?? 'My Plant',
-      taskType: _capitalizeFirst(row['task_type'] as String? ?? 'care'),
+      plantName: (plant['custom_name'] ?? plant['name'] ?? '').toString(),
+      taskType: _capitalizeFirst(row['task_type'] as String? ?? ''),
       amount: row['amount'] ?? '',
-      instruction: row['instruction'] ?? 'Take care of your plant.',
+      instruction: row['instruction'] ?? '',
       imageUrl: plant['image_url'] ?? '',
       dueDate: parsedDueDate?.toLocal(),
       isCompleted: row['is_completed'] ?? false,

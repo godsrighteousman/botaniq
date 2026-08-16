@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
-import 'core/theme/app_colors.dart';
+import 'features/localization/presentation/pages/language_selection_page.dart';
+import 'core/config/supabase_config.dart';
+import 'core/theme/app_theme.dart';
 import 'core/locale/locale_provider.dart';
+import 'core/locale/supported_app_locale.dart';
 import 'core/services/care_notification_service.dart';
+import 'features/subscription/presentation/controllers/subscription_controller.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Supabase başlatma — bu gerekli, auth state için zorunlu
+  SupabaseConfig.validate();
   await Supabase.initialize(
-    url: 'https://fikozptvdfzfdruukoqs.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpa296cHR2ZGZ6ZmRydXVrb3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMDc3NzEsImV4cCI6MjA5OTg4Mzc3MX0.QcFIb7d1utIEe5_cB-XBXTHl4F0XJCrujrpsy0QzdUQ',
+    url: SupabaseConfig.url,
+    publishableKey: SupabaseConfig.publishableKey,
   );
 
   // Yalnızca SharedPreferences'tan oku — ağ beklemesi YOK (~5ms)
   final localeProvider = LocaleProvider();
   await localeProvider.loadSavedLocale();
+  localeProvider.bindToAuth(Supabase.instance.client.auth);
+  final subscriptionController = SubscriptionController()
+    ..bindToAuth(Supabase.instance.client.auth);
   try {
     await CareNotificationService.instance.initialize();
   } catch (error) {
@@ -32,8 +37,13 @@ void main() async {
   }
 
   runApp(
-    ChangeNotifierProvider<LocaleProvider>.value(
-      value: localeProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<LocaleProvider>.value(value: localeProvider),
+        ChangeNotifierProvider<SubscriptionController>.value(
+          value: subscriptionController,
+        ),
+      ],
       child: const BotaniqApp(),
     ),
   );
@@ -48,33 +58,35 @@ class BotaniqApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = context.select<LocaleProvider, Locale?>((p) => p.locale);
+    final preferences = context.watch<LocaleProvider>();
 
     return MaterialApp(
-      title: 'Botaniq',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
-      locale: locale,
-      supportedLocales: AppLocalizations.supportedLocales,
+      locale: preferences.locale,
+      supportedLocales: SupportedAppLocales.locales,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        textTheme: GoogleFonts.interTextTheme().apply(
-          bodyColor: Colors.white,
-          displayColor: Colors.white,
-        ),
-      ),
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        if (preferences.locale != null) return preferences.locale;
+        return SupportedAppLocales.byLocale(
+          deviceLocale ?? SupportedAppLocales.fallback,
+        ).locale;
+      },
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: preferences.themeMode,
       home: StreamBuilder<AuthState>(
         stream: Supabase.instance.client.auth.onAuthStateChange,
         builder: (context, snapshot) {
+          if (!preferences.hasCompletedInitialSelection) {
+            return const LanguageSelectionPage();
+          }
+
           final session =
               snapshot.data?.session ??
               Supabase.instance.client.auth.currentSession;

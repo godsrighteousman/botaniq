@@ -1,0 +1,5 @@
+"CFBundleDisplayName" = "Botaniq";
+"NSCameraUsageDescription" = "Botaniq, yalnızca bir bitkiyi tararken veya fotoğrafını çekerken kamerayı kullanır.";
+"NSPhotoLibraryUsageDescription" = "Botaniq, fotoğraf arşivinizi yalnızca profil veya bitki görseli seçtiğinizde kullanır.";
+"NSMicrophoneUsageDescription" = "Botaniq, yalnızca kamera akışı sesli video kaydederken mikrofonu kullanır.";
+"NSLocationWhenInUseUsageDescription" = "Botaniq, yerel hava durumuna dayalı bitki bakım önerileri sunmak için uygulama açıkken konumunuzu kullanır.";

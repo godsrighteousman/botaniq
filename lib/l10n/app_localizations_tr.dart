@@ -63,6 +63,43 @@ class AppLocalizationsTr extends AppLocalizations {
   String get languageChanged => 'Dil başarıyla değiştirildi.';
 
   @override
+  String get languageSearchHint => 'Dillerde ara';
+
+  @override
+  String get languageRecommended => 'Önerilen';
+
+  @override
+  String get languageWelcomeTitle => 'Dilini seç';
+
+  @override
+  String get languageWelcomeSubtitle =>
+      'Botaniq\'te kullanmak istediğin dili seç. Daha sonra istediğin zaman değiştirebilirsin.';
+
+  @override
+  String get languageUseSystem => 'Cihaz dilini kullan';
+
+  @override
+  String get preferenceSystem => 'Sistem ayarını kullan';
+
+  @override
+  String get themeLight => 'Açık';
+
+  @override
+  String get themeDark => 'Koyu';
+
+  @override
+  String get themeSelectionTitle => 'Görünümü seç';
+
+  @override
+  String get measurementMetric => 'Metrik';
+
+  @override
+  String get measurementImperial => 'İngiliz birimleri';
+
+  @override
+  String get measurementSelectionTitle => 'Ölçü sistemini seç';
+
+  @override
   String get settingsSubtitle =>
       'Botaniq\'i kendi bakım ritmine göre şekillendir.';
 
@@ -95,7 +132,151 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsComingSoon => 'Bu alan hâlâ büyüyor.';
 
   @override
+  String get subscriptionPageTitle => 'Premium Üyelik';
+
+  @override
+  String get subscriptionHeroEyebrow => 'BOTANIQ PREMIUM';
+
+  @override
+  String get subscriptionHeroTitle => 'Bitkilerin için daha akıllı bakım';
+
+  @override
+  String get subscriptionHeroSubtitle =>
+      'Tüm premium bakım araçlarına eriş ve yeşil alanını güvenle büyüt.';
+
+  @override
+  String get subscriptionBenefitsTitle => 'Premium ile gelenler';
+
+  @override
+  String get subscriptionBenefitIdentification =>
+      'Sınırsız bitki tanıma ve sağlık analizi';
+
+  @override
+  String get subscriptionBenefitCare =>
+      'Kişiselleştirilmiş bakım planları ve hatırlatıcılar';
+
+  @override
+  String get subscriptionBenefitInsights =>
+      'Uzman içerikleri ve gelişmiş bakım içgörüleri';
+
+  @override
+  String get subscriptionMonthlyPlan => 'Aylık';
+
+  @override
+  String get subscriptionAnnualPlan => 'Yıllık';
+
+  @override
+  String subscriptionPerMonth(String price) {
+    return '$price / ay';
+  }
+
+  @override
+  String subscriptionPerYear(String price) {
+    return '$price / yıl';
+  }
+
+  @override
+  String get subscriptionBestValue => 'EN AVANTAJLI';
+
+  @override
+  String subscriptionSavePercent(int percent) {
+    return '%$percent tasarruf';
+  }
+
+  @override
+  String get subscriptionContinue => 'Premium’a Geç';
+
+  @override
+  String get subscriptionRestorePurchases => 'Satın Almaları Geri Yükle';
+
+  @override
+  String get subscriptionRestoring => 'Geri yükleniyor...';
+
+  @override
+  String get subscriptionManage => 'Aboneliği Yönet';
+
+  @override
+  String get subscriptionActiveTitle => 'Premium üyeliğin aktif';
+
+  @override
+  String get subscriptionActiveSubtitle =>
+      'Tüm premium özelliklerden yararlanabilirsin.';
+
+  @override
+  String subscriptionRenewsOn(String date) {
+    return '$date tarihinde yenilenir';
+  }
+
+  @override
+  String subscriptionExpiresOn(String date) {
+    return '$date tarihine kadar aktif';
+  }
+
+  @override
+  String get subscriptionAutoRenewDisclosure =>
+      'Ödeme Apple veya Google hesabından alınır. Abonelik, mevcut dönem bitmeden en az 24 saat önce iptal edilmezse otomatik yenilenir. Mağaza hesap ayarlarından istediğin zaman yönetebilir veya iptal edebilirsin.';
+
+  @override
+  String get subscriptionTermsLink => 'Kullanım Koşulları';
+
+  @override
+  String get subscriptionPrivacyLink => 'Gizlilik Politikası';
+
+  @override
+  String get subscriptionPurchaseSuccess => 'Premium üyeliğin etkinleştirildi.';
+
+  @override
+  String get subscriptionRestoreSuccess => 'Premium üyeliğin geri yüklendi.';
+
+  @override
+  String get subscriptionNothingToRestore =>
+      'Bu mağaza hesabında geri yüklenecek aktif bir üyelik bulunamadı.';
+
+  @override
+  String get subscriptionPaymentPending =>
+      'Ödeme mağaza onayı bekliyor. Onaylandığında üyeliğin otomatik olarak etkinleşir.';
+
+  @override
+  String get subscriptionErrorGeneric =>
+      'İşlem şu anda tamamlanamadı. Lütfen tekrar dene.';
+
+  @override
+  String get subscriptionErrorNetwork =>
+      'İnternet bağlantını kontrol edip tekrar dene.';
+
+  @override
+  String get subscriptionErrorNotAllowed =>
+      'Bu cihaz veya mağaza hesabı satın almaya izin vermiyor.';
+
+  @override
+  String get subscriptionErrorStore =>
+      'Mağaza ile bağlantı kurulamadı. Biraz sonra tekrar dene.';
+
+  @override
+  String get subscriptionMissingConfiguration =>
+      'RevenueCat anahtarı bu derlemeye eklenmemiş.';
+
+  @override
+  String get subscriptionUnsupported =>
+      'Abonelikler yalnızca iOS ve Android uygulamalarında kullanılabilir.';
+
+  @override
+  String get subscriptionProductsUnavailable =>
+      'Aylık ve yıllık ürünler mağazadan alınamadı. RevenueCat offering ayarlarını kontrol et.';
+
+  @override
+  String get subscriptionRetry => 'Tekrar Dene';
+
+  @override
+  String get subscriptionFree => 'Ücretsiz';
+
+  @override
   String get homeGoodMorning => 'Merhaba,';
+
+  @override
+  String homePersonalGreeting(String greeting, String name) {
+    return '$greeting, $name 👋';
+  }
 
   @override
   String get homeEmptyGarden => 'Bahçeniz henüz boş';
@@ -265,7 +446,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profileDeleteAccountWarning =>
-      'Hesap silme işlemi güvenli bir sunucu onayı gerektirir. Verilerin değiştirilmedi.';
+      'Hesabın silinir; kişisel bilgilerin (ad, e-posta, profil fotoğrafı) kalıcı olarak kaldırılır ve hesabın anonim hâle getirilir. Bu işlem geri alınamaz.';
 
   @override
   String get cancel => 'İptal';
@@ -460,7 +641,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String wateringOverdue(int days) {
-    return '$days gün gecikti';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days gün gecikti',
+      zero: 'Bugün sulanmalı',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -471,7 +658,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String wateringDueInDays(int days) {
-    return '$days gün sonra sulanmalı';
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days gün sonra sulanmalı',
+      zero: 'Bugün sulanmalı',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -713,6 +906,16 @@ class AppLocalizationsTr extends AppLocalizations {
       'Erken evre müdahalesi ve doğal Neem Yağı kürü.';
 
   @override
+  String get healthDiscoverLoadError =>
+      'Keşfet içerikleri şu anda yüklenemedi. Aşağı çekerek yeniden deneyebilirsin.';
+
+  @override
+  String get healthDiscoverEmpty => 'Yayınlanmış keşfet içeriği henüz yok.';
+
+  @override
+  String get healthDiscoverRetry => 'Yeniden Dene';
+
+  @override
   String get lightMeterTitle => 'Işık Ölçer';
 
   @override
@@ -721,6 +924,24 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get lightMeterInstruction =>
       'Telefonun ön kamerasını bitkinin\nbulunduğu alana ve ışık kaynağına doğru tut.';
+
+  @override
+  String get lightMeterCameraEstimate =>
+      'Kamera verisinden hesaplanan yaklaşık lux değeri';
+
+  @override
+  String get lightMeterStabilizing => 'Ölçüm dengeleniyor';
+
+  @override
+  String get lightMeterStabilizingRecommendation =>
+      'Telefonu birkaç saniye sabit tut; ani pozlama değişimleri filtreleniyor.';
+
+  @override
+  String get lightMeterUnavailable => 'Ölçüm kullanılamıyor';
+
+  @override
+  String get lightMeterUnavailableRecommendation =>
+      'Kamera iznini açıp bu ekranı yeniden deneyin.';
 
   @override
   String get lightLow => 'Düşük Işık (Gölge)';
@@ -1597,35 +1818,63 @@ class AppLocalizationsTr extends AppLocalizations {
   String get termsTitle => 'Koşullar ve Politikalar';
 
   @override
-  String get termsUpdated => 'Son güncelleme: Temmuz 2026';
+  String get termsUpdated => 'Son güncelleme: Ağustos 2026';
 
   @override
   String get termsUseTitle => '1. Kullanım Koşulları';
 
   @override
   String get termsUseBody =>
-      'Botaniq’e erişerek veya kullanarak bu kullanım koşullarını ve geçerli yasaları kabul edersin. Kabul etmiyorsan hizmeti kullanmamalısın.';
+      'Botaniq’e erişerek veya kullanarak bu koşulları ve geçerli tüm yasaları kabul edersin. Hizmetin herhangi bir bölümünü önceden bildirmeksizin değiştirebilir, askıya alabilir veya sonlandırabiliriz; bu koşulları ihlal eden veya hizmeti kötüye kullanan hesapları askıya alabilir ya da kapatabiliriz. Değişikliklerden sonra hizmeti kullanmaya devam etmen güncel koşulları kabul ettiğin anlamına gelir.';
 
   @override
-  String get termsPrivacyTitle => '2. Kullanıcı Gizliliği';
+  String get termsPrivacyTitle => '2. Topladığımız Veriler ve Kullanım Amacı';
 
   @override
   String get termsPrivacyBody =>
-      'Yalnızca kişiselleştirilmiş bitki bakım takvimleri sunmak için gereken kişisel verileri toplarız. Kişisel verilerini üçüncü taraflara satmayız.';
+      'Botaniq’i çalıştırmak ve geliştirmek için hizmeti kullanırken sağladığın veya oluşturduğun verileri işleriz: hesap ve profil bilgileri (ad, e-posta, giriş kimlikleri), çektiğin veya yüklediğin fotoğraflar (bitki ve kamera görselleri dâhil), konum, cihaz ve tanılama bilgileri, bildirim belirteçleri, kullanım/etkileşim verileri ve girdiğin içerikler (notlar, sohbet mesajları, destek talepleri). Bu veriler tarafımızca ve adımıza hareket eden güvenilir hizmet sağlayıcılar tarafından işlenir — bulut barındırma/veritabanı, yapay zekâ görsel ve metin analizi, kimlik doğrulama (Google/Apple ile giriş), anlık bildirim ve abonelik/ödeme işleme dâhil — yalnızca hizmeti çalıştırmak, güvenliğini sağlamak, desteklemek ve geliştirmek, deneyimini kişiselleştirmek, bitki tanıma ve bakım özelliklerini eğitmek ve değerlendirmek, dolandırıcılık ve kötüye kullanımı önlemek ve yasal yükümlülükleri yerine getirmek amacıyla. Botaniq’i kullanarak bu işlemeyi ve gerektiğinde verilerinin bu sağlayıcıların altyapısı için ülkeni aşan şekilde aktarılmasını kabul edersin. Kişisel verilerini satmayız.';
 
   @override
-  String get termsPlantTitle => '3. Bitki Verileri';
+  String get termsContentTitle => '3. İçeriğin ve Bize Verdiğin Lisans';
+
+  @override
+  String get termsContentBody =>
+      'Gönderdiğin fotoğraf, not ve diğer içeriklerin sahipliği sende kalır. İçerik göndererek bize, elimizde bulunduğu sürece Botaniq’i işletmek, güvenliğini sağlamak ve geliştirmek (bitki tanıma, teşhis ve diğer yapay zekâ destekli özellikleri iyileştirmek dâhil) amacıyla dünya çapında, telifsiz, münhasır olmayan, alt lisans verilebilir bir barındırma, saklama, çoğaltma, analiz etme ve kullanma lisansı vermiş olursun. Yüklediğin her şeyi paylaşma hakkına sahip olduğundan sen sorumlusun.';
+
+  @override
+  String get termsRetentionTitle => '4. Hesap Silme ve Veri Saklama';
+
+  @override
+  String get termsRetentionBody =>
+      'Uygulama içinden hesap silme talebinde bulunmak hesabını anonimleştirir: ad, e-posta ve profil fotoğrafın kalıcı olarak kaldırılır ve kimliğinle yeniden ilişkilendirilemez; giriş bilgilerin ve kalan uygulama verilerin ise aynı anonimleşmiş hesapla ilişkili kalır, böylece tekrar giriş yaparsan hesabını kullanmaya devam edebilirsin. Silme talebinden sonra bile, güvenlik, dolandırıcılık önleme, yasal, muhasebe veya uyuşmazlık çözümü amaçlarıyla verileri — anonimleştirilmiş, toplulaştırılmış veya yedek biçimde dâhil — yürürlükteki mevzuatın izin verdiği azami süre boyunca saklayabiliriz.';
+
+  @override
+  String get termsPlantTitle => '5. Bitki Verileri ve Yapay Zekâ Sonuçları';
 
   @override
   String get termsPlantBody =>
-      'Bitki bakımı, tanımlama ve teşhis bilgileri bilgilendirme amaçlıdır. Yapay zekâ sonuçları her zaman doğru olmayabilir; ciddi risklerde bitkini gözlemle ve bir uzmana danış.';
+      'Bitki bakımı, tanımlama ve teşhis bilgileri — yapay zekâ tarafından üretilenler dâhil — yalnızca genel bilgilendirme amaçlıdır; profesyonel bahçıvanlık, tarım, veterinerlik veya tıbbi tavsiye niteliği taşımaz. Yapay zekâ sonuçları yanlış veya eksik olabilir. Bitkilerin, evcil hayvanların ve hanenle ilgili bu bilgilere dayalı kararlardan yalnızca sen sorumlusun; ciddi durumlarda bitkini gözlemle ve yetkin bir uzmana danış.';
 
   @override
-  String get termsPremiumTitle => '4. Premium Abonelikler';
+  String get termsLiabilityTitle => '6. Sorumluluk Reddi ve Tazminat';
+
+  @override
+  String get termsLiabilityBody =>
+      'Botaniq, doğruluk, güvenilirlik veya belirli bir amaca uygunluk dâhil açık ya da zımni hiçbir garanti olmaksızın \"olduğu gibi\" ve \"mevcut haliyle\" sunulur. Yürürlükteki mevzuatın izin verdiği azami ölçüde; biz ve hizmet sağlayıcılarımız, hizmeti kullanmandan doğan dolaylı, arızi, özel veya sonuç niteliğindeki zararlardan ya da veri, bitki veya mal kaybından sorumlu tutulamayız ve herhangi bir talebe ilişkin toplam sorumluluğumuz, varsa, talepten önceki on iki ay içinde bize ödediğin tutarla sınırlıdır. Hizmeti kullanmandan, içeriğinden veya bu koşulları ya da yürürlükteki yasaları ihlal etmenden doğan taleplere karşı bizi tazmin etmeyi ve zarar görmemizi önlemeyi kabul edersin.';
+
+  @override
+  String get termsPremiumTitle => '7. Premium Abonelikler';
 
   @override
   String get termsPremiumBody =>
-      'Premium abonelikler uygulama mağazası sözleşmene göre ücretlendirilir. İstediğin zaman iptal edebilirsin; kısmi dönemler için iade yapılmaz.';
+      'Aylık veya yıllık Premium aboneliğin, satın alma onayından sonra Apple ya da Google hesabından ücretlendirilir. Abonelik, mevcut dönem bitmeden en az 24 saat önce iptal edilmezse otomatik yenilenir. Aboneliğini mağaza hesap ayarlarından yönetebilir veya iptal edebilirsin. İade talepleri ilgili mağazanın kurallarına göre değerlendirilir.';
+
+  @override
+  String get termsLawTitle => '8. Uygulanacak Hukuk ve Değişiklikler';
+
+  @override
+  String get termsLawBody =>
+      'Bu koşullar, faaliyet gösterdiğimiz yargı bölgesinin yasalarına tabidir; uyuşmazlıklar, yürürlükteki mevzuatın izin verdiği azami ölçüde o yargı bölgesinin geçerli usulleri kapsamında çözülür. Bu koşulları ve veri uygulamalarımızı, güncel sürümü uygulama içinde yayımlayarak dilediğimiz zaman değiştirebiliriz.';
 
   @override
   String get termsClosing => 'İçin rahat, bitkilerin mutlu olsun.';

@@ -120,9 +120,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.scannerError(e.toString()),
-            ),
+            content: Text(AppLocalizations.of(context)!.scannerFailed),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -231,7 +229,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
 
           // Odaklanmayı artırmak için hafif siyah katman
           Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.2)),
+            child: Container(color: Colors.black.withValues(alpha: 0.2)),
           ),
 
           // Ortadaki Odaklanma Köşeleri
@@ -241,7 +239,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
               height: 350,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   width: _isIdentifying
                       ? 0
                       : 1, // Tarama sırasında border'ı gizleyebiliriz
@@ -279,7 +277,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                           color: _accentGreen,
                           boxShadow: [
                             BoxShadow(
-                              color: _accentGreen.withOpacity(0.8),
+                              color: _accentGreen.withValues(alpha: 0.8),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -294,8 +292,8 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              _accentGreen.withOpacity(0.4),
-                              _accentGreen.withOpacity(0.0),
+                              _accentGreen.withValues(alpha: 0.4),
+                              _accentGreen.withValues(alpha: 0.0),
                             ],
                           ),
                         ),
@@ -322,7 +320,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -337,7 +335,7 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -370,12 +368,12 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                       decoration: BoxDecoration(
                         color: !_isMushroomMode
                             ? _accentGreen
-                            : Colors.black.withOpacity(0.6),
+                            : Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
                           color: !_isMushroomMode
                               ? _accentGreen
-                              : Colors.white.withOpacity(0.2),
+                              : Colors.white.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
@@ -408,12 +406,12 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                       decoration: BoxDecoration(
                         color: _isMushroomMode
                             ? _accentGreen
-                            : Colors.black.withOpacity(0.6),
+                            : Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
                           color: _isMushroomMode
                               ? _accentGreen
-                              : Colors.white.withOpacity(0.2),
+                              : Colors.white.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
@@ -452,10 +450,10 @@ class _PlantScannerPageState extends State<PlantScannerPage>
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
+                        color: Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                       child: Row(

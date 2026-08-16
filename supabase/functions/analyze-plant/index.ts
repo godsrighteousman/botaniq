@@ -52,14 +52,14 @@ Deno.serve(async (request: Request): Promise<Response> => {
   }
 
   if (request.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405);
+    return jsonResponse({ error_code: "method_not_allowed" }, 405);
   }
 
   try {
     const apiKey = Deno.env.get("OPENAI_API_KEY");
     if (!apiKey) {
       return jsonResponse(
-        { error: "OPENAI_API_KEY not configured on server" },
+        { error_code: "internal_configuration_error" },
         500,
       );
     }
@@ -67,10 +67,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     const body = await readRequestBody(request);
     if (!body.mode) {
       return jsonResponse(
-        {
-          error:
-            "Invalid mode. Use: identify, diagnose, chat, details, or localize",
-        },
+        { error_code: "invalid_mode" },
         400,
       );
     }
@@ -93,7 +90,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
 
     if (!body.image_base64?.trim()) {
       return jsonResponse(
-        { error: "image_base64 is required for identify and diagnose modes" },
+        { error_code: "image_required" },
         400,
       );
     }
@@ -101,7 +98,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     return await handleImageAnalysis(apiKey, body);
   } catch (error: unknown) {
     console.error("analyze-plant failed", error);
-    return jsonResponse({ error: errorMessage(error) }, 500);
+    return jsonResponse({ error_code: "internal_error" }, 500);
   }
 });
 
@@ -110,18 +107,18 @@ async function handleChat(
   inputMessages: ChatInputMessage[] | undefined,
   languageCode: string | undefined,
 ): Promise<Response> {
-  const language = responseLanguage(languageCode);
+  const locale = responseLocale(languageCode);
   const messages: OpenAIMessage[] = [
     {
       role: "system",
       content:
-        `Sen uzman bir bitki doktoru ve botanikçisin. Kullanıcının bitki sağlığı ve bakımı hakkındaki sorularını kısa, anlaşılır, güvenli ve pratik biçimde ${language} yanıtla.`,
+        `You are a plant-care assistant. Answer in ${locale.language} with concise, practical and cautious guidance. Do not present a photo-based health assessment as a certain diagnosis, and recommend professional help when safety or uncertainty warrants it.`,
     },
   ];
 
   for (const message of inputMessages ?? []) {
     const role = message.role === "assistant" ? "assistant" : "user";
-    const text = message.content?.trim() || "Bu bitkiyi incele.";
+    const text = message.content?.trim() || "Please assess this plant.";
 
     if (message.image_url?.trim()) {
       const imageUrl = message.image_url.startsWith("data:")
@@ -148,7 +145,11 @@ async function handleChat(
   });
 
   if (!result.ok) return result.response;
-  return jsonResponse({ reply: result.content });
+  return jsonResponse({
+    reply: result.content,
+    response_locale: locale.tag,
+    fallback_used: locale.fallbackUsed,
+  });
 }
 
 async function handleDetails(
@@ -156,16 +157,16 @@ async function handleDetails(
   prompt: string | undefined,
   languageCode: string | undefined,
 ): Promise<Response> {
-  const language = responseLanguage(languageCode);
+  const locale = responseLocale(languageCode);
   const messages: OpenAIMessage[] = [
     {
       role: "system",
       content:
-        `Sen uzman bir botanikçisin. Yalnızca geçerli bir JSON objesi ve ${language}, bitkiye özgü bilgiler döndür. Emin olmadığın bilgiyi uydurma.`,
+        `Return only a valid JSON object with evidence-based plant information in ${locale.language}. Keep scientific names unchanged and never invent uncertain details.`,
     },
     {
       role: "user",
-      content: prompt?.trim() || "Bitki hakkında detay ver.",
+      content: prompt?.trim() || "Provide plant-care details.",
     },
   ];
 
@@ -176,7 +177,11 @@ async function handleDetails(
   });
 
   if (!result.ok) return result.response;
-  return jsonResponse({ result: parseJsonObject(result.content) });
+  return jsonResponse({
+    result: parseJsonObject(result.content),
+    response_locale: locale.tag,
+    fallback_used: locale.fallbackUsed,
+  });
 }
 
 async function handleLocalization(
@@ -185,14 +190,14 @@ async function handleLocalization(
   languageCode: string | undefined,
 ): Promise<Response> {
   if (!content || Object.keys(content).length === 0) {
-    return jsonResponse({ error: "content is required for localize mode" }, 400);
+    return jsonResponse({ error_code: "content_required" }, 400);
   }
-  const language = responseLanguage(languageCode);
+  const locale = responseLocale(languageCode);
   const messages: OpenAIMessage[] = [
     {
       role: "system",
       content:
-        `Verilen bitki verilerini ${language} diline çevir. Yeni bilgi, bakım önerisi veya kesinlik ekleme; bilimsel tür adlarını değiştirme. JSON anahtarlarını aynen koru ve yalnızca geçerli JSON döndür.`,
+        `Translate the provided plant-care values into ${locale.language}. Preserve JSON keys and scientific names. Do not add facts, advice, certainty, or translate user-entered labels. Return only valid JSON.`,
     },
     { role: "user", content: JSON.stringify(content) },
   ];
@@ -203,7 +208,11 @@ async function handleLocalization(
     jsonMode: true,
   });
   if (!result.ok) return result.response;
-  return jsonResponse({ result: parseJsonObject(result.content) });
+  return jsonResponse({
+    result: parseJsonObject(result.content),
+    response_locale: locale.tag,
+    fallback_used: locale.fallbackUsed,
+  });
 }
 
 async function handleImageAnalysis(
@@ -212,15 +221,15 @@ async function handleImageAnalysis(
 ): Promise<Response> {
   const isDiagnosis = body.mode === "diagnose";
   const mimeType = body.image_mime_type === "png" ? "png" : "jpeg";
-  const language = responseLanguage(body.language_code);
+  const locale = responseLocale(body.language_code);
 
   const systemPrompt = isDiagnosis
-    ? `Sen uzman bir botanikçi ve bitki doktorusun. Fotoğraftaki bitkiyi görsel kanıta dayanarak tanımla, ardından hastalığını teşhis et. Emin değilsen uydurma isim verme; tanımlanamadığını açıkça yaz. Yalnızca geçerli JSON ve ${language} yanıt ver.`
-    : `Sen uzman bir botanikçisin. Fotoğraftaki bitkiyi görsel kanıta dayanarak tanımla. Emin olmadığın türü uydurma. Yalnızca geçerli JSON ve ${language} yanıt ver.`;
+    ? `Assess the plant only from visible evidence. Use cautious language rather than a certain diagnosis. Use null for an uncertain identity. Return only valid JSON with localized prose in ${locale.language}, while machine fields remain in English.`
+    : `Identify the plant only from visible evidence. Use null instead of inventing an uncertain identity. Return only valid JSON with localized prose in ${locale.language}.`;
 
   const fallbackPrompt = isDiagnosis
-    ? 'Şu JSON şemasında cevap ver: {"plant_name":"Ortak ad veya Tanımlanamayan Bitki","species":"Bilimsel tür veya Belirsiz","diagnosis":"Teşhis","prescription":"Tedavi adımları","urgency":"Düşük/Orta/Kritik","care_tips":["İpucu"],"recovery_time":"Tahmini süre"}'
-    : 'Şu JSON şemasında cevap ver: {"name":"Bitki adı","species":"Bilimsel tür","description":"Kısa bilgi","water_needs":"Sulama","watering_interval_days":7,"light_needs":"Işık"}. watering_interval_days türe uygun pozitif tam sayı olmalı.';
+    ? 'Use this schema: {"plant_name":null,"species":null,"diagnosis":"cautious assessment","prescription":"safe care steps","urgency_code":"low|medium|critical","care_tips":["tip"],"recovery_time":"estimate"}.'
+    : 'Use this schema: {"name":null,"species":null,"description":"summary","water_needs":"watering guidance","watering_interval_days":7,"light_needs":"light guidance"}. watering_interval_days must be a positive integer.';
 
   const messages: OpenAIMessage[] = [
     { role: "system", content: systemPrompt },
@@ -246,7 +255,11 @@ async function handleImageAnalysis(
   });
 
   if (!result.ok) return result.response;
-  return jsonResponse({ result: parseJsonObject(result.content) });
+  return jsonResponse({
+    result: parseJsonObject(result.content),
+    response_locale: locale.tag,
+    fallback_used: locale.fallbackUsed,
+  });
 }
 
 type OpenAIResult =
@@ -282,7 +295,7 @@ async function callOpenAI(
     return {
       ok: false,
       response: jsonResponse(
-        { error: data.error?.message || "OpenAI API error" },
+        { error_code: "ai_service_unavailable" },
         response.status,
       ),
     };
@@ -293,7 +306,7 @@ async function callOpenAI(
     return {
       ok: false,
       response: jsonResponse(
-        { error: "OpenAI returned an empty response" },
+        { error_code: "ai_empty_response" },
         502,
       ),
     };
@@ -334,8 +347,45 @@ async function readRequestBody(
   };
 }
 
-function responseLanguage(languageCode: string | undefined): string {
-  return languageCode === "en" ? "English" : "Türkçe";
+interface ResolvedResponseLocale {
+  tag: string;
+  language: string;
+  fallbackUsed: boolean;
+}
+
+const responseLanguages: Record<string, string> = {
+  en: "English",
+  tr: "Turkish",
+  de: "German",
+  fr: "French",
+  es: "Spanish",
+  it: "Italian",
+  pt: "European Portuguese",
+  "pt-BR": "Brazilian Portuguese",
+  pl: "Polish",
+  ru: "Russian",
+  "zh-Hans": "Simplified Chinese",
+  "zh-Hant": "Traditional Chinese",
+  id: "Indonesian",
+  th: "Thai",
+  ar: "Arabic",
+  "nl-NL": "Dutch as used in the Netherlands",
+  "nl-BE": "Belgian Dutch (Flemish)",
+};
+
+function responseLocale(value: string | undefined): ResolvedResponseLocale {
+  const raw = value?.trim().replaceAll("_", "-") || "";
+  const exact = Object.keys(responseLanguages).find((tag) =>
+    tag.toLowerCase() === raw.toLowerCase()
+  );
+  if (exact) {
+    return {
+      tag: exact,
+      language: responseLanguages[exact],
+      fallbackUsed: false,
+    };
+  }
+  return { tag: "en", language: responseLanguages.en, fallbackUsed: true };
 }
 
 async function readOpenAIResponse(
@@ -366,10 +416,6 @@ function jsonResponse(
     status,
     headers: jsonHeaders,
   });
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unexpected server error";
 }
 
 function stringValue(value: unknown): string | undefined {

@@ -39,6 +39,7 @@ migrate_working_dir/
 !.env.example
 config/env.json
 config/*.local.json
+/ios/Flutter/GoogleAuth.local.xcconfig
 
 # Symbolication related
 app.*.symbols
@@ -50,3 +51,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Supabase CLI local link/session cache
+/supabase/.temp/
+
+# Stray editor/tool backup files
+*.backup

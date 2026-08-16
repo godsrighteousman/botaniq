@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../models/home_models.dart';
@@ -49,7 +50,7 @@ class MyPlantsCarousel extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0ED761).withOpacity(0.08),
+                    color: const Color(0xFF0ED761).withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -76,7 +77,7 @@ class MyPlantsCarousel extends StatelessWidget {
             clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(horizontal: 4),
             itemCount: plants.length,
-            separatorBuilder: (_, _a) => const SizedBox(width: 14),
+            separatorBuilder: (_, a) => const SizedBox(width: 14),
             itemBuilder: (context, index) => _PlantCard(
               plant: plants[index],
               onPlantChanged: onPlantChanged,
@@ -110,10 +111,7 @@ class _PlantCard extends StatelessWidget {
     final date = watering.lastWateredAt;
     final lastWatered = date == null
         ? l10n.wateringNever
-        : l10n.wateringLastDate(
-            '${date.day.toString().padLeft(2, '0')}.'
-            '${date.month.toString().padLeft(2, '0')}.${date.year}',
-          );
+        : l10n.wateringLastDate(DateFormat.yMd(l10n.localeName).format(date));
     return GestureDetector(
       onTap: () async {
         final changed = await Navigator.push<bool>(
@@ -128,12 +126,12 @@ class _PlantCard extends StatelessWidget {
       child: Container(
         width: 155,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.85),
+          color: Colors.white.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: const Color(0xFFE8F5EE)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0ED761).withOpacity(0.06),
+              color: const Color(0xFF0ED761).withValues(alpha: 0.06),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -153,7 +151,7 @@ class _PlantCard extends StatelessWidget {
                   plant.imageUrl,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _a, _b) => Container(
+                  errorBuilder: (_, a, b) => Container(
                     color: const Color(0xFFE8F5EE),
                     child: const Center(
                       child: Icon(
@@ -186,7 +184,7 @@ class _PlantCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    plant.name,
+                    plant.name.isEmpty ? l10n.plantUnknown : plant.name,
                     style: GoogleFonts.outfit(
                       color: const Color(0xFF1B3A2A),
                       fontSize: 15,
@@ -227,7 +225,7 @@ class _PlantCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: plant.statusColor.withOpacity(0.1),
+                      color: plant.statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(

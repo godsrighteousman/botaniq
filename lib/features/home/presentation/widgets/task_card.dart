@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/locale/locale_provider.dart';
+import '../../../../core/measurement/measurement_formatter.dart';
 import '../models/home_models.dart';
 
 /// Tek bir görev kartı widget'ı.
@@ -16,6 +19,10 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final measurements = MeasurementFormatter(
+      preference: context.watch<LocaleProvider>().measurementPreference,
+      formattingLocale: l10n.localeName,
+    );
     final isCompleted = task.isCompleted;
     final isOverdue = task.isOverdue;
 
@@ -32,20 +39,20 @@ class TaskCard extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    const Color(0xFFFF6B6B).withOpacity(0.08),
-                    Colors.white.withOpacity(0.9),
+                    const Color(0xFFFF6B6B).withValues(alpha: 0.08),
+                    Colors.white.withValues(alpha: 0.9),
                   ],
                 )
               : null,
           color: isOverdue
               ? null
               : isCompleted
-              ? const Color(0xFFF5F9F6).withOpacity(0.6)
-              : Colors.white.withOpacity(0.85),
+              ? const Color(0xFFF5F9F6).withValues(alpha: 0.6)
+              : Colors.white.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isOverdue && !isCompleted
-                ? const Color(0xFFFF6B6B).withOpacity(0.3)
+                ? const Color(0xFFFF6B6B).withValues(alpha: 0.3)
                 : isCompleted
                 ? Colors.transparent
                 : const Color(0xFFE8F5EE),
@@ -56,8 +63,8 @@ class TaskCard extends StatelessWidget {
               : [
                   BoxShadow(
                     color: isOverdue
-                        ? const Color(0xFFFF6B6B).withOpacity(0.08)
-                        : Colors.black.withOpacity(0.04),
+                        ? const Color(0xFFFF6B6B).withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.04),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -137,7 +144,7 @@ class TaskCard extends StatelessWidget {
 
                   // Bitki adı
                   Text(
-                    task.plantName,
+                    task.plantName.isEmpty ? l10n.plantUnknown : task.plantName,
                     style: GoogleFonts.outfit(
                       color: isCompleted
                           ? const Color(0xFF7A8F82)
@@ -170,7 +177,7 @@ class TaskCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           '${_localizedTaskType(l10n, task.taskType)}'
-                          '${task.amount.isNotEmpty ? ' · ${task.amount}' : ''}',
+                          '${task.amount.isNotEmpty ? ' · ${measurements.displayLegacyAmount(task.amount)}' : ''}',
                           style: GoogleFonts.inter(
                             color: isCompleted
                                 ? const Color(0xFFADBFB4)
@@ -218,7 +225,7 @@ class TaskCard extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isOverdue
-                              ? const Color(0xFFFF6B6B).withOpacity(0.3)
+                              ? const Color(0xFFFF6B6B).withValues(alpha: 0.3)
                               : const Color(0xFFE0E8E3),
                         ),
                       ),

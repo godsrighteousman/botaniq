@@ -106,15 +106,13 @@ class CareTaskPlanner {
       final plantId = plant['id']?.toString() ?? '';
       if (plantId.isEmpty) continue;
 
-      final plantName = (plant['custom_name'] ?? plant['name'] ?? 'My Plant')
+      final plantName = (plant['custom_name'] ?? plant['name'] ?? '')
           .toString();
       final imageUrl = plant['image_url']?.toString() ?? '';
       final schedule = WateringScheduleService.fromPlant(plant, now: now);
       final dueDate = schedule.dueDate;
 
-      final isDue = isToday
-          ? schedule.isDue
-          : isSameLocalDay(dueDate, target);
+      final isDue = isToday ? schedule.isDue : isSameLocalDay(dueDate, target);
       if (!isDue) continue;
 
       final waterRequirement = plant['water_requirement']?.toString().trim();
@@ -127,7 +125,7 @@ class CareTaskPlanner {
           amount: waterRequirement == null || waterRequirement.isEmpty
               ? '250ml'
               : waterRequirement,
-          instruction: 'Time to water your $plantName!',
+          instruction: '',
           imageUrl: imageUrl,
           dueDate: dueDate,
         ),

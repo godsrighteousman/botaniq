@@ -3,21 +3,32 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Botaniq needs camera access to scan and identify your plants.</string>
+	<string>Botaniq uses the camera only when you scan or photograph a plant.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Botaniq needs photo library access so you can choose a profile or plant photo.</string>
+	<string>Botaniq uses your photo library only when you choose a profile or plant image.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Botaniq needs microphone access to record videos if needed.</string>
+	<string>Botaniq uses the microphone only when a camera flow records video with sound.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Botaniq, bitkileriniz için gerçek zamanlı hava durumu verilerini almak amacıyla konum bilgisine ihtiyaç duyar.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Botaniq, bitkileriniz için her zaman en güncel hava durumu verilerini almak amacıyla konum bilgisine ihtiyaç duyar.</string>
+	<string>Botaniq uses your location while the app is open to provide local weather-based plant-care guidance.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Botaniq</string>
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

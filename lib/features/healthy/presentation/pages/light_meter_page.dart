@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
+import '../../domain/stable_lux_filter.dart';
+
 class LightMeterPage extends StatefulWidget {
   const LightMeterPage({super.key});
 
@@ -19,8 +21,11 @@ class _LightMeterPageState extends State<LightMeterPage>
 
   double _currentLux = 0.0;
   bool _isProcessingImage = false;
+  bool _hasMeasurement = false;
+  bool _cameraFailed = false;
   CameraController? _cameraController;
   DateTime _lastProcessTime = DateTime.now();
+  final StableLuxFilter _luxFilter = StableLuxFilter();
 
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -71,12 +76,13 @@ class _LightMeterPageState extends State<LightMeterPage>
         if (DateTime.now().difference(_lastProcessTime).inMilliseconds > 400) {
           _isProcessingImage = true;
 
-          double brightness = _calculateBrightness(image);
-          double estimatedLux = _mapBrightnessToLux(brightness);
+          final brightness = _calculateBrightness(image);
+          final estimatedLux = _luxFilter.add(_mapBrightnessToLux(brightness));
 
           if (mounted) {
             setState(() {
               _currentLux = estimatedLux;
+              _hasMeasurement = _luxFilter.sampleCount >= 3;
             });
           }
 
@@ -85,10 +91,12 @@ class _LightMeterPageState extends State<LightMeterPage>
         }
       });
     } catch (e) {
-      // Kamera izni yoksa fallback değeri gösterilir
+      // A fabricated fallback lux value would look authoritative. Keep the
+      // unavailable state explicit when permission or camera setup fails.
       if (mounted) {
         setState(() {
-          _currentLux = 300.0;
+          _cameraFailed = true;
+          _hasMeasurement = false;
         });
       }
     }
@@ -101,7 +109,7 @@ class _LightMeterPageState extends State<LightMeterPage>
     if (image.format.group == ImageFormatGroup.bgra8888) {
       final bytes = image.planes[0].bytes;
       // Performans için atlayarak piksel matrisi işleme
-      for (int i = 0; i < bytes.length; i += 40) {
+      for (int i = 0; i + 2 < bytes.length; i += 40) {
         sum += bytes[i]; // B
         sum += bytes[i + 1]; // G
         sum += bytes[i + 2]; // R
@@ -141,6 +149,11 @@ class _LightMeterPageState extends State<LightMeterPage>
   }
 
   String _getLightStatus(AppLocalizations l10n) {
+    if (!_hasMeasurement) {
+      return _cameraFailed
+          ? l10n.lightMeterUnavailable
+          : l10n.lightMeterStabilizing;
+    }
     if (_currentLux < 500) return l10n.lightLow;
     if (_currentLux < 2000) return l10n.lightMedium;
     if (_currentLux < 10000) return l10n.lightHigh;
@@ -148,6 +161,7 @@ class _LightMeterPageState extends State<LightMeterPage>
   }
 
   Color _getStatusColor() {
+    if (!_hasMeasurement) return const Color(0xFF8B9E93);
     if (_currentLux < 500) return const Color(0xFF6B7D73);
     if (_currentLux < 2000) return const Color(0xFF4FA976);
     if (_currentLux < 10000) return const Color(0xFFE2A04A);
@@ -155,6 +169,11 @@ class _LightMeterPageState extends State<LightMeterPage>
   }
 
   String _getRecommendation(AppLocalizations l10n) {
+    if (!_hasMeasurement) {
+      return _cameraFailed
+          ? l10n.lightMeterUnavailableRecommendation
+          : l10n.lightMeterStabilizingRecommendation;
+    }
     if (_currentLux < 500) return l10n.lightLowRecommendation;
     if (_currentLux < 2000) return l10n.lightMediumRecommendation;
     if (_currentLux < 10000) return l10n.lightHighRecommendation;
@@ -212,7 +231,17 @@ class _LightMeterPageState extends State<LightMeterPage>
                   height: 1.3,
                 ),
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 8),
+              Text(
+                l10n.lightMeterCameraEstimate,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF8B9E93),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 44),
               _buildLuxGauge(),
               const SizedBox(height: 60),
               Container(
@@ -223,7 +252,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFCBD5E1).withOpacity(0.05 * 4),
+                      color: const Color(0xFFCBD5E1).withValues(alpha: 0.05 * 4),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -238,7 +267,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor().withOpacity(0.1),
+                        color: _getStatusColor().withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: AnimatedSwitcher(
@@ -301,7 +330,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                 height: 240,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _getStatusColor().withOpacity(0.05),
+                  color: _getStatusColor().withValues(alpha: 0.05),
                 ),
               ),
             );
@@ -317,7 +346,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                 height: 180,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _getStatusColor().withOpacity(0.1),
+                  color: _getStatusColor().withValues(alpha: 0.1),
                 ),
               ),
             );
@@ -334,7 +363,7 @@ class _LightMeterPageState extends State<LightMeterPage>
             border: Border.all(color: _getStatusColor(), width: 6),
             boxShadow: [
               BoxShadow(
-                color: _getStatusColor().withOpacity(0.3),
+                color: _getStatusColor().withValues(alpha: 0.3),
                 blurRadius: 30,
                 offset: const Offset(0, 10),
               ),
@@ -350,7 +379,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                 duration: const Duration(milliseconds: 400),
                 builder: (context, value, child) {
                   return Text(
-                    '${value.toInt()}',
+                    _hasMeasurement ? '${value.round()}' : '—',
                     style: GoogleFonts.outfit(
                       color: const Color(0xFF2C3E35),
                       fontSize: 48,

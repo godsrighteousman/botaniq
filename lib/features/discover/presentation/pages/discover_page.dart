@@ -46,7 +46,7 @@ class DiscoverPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+                        color: const Color(0xFFCBD5E1).withValues(alpha: 0.04 * 4),
                         blurRadius: 20,
                         offset: const Offset(0, 4),
                       ),
@@ -166,7 +166,7 @@ class DiscoverPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.04 * 4),
+            color: const Color(0xFFCBD5E1).withValues(alpha: 0.04 * 4),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -198,7 +198,7 @@ class DiscoverPage extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _accentGreen.withOpacity(0.15),
+                    color: _accentGreen.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -238,7 +238,7 @@ class DiscoverPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCBD5E1).withOpacity(0.03 * 4),
+            color: const Color(0xFFCBD5E1).withValues(alpha: 0.03 * 4),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -249,7 +249,7 @@ class DiscoverPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _accentGreen.withOpacity(0.1),
+              color: _accentGreen.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(icon, color: _accentGreen, size: 24),
@@ -277,7 +277,7 @@ class DiscoverPage extends StatelessWidget {
           ),
           Icon(
             Icons.chevron_right_rounded,
-            color: _textSecondary.withOpacity(0.5),
+            color: _textSecondary.withValues(alpha: 0.5),
           ),
         ],
       ),

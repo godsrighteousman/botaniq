@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
+import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/services/openai_service.dart';
 import '../../../../core/services/sick_plant_service.dart';
 
@@ -126,12 +127,9 @@ class _AiChatPageState extends State<AiChatPage> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        final message = e.toString().length > 100
-            ? '${e.toString().substring(0, 100)}...'
-            : e.toString();
         setState(() {
           _messages.add({
-            'content': l10n.chatError(message),
+            'content': l10n.subscriptionErrorGeneric,
             'role': 'assistant',
             'image_url': null,
           });
@@ -153,7 +151,7 @@ class _AiChatPageState extends State<AiChatPage> {
         final l10n = AppLocalizations.of(context)!;
         final diagnosis = result['diagnosis'] ?? l10n.chatDiagnosisUnknown;
         final prescription = result['prescription'] ?? l10n.chatNoTreatment;
-        final urgency = result['urgency'] ?? 'Orta';
+        final urgency = result['urgency_code'] ?? result['urgency'] ?? 'medium';
         final species = _cleanIdentification(result['species']);
         final detectedName =
             _cleanIdentification(result['plant_name']) ??
@@ -288,9 +286,10 @@ class _AiChatPageState extends State<AiChatPage> {
       final reply = await OpenAIService.chatWithDoctor(recentMessages);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
           _messages.add({
-            'content': reply ?? 'Yanıt alınamadı. Tekrar deneyin.',
+            'content': reply ?? l10n.chatError(l10n.commonUnknown),
             'role': 'assistant',
             'image_url': null,
           });
@@ -316,12 +315,30 @@ class _AiChatPageState extends State<AiChatPage> {
   }) async {
     if (_currentSickPlantId == null) return;
     try {
-      await Supabase.instance.client.from('diagnosis_messages').insert({
+      final localeTag = await LocaleProvider.preferredLocaleTag();
+      final payload = <String, dynamic>{
         'sick_plant_id': _currentSickPlantId,
         'role': role,
         'content': content,
         'image_url': imageUrl,
-      });
+        'content_locale': localeTag,
+      };
+      try {
+        await Supabase.instance.client
+            .from('diagnosis_messages')
+            .insert(payload);
+      } on PostgrestException catch (error) {
+        final schemaIsOlder =
+            error.code == '42703' ||
+            error.code == 'PGRST204' ||
+            error.message.contains('content_locale');
+        if (!schemaIsOlder) rethrow;
+        await Supabase.instance.client
+            .from('diagnosis_messages')
+            .insert(
+              Map<String, dynamic>.from(payload)..remove('content_locale'),
+            );
+      }
     } catch (e) {
       debugPrint("Mesaj kaydetme hatası: $e");
     }
@@ -399,12 +416,9 @@ class _AiChatPageState extends State<AiChatPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Color(0xFF2C3E35),
-            size: 18,
-          ),
+        leading: BackButton(
+          color: const Color(0xFF2C3E35),
+          style: IconButton.styleFrom(iconSize: 18),
           onPressed: () => Navigator.pop(context, _currentSickPlantId != null),
         ),
         title: Column(
@@ -457,7 +471,7 @@ class _AiChatPageState extends State<AiChatPage> {
 
   Widget _buildTypingIndicator() {
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -466,7 +480,7 @@ class _AiChatPageState extends State<AiChatPage> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFCBD5E1).withOpacity(0.16),
+              color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -499,7 +513,9 @@ class _AiChatPageState extends State<AiChatPage> {
 
   Widget _buildMessageBubble(String text, bool isUser, {String? imageUrl}) {
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isUser
+          ? AlignmentDirectional.centerEnd
+          : AlignmentDirectional.centerStart,
       child: Container(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.78,
@@ -508,16 +524,16 @@ class _AiChatPageState extends State<AiChatPage> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isUser ? _primaryGreen : Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(24),
-            topRight: const Radius.circular(24),
-            bottomLeft: Radius.circular(isUser ? 24 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 24),
+          borderRadius: BorderRadiusDirectional.only(
+            topStart: const Radius.circular(24),
+            topEnd: const Radius.circular(24),
+            bottomStart: Radius.circular(isUser ? 24 : 4),
+            bottomEnd: Radius.circular(isUser ? 4 : 24),
           ),
           boxShadow: [
             if (!isUser)
               BoxShadow(
-                color: const Color(0xFFCBD5E1).withOpacity(0.16),
+                color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
@@ -538,7 +554,8 @@ class _AiChatPageState extends State<AiChatPage> {
                     width: double.infinity,
                     height: 180,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    matchTextDirection: false,
+                    errorBuilder: (_, _, _) => Container(
                       height: 80,
                       color: const Color(0xFFF1F5F9),
                       child: const Center(
@@ -621,7 +638,7 @@ class _AiChatPageState extends State<AiChatPage> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: _primaryGreen.withOpacity(0.1),
+                color: _primaryGreen.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
@@ -693,7 +710,7 @@ class _AiChatPageState extends State<AiChatPage> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _primaryGreen.withOpacity(0.3),
+                    color: _primaryGreen.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

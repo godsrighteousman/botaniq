@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../l10n/app_localizations.dart';
+import '../locale/locale_provider.dart';
+import '../locale/supported_app_locale.dart';
 import 'watering_schedule_service.dart';
 
 enum CareNotificationDestination { garden, clinic }
@@ -32,13 +34,7 @@ class CareNotificationService {
     if (_isInitialized) return;
 
     tz_data.initializeTimeZones();
-    try {
-      final timezoneName = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timezoneName));
-    } catch (error) {
-      debugPrint('Cihaz saat dilimi okunamadı, UTC kullanılıyor: $error');
-      tz.setLocalLocation(tz.UTC);
-    }
+    await _refreshLocalTimezone();
 
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -127,6 +123,9 @@ class CareNotificationService {
   Future<void> refreshSchedules() async {
     try {
       await initialize();
+      // The device timezone can change while the app remains installed (for
+      // example, after travel). Re-read it before calculating every schedule.
+      await _refreshLocalTimezone();
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) {
         await cancelCareNotifications();
@@ -137,20 +136,20 @@ class CareNotificationService {
         _loadPlants(user.id),
         _hasActiveSickPlant(user.id),
         _wateringRemindersEnabled(user.id),
-        _languageCode(),
+        _localizations(),
       ]);
       final plants = results[0] as List<Map<String, dynamic>>;
       final hasSickPlant = results[1] as bool;
       final wateringEnabled = results[2] as bool;
-      final languageCode = results[3] as String;
+      final localizations = results[3] as AppLocalizations;
 
       await cancelCareNotifications();
 
       if (wateringEnabled) {
-        await _scheduleWateringNotifications(plants, languageCode);
+        await _scheduleWateringNotifications(plants, localizations);
       }
       if (hasSickPlant) {
-        await _scheduleClinicNotifications(languageCode);
+        await _scheduleClinicNotifications(localizations);
       }
     } catch (error) {
       debugPrint('Bakım bildirimleri zamanlanamadı: $error');
@@ -201,18 +200,35 @@ class CareNotificationService {
     return true;
   }
 
-  Future<String> _languageCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('app_locale');
-    if (saved == 'en' || saved == 'tr') return saved!;
-    final systemLanguage =
-        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-    return systemLanguage == 'en' ? 'en' : 'tr';
+  Future<void> _refreshLocalTimezone() async {
+    try {
+      final timezoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timezoneName));
+    } catch (error) {
+      debugPrint('Cihaz saat dilimi okunamadı, UTC kullanılıyor: $error');
+      tz.setLocalLocation(tz.UTC);
+    }
+  }
+
+  Future<AppLocalizations> _localizations() async {
+    final requestedTag = await LocaleProvider.preferredLocaleTag();
+    final locale =
+        SupportedAppLocales.byTag(requestedTag)?.locale ??
+        SupportedAppLocales.fallback;
+    try {
+      return await AppLocalizations.delegate.load(locale);
+    } catch (error) {
+      debugPrint(
+        'Bildirim dili yüklenemedi ($requestedTag), İngilizce kullanılıyor: '
+        '$error',
+      );
+      return AppLocalizations.delegate.load(SupportedAppLocales.fallback);
+    }
   }
 
   Future<void> _scheduleWateringNotifications(
     List<Map<String, dynamic>> plants,
-    String languageCode,
+    AppLocalizations localizations,
   ) async {
     if (plants.isEmpty) return;
     final now = tz.TZDateTime.now(tz.local);
@@ -246,23 +262,19 @@ class CareNotificationService {
 
       await _notifications.zonedSchedule(
         id: _waterNotificationBaseId + slot,
-        title: languageCode == 'en'
-            ? 'Your plants are waiting 💧'
-            : 'Bitkilerin seni bekliyor 💧',
-        body: languageCode == 'en'
-            ? 'Don’t forget to water the plants due today.'
-            : 'Bugün sulanması gereken bitkilerini sulamayı unutma.',
+        title: localizations.notificationWateringTitle,
+        body: localizations.homeWateringNotification,
         payload: 'garden',
         scheduledDate: scheduledDate,
-        notificationDetails: const NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'plant_care_water',
-            'Watering reminders',
-            channelDescription: 'Reminders for plants that need watering today',
+            localizations.notificationWateringTitle,
+            channelDescription: localizations.notificationWateringSubtitle,
             importance: Importance.high,
             priority: Priority.high,
           ),
-          iOS: DarwinNotificationDetails(
+          iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
@@ -275,7 +287,9 @@ class CareNotificationService {
     }
   }
 
-  Future<void> _scheduleClinicNotifications(String languageCode) async {
+  Future<void> _scheduleClinicNotifications(
+    AppLocalizations localizations,
+  ) async {
     final now = tz.TZDateTime.now(tz.local);
     const hours = [12, 19];
 
@@ -291,28 +305,21 @@ class CareNotificationService {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
 
-      final evening = slot == 1;
       await _notifications.zonedSchedule(
         id: _clinicNotificationBaseId + slot,
-        title: languageCode == 'en'
-            ? 'Clinic check-up time 🩺'
-            : 'Bitki muayene vakti 🩺',
-        body: languageCode == 'en'
-            ? 'Your sick plant needs attention. You can ask me for help.'
-            : evening
-            ? 'Hasta bitkinin akşam kontrolü geldi. Bana danışabilirsin.'
-            : 'Hasta bitkin ilgi bekliyor. Tedavisi için bana danışabilirsin.',
+        title: localizations.clinicTitle,
+        body: localizations.clinicNewPhotoSubtitle,
         payload: 'clinic',
         scheduledDate: scheduledDate,
-        notificationDetails: const NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'plant_care_clinic',
-            'Plant clinic reminders',
-            channelDescription: 'Check-up reminders for sick plants',
+            localizations.clinicTitle,
+            channelDescription: localizations.clinicNewPhotoSubtitle,
             importance: Importance.high,
             priority: Priority.high,
           ),
-          iOS: DarwinNotificationDetails(
+          iOS: const DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,

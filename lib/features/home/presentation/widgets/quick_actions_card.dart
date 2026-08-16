@@ -47,7 +47,7 @@ class QuickActionsCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(26),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0ED761).withOpacity(0.3),
+                  color: const Color(0xFF0ED761).withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -62,7 +62,7 @@ class QuickActionsCard extends StatelessWidget {
                   child: Icon(
                     Icons.document_scanner_rounded,
                     size: 100,
-                    color: Colors.white.withOpacity(0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                   ),
                 ),
                 // İçerik
@@ -96,7 +96,7 @@ class QuickActionsCard extends StatelessWidget {
                       Text(
                         l10n.homeIdentifyCamera,
                         style: GoogleFonts.inter(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),

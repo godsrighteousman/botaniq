@@ -146,7 +146,7 @@ class _SchedulePageState extends State<SchedulePage> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _accentGreen.withOpacity(0.15),
+                            color: _accentGreen.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -195,7 +195,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 decoration: BoxDecoration(
                   color: _lightBg,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.05)),
+                  border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
                 ),
                 child: Row(
                   children: [
@@ -363,12 +363,12 @@ class _SchedulePageState extends State<SchedulePage> {
                         border: Border.all(
                           color: isSelected
                               ? Colors.transparent
-                              : Colors.black.withOpacity(0.05),
+                              : Colors.black.withValues(alpha: 0.05),
                         ),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: _accentGreen.withOpacity(0.3),
+                                  color: _accentGreen.withValues(alpha: 0.3),
                                   blurRadius: 10,
                                   spreadRadius: 2,
                                   offset: const Offset(0, 4),
@@ -474,18 +474,18 @@ class _SchedulePageState extends State<SchedulePage> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isCompleted ? _lightBg.withOpacity(0.5) : Colors.white,
+          color: isCompleted ? _lightBg.withValues(alpha: 0.5) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isCompleted
                 ? Colors.transparent
-                : Colors.black.withOpacity(0.05),
+                : Colors.black.withValues(alpha: 0.05),
           ),
           boxShadow: isCompleted
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 10,
                     spreadRadius: 0,
                     offset: const Offset(0, 4),
@@ -563,7 +563,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 border: Border.all(
                   color: isCompleted
                       ? _accentGreen
-                      : Colors.black.withOpacity(0.1),
+                      : Colors.black.withValues(alpha: 0.1),
                 ),
               ),
               child: isCompleted

@@ -90,7 +90,7 @@ class _DoctorTabState extends State<DoctorTab> {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF3B4D43).withOpacity(0.3),
+              color: const Color(0xFF3B4D43).withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -101,8 +101,8 @@ class _DoctorTabState extends State<DoctorTab> {
             borderRadius: BorderRadius.circular(28),
             gradient: LinearGradient(
               colors: [
-                Colors.black.withOpacity(0.1),
-                Colors.black.withOpacity(0.6),
+                Colors.black.withValues(alpha: 0.1),
+                Colors.black.withValues(alpha: 0.6),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -129,9 +129,9 @@ class _DoctorTabState extends State<DoctorTab> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -233,7 +233,7 @@ class _DoctorTabState extends State<DoctorTab> {
                   child: ListView.separated(
                     physics: const BouncingScrollPhysics(),
                     itemCount: _userPlants.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final plant = _userPlants[index];
                       return _buildPlantPatientOption(
@@ -275,19 +275,19 @@ class _DoctorTabState extends State<DoctorTab> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              _primaryGreen.withOpacity(0.1),
-              _primaryGreen.withOpacity(0.05),
+              _primaryGreen.withValues(alpha: 0.1),
+              _primaryGreen.withValues(alpha: 0.05),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _primaryGreen.withOpacity(0.3)),
+          border: Border.all(color: _primaryGreen.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _primaryGreen.withOpacity(0.15),
+                color: _primaryGreen.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
@@ -361,7 +361,7 @@ class _DoctorTabState extends State<DoctorTab> {
           border: Border.all(color: const Color(0xFFE2E8F0)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFCBD5E1).withOpacity(0.16),
+              color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -377,7 +377,7 @@ class _DoctorTabState extends State<DoctorTab> {
                       width: 56,
                       height: 56,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildPlaceholderAvatar(),
+                      errorBuilder: (_, _, _) => _buildPlaceholderAvatar(),
                     )
                   : _buildPlaceholderAvatar(),
             ),
@@ -395,7 +395,7 @@ class _DoctorTabState extends State<DoctorTab> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: _primaryGreen.withOpacity(0.1),
+                color: _primaryGreen.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -484,7 +484,7 @@ class _DoctorTabState extends State<DoctorTab> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.08),
+              color: color.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -497,7 +497,7 @@ class _DoctorTabState extends State<DoctorTab> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: color, size: 28),

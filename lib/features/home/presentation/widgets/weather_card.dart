@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/locale/locale_provider.dart';
+import '../../../../core/measurement/measurement_formatter.dart';
 
 /// Hava durumu bilgisi kartı. Konum, sıcaklık ve bakım ipucu gösterir.
 /// Botanik konsepte uygun glassmorphism tarzı tasarım.
@@ -23,16 +27,24 @@ class WeatherCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final weatherInfo = _resolveWeatherVisuals(condition);
     final localizedTip = _localizedTip(l10n, condition);
+    final measurementPreference = context.select<
+      LocaleProvider,
+      MeasurementSystemPreference
+    >((provider) => provider.measurementPreference);
+    final formatter = MeasurementFormatter(
+      preference: measurementPreference,
+      formattingLocale: Localizations.localeOf(context).toLanguageTag(),
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
+        color: Colors.white.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: const Color(0xFFE8F5EE)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -87,7 +99,7 @@ class WeatherCard extends StatelessWidget {
 
           // Sıcaklık
           Text(
-            '${temperature.round()}°',
+            formatter.temperatureCelsius(temperature),
             style: GoogleFonts.outfit(
               color: const Color(0xFF1B3A2A),
               fontSize: 28,
@@ -122,25 +134,25 @@ class WeatherCard extends StatelessWidget {
       return _WeatherVisuals(
         icon: Icons.cloud_queue_rounded,
         iconColor: Colors.blueGrey,
-        bgColor: Colors.blueGrey.withOpacity(0.1),
+        bgColor: Colors.blueGrey.withValues(alpha: 0.1),
       );
     } else if (cond.contains('rain') || cond.contains('shower')) {
       return _WeatherVisuals(
         icon: Icons.umbrella_rounded,
         iconColor: Colors.blue,
-        bgColor: Colors.blue.withOpacity(0.1),
+        bgColor: Colors.blue.withValues(alpha: 0.1),
       );
     } else if (cond.contains('snow')) {
       return _WeatherVisuals(
         icon: Icons.ac_unit_rounded,
         iconColor: Colors.lightBlueAccent,
-        bgColor: Colors.lightBlueAccent.withOpacity(0.1),
+        bgColor: Colors.lightBlueAccent.withValues(alpha: 0.1),
       );
     } else if (cond.contains('storm') || cond.contains('thunder')) {
       return _WeatherVisuals(
         icon: Icons.thunderstorm_rounded,
         iconColor: Colors.amber,
-        bgColor: Colors.amber.withOpacity(0.1),
+        bgColor: Colors.amber.withValues(alpha: 0.1),
       );
     }
     return _WeatherVisuals(
