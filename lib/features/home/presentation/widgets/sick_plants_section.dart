@@ -19,6 +19,7 @@ class SickPlantsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (sickPlants.isEmpty) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +35,7 @@ class SickPlantsSection extends StatelessWidget {
                   Text(
                     l10n.homeSickPlants,
                     style: GoogleFonts.outfit(
-                      color: const Color(0xFF1B3A2A),
+                      color: colors.onSurface,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                     ),
@@ -123,6 +124,7 @@ class _SickPlantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
     final name = plant['name'] ?? l10n.clinicUnknown;
     final diagnosis = plant['diagnosis'] ?? l10n.clinicPendingDiagnosis;
     final urgency = plant['urgency'] ?? 'Orta';
@@ -141,152 +143,159 @@ class _SickPlantCard extends StatelessWidget {
         urgencyColor = const Color(0xFFE2A04A);
     }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 250,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: urgencyColor.withValues(alpha: 0.2), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: urgencyColor.withValues(alpha: 0.05),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+    return Material(
+      color: colors.surface.withValues(alpha: 0.9),
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: 250,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: urgencyColor.withValues(alpha: 0.2),
+              width: 1,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Üst kısım: İkon + İsim + Aciliyet
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Tatlı Hasta Bitki İkonu (Yaprak + Yara Bandı)
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: urgencyColor.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Center(
-                        child: Text('🌿', style: TextStyle(fontSize: 24)),
-                      ),
-                    ),
-                    Positioned(
-                      right: -4,
-                      top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: urgencyColor.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Üst kısım: İkon + İsim + Aciliyet
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Tatlı Hasta Bitki İkonu (Yaprak + Yara Bandı)
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: urgencyColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Text('🩹', style: TextStyle(fontSize: 13)),
+                        child: const Center(
+                          child: Text('🌿', style: TextStyle(fontSize: 24)),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: GoogleFonts.outfit(
-                          color: const Color(0xFF1B3A2A),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: urgencyColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          _localizedUrgency(l10n, urgency.toString()),
-                          style: GoogleFonts.inter(
-                            color: urgencyColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: colors.surface,
+                            shape: BoxShape.circle,
                           ),
+                          child: const Text('🩹', style: TextStyle(fontSize: 13)),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-
-            // Orta kısım: Teşhis
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                diagnosis,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF5C7165),
-                  fontSize: 12,
-                  height: 1.3,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-
-            // Alt kısım: İyileşme ilerlemesi
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.clinicRecovery,
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFF7A8F82),
-                        fontSize: 10,
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: GoogleFonts.outfit(
+                            color: colors.onSurface,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: urgencyColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            _localizedUrgency(l10n, urgency.toString()),
+                            style: GoogleFonts.inter(
+                              color: urgencyColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '${(recoveryProgress * 100).toInt()}%',
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFF0ED761),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: recoveryProgress,
-                    backgroundColor: const Color(0xFFE8F5EE),
-                    color: const Color(0xFF0ED761),
-                    minHeight: 5,
                   ),
+                ],
+              ),
+
+              // Orta kısım: Teşhis
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  diagnosis,
+                  style: GoogleFonts.inter(
+                    color: colors.onSurfaceVariant,
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-          ],
+              ),
+
+              // Alt kısım: İyileşme ilerlemesi
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.clinicRecovery,
+                        style: GoogleFonts.inter(
+                          color: colors.onSurfaceVariant,
+                          fontSize: 10,
+                        ),
+                      ),
+                      Text(
+                        '${(recoveryProgress * 100).toInt()}%',
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFF0ED761),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: recoveryProgress,
+                      backgroundColor: colors.surfaceContainerHighest,
+                      color: const Color(0xFF0ED761),
+                      minHeight: 5,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

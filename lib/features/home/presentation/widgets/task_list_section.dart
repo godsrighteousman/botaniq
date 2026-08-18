@@ -47,7 +47,7 @@ class TaskListSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Seçili gün başlığı ──
-          _buildSectionHeader(sectionTitle),
+          _buildSectionHeader(context, sectionTitle),
           const SizedBox(height: 14),
 
           if (tasks.isEmpty)
@@ -60,7 +60,10 @@ class TaskListSection extends StatelessWidget {
           // ── Yarın bölümü ──
           if (showTomorrow && tomorrowTasks.isNotEmpty) ...[
             const SizedBox(height: 24),
-            _buildSectionHeader(AppLocalizations.of(context)!.homeTomorrow),
+            _buildSectionHeader(
+              context,
+              AppLocalizations.of(context)!.homeTomorrow,
+            ),
             const SizedBox(height: 14),
             ...tomorrowTasks.map(
               (task) => TaskCard(task: task, onTap: () => onTaskTap(task)),
@@ -71,11 +74,11 @@ class TaskListSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Text(
       title,
       style: GoogleFonts.outfit(
-        color: const Color(0xFF1B3A2A),
+        color: Theme.of(context).colorScheme.onSurface,
         fontSize: 22,
         fontWeight: FontWeight.w700,
       ),
@@ -84,13 +87,14 @@ class TaskListSection extends StatelessWidget {
 
   Widget _buildEmptyTaskState(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F9F6),
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE8F5EE)),
+        border: Border.all(color: colors.outlineVariant),
       ),
       child: Column(
         children: [
@@ -110,7 +114,7 @@ class TaskListSection extends StatelessWidget {
           Text(
             l10n.homeNoTasks,
             style: GoogleFonts.outfit(
-              color: const Color(0xFF5C7165),
+              color: colors.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -118,10 +122,7 @@ class TaskListSection extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             l10n.homeAllCared,
-            style: GoogleFonts.inter(
-              color: const Color(0xFF7A8F82),
-              fontSize: 13,
-            ),
+            style: GoogleFonts.inter(color: colors.onSurfaceVariant, fontSize: 13),
           ),
         ],
       ),

@@ -7,7 +7,6 @@ import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/measurement/measurement_formatter.dart';
 
 /// Hava durumu bilgisi kartı. Konum, sıcaklık ve bakım ipucu gösterir.
-/// Botanik konsepte uygun glassmorphism tarzı tasarım.
 class WeatherCard extends StatelessWidget {
   final String locationName;
   final double temperature;
@@ -25,6 +24,7 @@ class WeatherCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
     final weatherInfo = _resolveWeatherVisuals(condition);
     final localizedTip = _localizedTip(l10n, condition);
     final measurementPreference = context.select<
@@ -39,9 +39,9 @@ class WeatherCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.85),
+        color: colors.surface.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: const Color(0xFFE8F5EE)),
+        border: Border.all(color: colors.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -75,7 +75,7 @@ class WeatherCard extends StatelessWidget {
                 Text(
                   locationName.isEmpty ? l10n.weatherTitle : locationName,
                   style: GoogleFonts.inter(
-                    color: const Color(0xFF1B3A2A),
+                    color: colors.onSurface,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -85,7 +85,7 @@ class WeatherCard extends StatelessWidget {
                   Text(
                     localizedTip,
                     style: GoogleFonts.inter(
-                      color: const Color(0xFF7A8F82),
+                      color: colors.onSurfaceVariant,
                       fontSize: 12,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -101,7 +101,7 @@ class WeatherCard extends StatelessWidget {
           Text(
             formatter.temperatureCelsius(temperature),
             style: GoogleFonts.outfit(
-              color: const Color(0xFF1B3A2A),
+              color: colors.onSurface,
               fontSize: 28,
               fontWeight: FontWeight.w700,
             ),

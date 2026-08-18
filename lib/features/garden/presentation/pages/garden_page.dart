@@ -98,34 +98,40 @@ class _GardenPageState extends State<GardenPage> {
                       letterSpacing: -0.5,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SearchHistoryPage(),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: _accentGreen.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
-                      );
-                      _fetchPlants();
-                    },
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: _accentGreen,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: _accentGreen.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                      ],
+                    ),
+                    child: Material(
+                      color: _accentGreen,
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SearchHistoryPage(),
+                            ),
+                          );
+                          _fetchPlants();
+                        },
+                        child: const SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Icon(
+                            Icons.history_rounded,
+                            color: Colors.white,
+                            size: 24,
                           ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.history_rounded,
-                        color: Colors.white,
-                        size: 24,
+                        ),
                       ),
                     ),
                   ),
@@ -222,25 +228,30 @@ class _GardenPageState extends State<GardenPage> {
 
   Widget _buildFilterChip(String value, String label) {
     final isSelected = _selectedFilter == value;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedFilter = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? _accentGreen : _cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? _accentGreen
-                : Theme.of(context).colorScheme.outlineVariant,
+    return Material(
+      color: isSelected ? _accentGreen : _cardBg,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: () => setState(() => _selectedFilter = value),
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? _accentGreen
+                  : Theme.of(context).colorScheme.outlineVariant,
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            color: isSelected ? Colors.white : _textSecondary,
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              color: isSelected ? Colors.white : _textSecondary,
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            ),
           ),
         ),
       ),
@@ -265,20 +276,23 @@ class _GardenPageState extends State<GardenPage> {
         ? Colors.orange
         : _accentGreen;
 
-    return GestureDetector(
-      onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                PlantDetailPage(plantData: plant, isFromGarden: true),
-          ),
-        );
-        await _fetchPlants();
-      },
-      child: Container(
+    return Material(
+      color: _cardBg,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  PlantDetailPage(plantData: plant, isFromGarden: true),
+            ),
+          );
+          await _fetchPlants();
+        },
+        child: Container(
         decoration: BoxDecoration(
-          color: _cardBg,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -409,6 +423,7 @@ class _GardenPageState extends State<GardenPage> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

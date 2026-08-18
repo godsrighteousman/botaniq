@@ -28,6 +28,7 @@ class HomeHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final greeting = _getGreeting(l10n, now);
     final displayName = userName.isEmpty ? l10n.appTitle : userName;
+    final colors = Theme.of(context).colorScheme;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -39,7 +40,7 @@ class HomeHeader extends StatelessWidget {
               Text(
                 l10n.homePersonalGreeting(greeting, displayName),
                 style: GoogleFonts.outfit(
-                  color: const Color(0xFF1B3A2A),
+                  color: colors.onSurface,
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.5,
@@ -51,7 +52,7 @@ class HomeHeader extends StatelessWidget {
               Text(
                 DateFormat('d MMMM, EEEE', locale).format(now),
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF7A8F82),
+                  color: colors.onSurfaceVariant,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -99,27 +100,36 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final button = GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0xFF0ED761).withValues(alpha: 0.12)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0ED761).withValues(alpha: 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+    final colors = Theme.of(context).colorScheme;
+    final button = Material(
+      color: colors.surface.withValues(alpha: 0.9),
+      shape: CircleBorder(
+        side: BorderSide(color: const Color(0xFF0ED761).withValues(alpha: 0.14)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Icon(icon, color: colors.onSurface, size: 20),
         ),
-        child: Icon(icon, color: const Color(0xFF3B4D43), size: 20),
       ),
     );
-    if (tooltip == null) return button;
-    return Tooltip(message: tooltip!, child: button);
+    final withShadow = Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0ED761).withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: button,
+    );
+    if (tooltip == null) return withShadow;
+    return Tooltip(message: tooltip!, child: withShadow);
   }
 }

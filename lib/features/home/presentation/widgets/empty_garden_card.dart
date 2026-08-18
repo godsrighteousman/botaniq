@@ -13,6 +13,7 @@ class EmptyGardenCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
 
     return Container(
       width: double.infinity,
@@ -24,7 +25,7 @@ class EmptyGardenCard extends StatelessWidget {
           colors: [
             const Color(0xFF0ED761).withValues(alpha: 0.10),
             const Color(0xFF0ABF55).withValues(alpha: 0.04),
-            const Color(0xFFE8F5EE).withValues(alpha: 0.3),
+            colors.surfaceContainerHighest.withValues(alpha: 0.3),
           ],
           stops: const [0.0, 0.5, 1.0],
         ),
@@ -53,7 +54,7 @@ class EmptyGardenCard extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -64,10 +65,7 @@ class EmptyGardenCard extends StatelessWidget {
                   ],
                 ),
                 child: const Center(
-                  child: Text(
-                    '🌱',
-                    style: TextStyle(fontSize: 36),
-                  ),
+                  child: Text('🌱', style: TextStyle(fontSize: 36)),
                 ),
               ),
               // Artı rozeti
@@ -76,8 +74,8 @@ class EmptyGardenCard extends StatelessWidget {
                 right: 8,
                 child: Container(
                   padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: colors.surface,
                     shape: BoxShape.circle,
                   ),
                   child: Container(
@@ -104,7 +102,7 @@ class EmptyGardenCard extends StatelessWidget {
           Text(
             l10n.homeEmptyGarden,
             style: GoogleFonts.outfit(
-              color: const Color(0xFF1B3A2A),
+              color: colors.onSurface,
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
@@ -117,7 +115,7 @@ class EmptyGardenCard extends StatelessWidget {
             l10n.homeEmptyGardenSubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              color: const Color(0xFF5C7165),
+              color: colors.onSurfaceVariant,
               fontSize: 14,
               height: 1.55,
             ),

@@ -21,6 +21,7 @@ class HorizontalCalendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeName = Localizations.localeOf(context).toLanguageTag();
+    final colors = Theme.of(context).colorScheme;
     return SizedBox(
       height: 100,
       child: ListView.builder(
@@ -35,86 +36,98 @@ class HorizontalCalendar extends StatelessWidget {
           final dayKey = DateFormat('yyyy-MM-dd').format(date);
           final hasTask = daysWithTasks[dayKey] ?? false;
 
-          return GestureDetector(
-            onTap: () => onDateSelected(date),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutCubic,
-              width: 62,
-              margin: const EdgeInsets.only(right: 10),
-              decoration: BoxDecoration(
-                gradient: isSelected
-                    ? const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF0ED761), Color(0xFF0ABF55)],
-                      )
-                    : null,
-                color: isSelected ? null : Colors.white.withValues(alpha: 0.7),
+          return Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(22),
+              child: InkWell(
+                onTap: () => onDateSelected(date),
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: isSelected
-                      ? Colors.transparent
-                      : isToday
-                      ? const Color(0xFF0ED761).withValues(alpha: 0.4)
-                      : const Color(0xFFE8F5EE),
-                  width: isToday && !isSelected ? 1.5 : 1,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  width: 62,
+                  decoration: BoxDecoration(
+                    gradient: isSelected
+                        ? const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF0ED761), Color(0xFF0ABF55)],
+                          )
+                        : null,
+                    color: isSelected
+                        ? null
+                        : colors.surface.withValues(alpha: 0.75),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.transparent
+                          : isToday
+                          ? const Color(0xFF0ED761).withValues(alpha: 0.4)
+                          : colors.outlineVariant,
+                      width: isToday && !isSelected ? 1.5 : 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF0ED761,
+                              ).withValues(alpha: 0.35),
+                              blurRadius: 14,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 6),
+                            ),
+                          ]
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        DateFormat(
+                          'EEE',
+                          localeName,
+                        ).format(date).toUpperCase(),
+                        style: GoogleFonts.inter(
+                          color: isSelected
+                              ? Colors.white.withValues(alpha: 0.85)
+                              : colors.onSurfaceVariant,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        date.day.toString(),
+                        style: GoogleFonts.outfit(
+                          color: isSelected ? Colors.white : colors.onSurface,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        width: hasTask ? 6 : 0,
+                        height: hasTask ? 6 : 0,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF0ED761),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: const Color(0xFF0ED761).withValues(alpha: 0.35),
-                          blurRadius: 14,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 6),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    DateFormat('EEE', localeName).format(date).toUpperCase(),
-                    style: GoogleFonts.inter(
-                      color: isSelected
-                          ? Colors.white.withValues(alpha: 0.85)
-                          : const Color(0xFF7A8F82),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    date.day.toString(),
-                    style: GoogleFonts.outfit(
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF1B3A2A),
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    width: hasTask ? 6 : 0,
-                    height: hasTask ? 6 : 0,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.white
-                          : const Color(0xFF0ED761),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
               ),
             ),
           );

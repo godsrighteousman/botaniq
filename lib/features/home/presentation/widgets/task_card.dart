@@ -19,6 +19,7 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
     final measurements = MeasurementFormatter(
       preference: context.watch<LocaleProvider>().measurementPreference,
       formattingLocale: l10n.localeName,
@@ -26,219 +27,230 @@ class TaskCard extends StatelessWidget {
     final isCompleted = task.isCompleted;
     final isOverdue = task.isOverdue;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutCubic,
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: isOverdue && !isCompleted
-              ? LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    const Color(0xFFFF6B6B).withValues(alpha: 0.08),
-                    Colors.white.withValues(alpha: 0.9),
-                  ],
-                )
-              : null,
-          color: isOverdue
-              ? null
-              : isCompleted
-              ? const Color(0xFFF5F9F6).withValues(alpha: 0.6)
-              : Colors.white.withValues(alpha: 0.85),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: isOverdue && !isCompleted
-                ? const Color(0xFFFF6B6B).withValues(alpha: 0.3)
-                : isCompleted
-                ? Colors.transparent
-                : const Color(0xFFE8F5EE),
-            width: isOverdue ? 1.5 : 1,
-          ),
-          boxShadow: isCompleted
-              ? []
-              : [
-                  BoxShadow(
-                    color: isOverdue
-                        ? const Color(0xFFFF6B6B).withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-        ),
-        child: Row(
-          children: [
-            // Bitki resmi
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: isCompleted ? 0.4 : 1.0,
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: const Color(0xFFE8F5EE),
-                  image: task.imageUrl.isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(task.imageUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: task.imageUrl.isEmpty
-                    ? const Icon(
-                        Icons.local_florist_outlined,
-                        color: Color(0xFF86D5A6),
-                        size: 24,
-                      )
-                    : null,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: isOverdue && !isCompleted
+                  ? LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        const Color(0xFFFF6B6B).withValues(alpha: 0.08),
+                        colors.surface.withValues(alpha: 0.9),
+                      ],
+                    )
+                  : null,
+              color: isOverdue
+                  ? null
+                  : isCompleted
+                  ? colors.surfaceContainerHighest.withValues(alpha: 0.5)
+                  : colors.surface.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isOverdue && !isCompleted
+                    ? const Color(0xFFFF6B6B).withValues(alpha: 0.3)
+                    : isCompleted
+                    ? Colors.transparent
+                    : colors.outlineVariant,
+                width: isOverdue ? 1.5 : 1,
               ),
+              boxShadow: isCompleted
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: isOverdue
+                            ? const Color(0xFFFF6B6B).withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
             ),
-            const SizedBox(width: 14),
+            child: Row(
+              children: [
+                // Bitki resmi
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: isCompleted ? 0.4 : 1.0,
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: colors.surfaceContainerHighest,
+                      image: task.imageUrl.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(task.imageUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: task.imageUrl.isEmpty
+                        ? const Icon(
+                            Icons.local_florist_outlined,
+                            color: Color(0xFF86D5A6),
+                            size: 24,
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 14),
 
-            // Görev bilgisi
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Overdue rozeti
-                  if (isOverdue && !isCompleted) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      margin: const EdgeInsets.only(bottom: 6),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                // Görev bilgisi
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Overdue rozeti
+                      if (isOverdue && !isCompleted) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          margin: const EdgeInsets.only(bottom: 6),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF6B6B), Color(0xFFFF8E53)],
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.warning_rounded,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                l10n.homeOverdue,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(8),
+                      ],
+
+                      // Bitki adı
+                      Text(
+                        task.plantName.isEmpty
+                            ? l10n.plantUnknown
+                            : task.plantName,
+                        style: GoogleFonts.outfit(
+                          color: isCompleted
+                              ? colors.onSurfaceVariant
+                              : colors.onSurface,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          decoration: isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
+                          decorationColor: colors.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      const SizedBox(height: 4),
+
+                      // Görev tipi + miktar
+                      Row(
                         children: [
-                          const Icon(
-                            Icons.warning_rounded,
-                            color: Colors.white,
-                            size: 12,
+                          Icon(
+                            _getTaskIcon(task.taskType),
+                            color: isCompleted
+                                ? colors.onSurfaceVariant
+                                : isOverdue
+                                ? const Color(0xFFFF6B6B)
+                                : const Color(0xFF0ED761),
+                            size: 14,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            l10n.homeOverdue,
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
+                          Flexible(
+                            child: Text(
+                              '${_localizedTaskType(l10n, task.taskType)}'
+                              '${task.amount.isNotEmpty ? ' · ${measurements.displayLegacyAmount(task.amount)}' : ''}',
+                              style: GoogleFonts.inter(
+                                color: colors.onSurfaceVariant.withValues(
+                                  alpha: isCompleted ? 0.6 : 1,
+                                ),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-
-                  // Bitki adı
-                  Text(
-                    task.plantName.isEmpty ? l10n.plantUnknown : task.plantName,
-                    style: GoogleFonts.outfit(
-                      color: isCompleted
-                          ? const Color(0xFF7A8F82)
-                          : const Color(0xFF1B3A2A),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      decoration: isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                      decorationColor: const Color(0xFF7A8F82),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Görev tipi + miktar
-                  Row(
-                    children: [
-                      Icon(
-                        _getTaskIcon(task.taskType),
-                        color: isCompleted
-                            ? const Color(0xFF7A8F82)
-                            : isOverdue
-                            ? const Color(0xFFFF6B6B)
-                            : const Color(0xFF0ED761),
-                        size: 14,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          '${_localizedTaskType(l10n, task.taskType)}'
-                          '${task.amount.isNotEmpty ? ' · ${measurements.displayLegacyAmount(task.amount)}' : ''}',
-                          style: GoogleFonts.inter(
-                            color: isCompleted
-                                ? const Color(0xFFADBFB4)
-                                : const Color(0xFF5C7165),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            // Sağ taraf: durum ikonu
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 350),
-              transitionBuilder: (child, animation) =>
-                  ScaleTransition(scale: animation, child: child),
-              child: isCompleted
-                  ? Container(
-                      key: const ValueKey('done'),
-                      width: 34,
-                      height: 34,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF0ED761), Color(0xFF0ABF55)],
+                // Sağ taraf: durum ikonu
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
+                  child: isCompleted
+                      ? Container(
+                          key: const ValueKey('done'),
+                          width: 34,
+                          height: 34,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFF0ED761), Color(0xFF0ABF55)],
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        )
+                      : Container(
+                          key: const ValueKey('pending'),
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: colors.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isOverdue
+                                  ? const Color(
+                                      0xFFFF6B6B,
+                                    ).withValues(alpha: 0.3)
+                                  : colors.outlineVariant,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.chevron_right_rounded,
+                            color: isOverdue
+                                ? const Color(0xFFFF6B6B)
+                                : colors.onSurfaceVariant,
+                            size: 20,
+                          ),
                         ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    )
-                  : Container(
-                      key: const ValueKey('pending'),
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F9F6),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isOverdue
-                              ? const Color(0xFFFF6B6B).withValues(alpha: 0.3)
-                              : const Color(0xFFE0E8E3),
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        color: isOverdue
-                            ? const Color(0xFFFF6B6B)
-                            : const Color(0xFF7A8F82),
-                        size: 20,
-                      ),
-                    ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
