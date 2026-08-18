@@ -43,7 +43,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.historyClearTitle,
@@ -54,7 +54,7 @@ class _SearchHistoryPageState extends State<SearchHistoryPage> {
         ),
         content: Text(
           l10n.historyClearMessage,
-          style: GoogleFonts.inter(color: const Color(0xFF5C7165)),
+          style: GoogleFonts.inter(color: _textSecondary),
         ),
         actions: [
           TextButton(

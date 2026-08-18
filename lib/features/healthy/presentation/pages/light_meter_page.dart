@@ -183,6 +183,7 @@ class _LightMeterPageState extends State<LightMeterPage>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: _bgHint,
       appBar: AppBar(
@@ -190,9 +191,9 @@ class _LightMeterPageState extends State<LightMeterPage>
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Color(0xFF2C3E35),
+            color: colors.onSurface,
             size: 18,
           ),
           onPressed: () => Navigator.pop(context),
@@ -200,7 +201,7 @@ class _LightMeterPageState extends State<LightMeterPage>
         title: Text(
           l10n.lightMeterTitle,
           style: GoogleFonts.outfit(
-            color: const Color(0xFF2C3E35),
+            color: colors.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
@@ -216,7 +217,7 @@ class _LightMeterPageState extends State<LightMeterPage>
               Text(
                 l10n.lightMeterInstructionTitle,
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF6E6E73),
+                  color: colors.onSurfaceVariant,
                   fontSize: 16,
                 ),
               ),
@@ -225,7 +226,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                 l10n.lightMeterInstruction,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
-                  color: const Color(0xFF2C3E35),
+                  color: colors.onSurface,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
@@ -236,19 +237,19 @@ class _LightMeterPageState extends State<LightMeterPage>
                 l10n.lightMeterCameraEstimate,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF8B9E93),
+                  color: colors.onSurfaceVariant,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 44),
-              _buildLuxGauge(),
+              _buildLuxGauge(context),
               const SizedBox(height: 60),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
@@ -287,9 +288,9 @@ class _LightMeterPageState extends State<LightMeterPage>
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.info_outline_rounded,
-                          color: Color(0xFF8B9E93),
+                          color: colors.onSurfaceVariant,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -297,7 +298,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                           child: Text(
                             _getRecommendation(l10n),
                             style: GoogleFonts.inter(
-                              color: const Color(0xFF6E6E73),
+                              color: colors.onSurfaceVariant,
                               fontSize: 14,
                               height: 1.4,
                             ),
@@ -315,7 +316,8 @@ class _LightMeterPageState extends State<LightMeterPage>
     );
   }
 
-  Widget _buildLuxGauge() {
+  Widget _buildLuxGauge(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -359,7 +361,7 @@ class _LightMeterPageState extends State<LightMeterPage>
           height: 200,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white,
+            color: colors.surface,
             border: Border.all(color: _getStatusColor(), width: 6),
             boxShadow: [
               BoxShadow(
@@ -381,7 +383,7 @@ class _LightMeterPageState extends State<LightMeterPage>
                   return Text(
                     _hasMeasurement ? '${value.round()}' : '—',
                     style: GoogleFonts.outfit(
-                      color: const Color(0xFF2C3E35),
+                      color: colors.onSurface,
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
                       height: 1.0,
@@ -392,7 +394,7 @@ class _LightMeterPageState extends State<LightMeterPage>
               Text(
                 'LUX',
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF8B9E93),
+                  color: colors.onSurfaceVariant,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 2,
