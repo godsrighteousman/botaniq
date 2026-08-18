@@ -6,16 +6,17 @@ class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
 
   final Color _accentGreen = const Color(0xFF86D5A6);
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _cardBg = Colors.white;
-  final Color _primaryText = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF8B9E93);
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final lightBg = theme.scaffoldBackgroundColor;
+    final cardBg = theme.colorScheme.surface;
+    final primaryText = theme.colorScheme.onSurface;
+    final textSecondary = theme.colorScheme.onSurfaceVariant;
     return Scaffold(
-      backgroundColor: _lightBg,
+      backgroundColor: lightBg,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -28,7 +29,7 @@ class DiscoverPage extends StatelessWidget {
                 Text(
                   AppLocalizations.of(context)!.discoverTitle,
                   style: GoogleFonts.outfit(
-                    color: _primaryText,
+                    color: primaryText,
                     fontSize: 32,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,
@@ -42,7 +43,7 @@ class DiscoverPage extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _cardBg,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -59,10 +60,10 @@ class DiscoverPage extends StatelessWidget {
                         context,
                       )!.discoverSearchHint,
                       hintStyle: GoogleFonts.inter(
-                        color: _textSecondary,
+                        color: textSecondary,
                         fontSize: 14,
                       ),
-                      icon: Icon(Icons.search_rounded, color: _textSecondary),
+                      icon: Icon(Icons.search_rounded, color: textSecondary),
                     ),
                   ),
                 ),
@@ -75,7 +76,7 @@ class DiscoverPage extends StatelessWidget {
                     Text(
                       AppLocalizations.of(context)!.discoverLatestArticles,
                       style: GoogleFonts.outfit(
-                        color: _primaryText,
+                        color: primaryText,
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                       ),
@@ -99,18 +100,21 @@ class DiscoverPage extends StatelessWidget {
                     clipBehavior: Clip.none,
                     children: [
                       _buildArticleCard(
+                        context,
                         l10n.discoverMonsteraTitle,
                         l10n.discoverIndoorPlants,
                         'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=400',
                       ),
                       const SizedBox(width: 16),
                       _buildArticleCard(
+                        context,
                         l10n.discoverSucculentWatering,
                         l10n.discoverCacti,
                         'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&q=80&w=400',
                       ),
                       const SizedBox(width: 16),
                       _buildArticleCard(
+                        context,
                         l10n.discoverHerbSoil,
                         l10n.discoverHerbs,
                         'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=400',
@@ -125,25 +129,28 @@ class DiscoverPage extends StatelessWidget {
                 Text(
                   AppLocalizations.of(context)!.discoverTrendingGuides,
                   style: GoogleFonts.outfit(
-                    color: _primaryText,
+                    color: primaryText,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 16),
                 _buildGuideCard(
+                  context,
                   l10n.discoverPropagation,
                   l10n.discoverMinutesRead(12),
                   Icons.eco_rounded,
                 ),
                 const SizedBox(height: 12),
                 _buildGuideCard(
+                  context,
                   l10n.discoverPests,
                   l10n.discoverMinutesRead(8),
                   Icons.bug_report_rounded,
                 ),
                 const SizedBox(height: 12),
                 _buildGuideCard(
+                  context,
                   l10n.discoverRepotting,
                   l10n.discoverMinutesRead(15),
                   Icons.yard_rounded,
@@ -158,11 +165,19 @@ class DiscoverPage extends StatelessWidget {
     );
   }
 
-  Widget _buildArticleCard(String title, String tag, String imageUrl) {
+  Widget _buildArticleCard(
+    BuildContext context,
+    String title,
+    String tag,
+    String imageUrl,
+  ) {
+    final theme = Theme.of(context);
+    final cardBg = theme.colorScheme.surface;
+    final primaryText = theme.colorScheme.onSurface;
     return Container(
       width: 240,
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -214,7 +229,7 @@ class DiscoverPage extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.inter(
-                    color: _primaryText,
+                    color: primaryText,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     height: 1.3,
@@ -230,11 +245,20 @@ class DiscoverPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGuideCard(String title, String readTime, IconData icon) {
+  Widget _buildGuideCard(
+    BuildContext context,
+    String title,
+    String readTime,
+    IconData icon,
+  ) {
+    final theme = Theme.of(context);
+    final cardBg = theme.colorScheme.surface;
+    final primaryText = theme.colorScheme.onSurface;
+    final textSecondary = theme.colorScheme.onSurfaceVariant;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -262,7 +286,7 @@ class DiscoverPage extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.inter(
-                    color: _primaryText,
+                    color: primaryText,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -270,14 +294,14 @@ class DiscoverPage extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   readTime,
-                  style: GoogleFonts.inter(color: _textSecondary, fontSize: 13),
+                  style: GoogleFonts.inter(color: textSecondary, fontSize: 13),
                 ),
               ],
             ),
           ),
           Icon(
             Icons.chevron_right_rounded,
-            color: _textSecondary.withValues(alpha: 0.5),
+            color: textSecondary.withValues(alpha: 0.5),
           ),
         ],
       ),

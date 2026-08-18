@@ -16,10 +16,10 @@ class GardenPage extends StatefulWidget {
 
 class _GardenPageState extends State<GardenPage> {
   final Color _accentGreen = const Color(0xFF86D5A6);
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _cardBg = Colors.white;
-  final Color _primaryText = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF8A8A8E);
+  Color get _lightBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _cardBg => Theme.of(context).colorScheme.surface;
+  Color get _primaryText => Theme.of(context).colorScheme.onSurface;
+  Color get _textSecondary => Theme.of(context).colorScheme.onSurfaceVariant;
 
   List<Map<String, dynamic>> _plants = [];
   bool _isLoading = true;
@@ -230,7 +230,9 @@ class _GardenPageState extends State<GardenPage> {
           color: isSelected ? _accentGreen : _cardBg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? _accentGreen : const Color(0xFFE2E8F0),
+            color: isSelected
+                ? _accentGreen
+                : Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         child: Text(
@@ -442,7 +444,7 @@ class _PlantPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: const Color(0xFFE8F5EE),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: const Icon(
         Icons.local_florist_outlined,
         color: Color(0xFF86D5A6),

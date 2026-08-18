@@ -26,9 +26,9 @@ class _AddPlantWizardState extends State<AddPlantWizard> {
   int _currentPage = 0;
 
   final Color _accentGreen = const Color(0xFF86D5A6);
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _textPrimary = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF8B9E93);
+  Color get _lightBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _textPrimary => Theme.of(context).colorScheme.onSurface;
+  Color get _textSecondary => Theme.of(context).colorScheme.onSurfaceVariant;
 
   // States for answers
   String? _selectedRoom;

@@ -117,7 +117,6 @@
   "profileAppSettings": "การตั้งค่าแอพ",
   "profileNotificationPrefs": "การตั้งค่าการแจ้งเตือน",
   "profileSupportLegal": "การสนับสนุนและกฎหมาย",
-  "profileHelpCenter": "ศูนย์ช่วยเหลือ",
   "profileTerms": "ข้อกำหนดการใช้งานและนโยบาย",
   "profileSignOut": "ออกจากระบบ",
   "profileDeleteAccount": "ลบบัญชี",
@@ -128,7 +127,6 @@
   "profileActiveWeek": "จังหวะการดูแลของคุณมีชีวิตชีวาและเติบโต",
   "profileAppSettingsSubtitle": "ภาษา หน่วย และการเชื่อมต่อ AI",
   "profileNotificationPrefsSubtitle": "เลือกช่วงเวลาการดูแลที่เข้าถึงคุณ",
-  "profileHelpCenterSubtitle": "คำตอบและคำแนะนำอย่างรวดเร็ว",
   "profileTermsSubtitle": "ความเป็นส่วนตัว ข้อกำหนด และนโยบาย",
   "profileAccountActions": "การดำเนินการของบัญชี",
   "profileSignOutQuestion": "คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?",
@@ -262,14 +260,10 @@
   "clinicUrgencyLow": "ต่ำ",
   "clinicUrgencyMedium": "ปานกลาง",
   "clinicUrgencyCritical": "สำคัญ",
-  "healthTrendingTips": "เคล็ดลับสุขภาพที่กำลังมาแรง",
   "healthHumidityArticleTitle": "การเตรียมฤดูหนาว: รักษาความชื้นให้สมดุล",
   "healthHumidityArticleSubtitle": "วิธีปกป้องต้นไม้ของคุณจากอากาศหม้อน้ำแห้งในช่วงเดือนที่มีอากาศหนาวเย็น",
-  "healthWeeklySpotlight": "ผู้ป่วยและการเยียวยาประจำสัปดาห์",
   "healthAphidTitle": "เพลี้ยอ่อนรบกวน",
   "healthAphidSubtitle": "การแทรกแซงในระยะเริ่มต้นและการบำบัดน้ำมันสะเดาตามธรรมชาติ",
-  "healthDiscoverLoadError": "ไม่สามารถโหลดเนื้อหา Discover ได้ในขณะนี้ ดึงลงเพื่อลองอีกครั้ง",
-  "healthDiscoverEmpty": "ยังไม่มีเนื้อหาการค้นพบที่เผยแพร่",
   "healthDiscoverRetry": "ลองอีกครั้ง",
   "lightMeterTitle": "เครื่องวัดแสง",
   "lightMeterInstructionTitle": "เพื่อวัดแสง",
@@ -288,13 +282,7 @@
   "lightHighRecommendation": "เหมาะสำหรับว่านหางจระเข้ กระบองเพชร และเจอเรเนียมที่ชอบแสงแดด",
   "lightVeryHighRecommendation": "เหมาะสำหรับพืชกลางแจ้งและพืชอวบน้ำ",
   "homeLoadingPlants": "กำลังโหลดพืช...",
-  "homeNotifications": "การแจ้งเตือน",
-  "homeWateringTime": "เวลารดน้ำ",
   "homeWateringNotification": "พืชในร่มของคุณต้องการการรดน้ำ",
-  "homeWelcome": "ยินดีต้อนรับ!",
-  "homeWelcomeNotification": "ยินดีต้อนรับสู่ Botaniq เริ่มต้นด้วยการเพิ่มโรงงานแรกของคุณ",
-  "homeTenMinutesAgo": "10 นาทีที่แล้ว",
-  "homeOneDayAgo": "1 วันที่ผ่านมา",
   "homeQuickActions": "การดำเนินการด่วน",
   "homeIdentifyCamera": "ระบุด้วยกล้องของคุณ",
   "homeTomorrow": "พรุ่งนี้",
@@ -463,7 +451,6 @@
   "signUpWith": "หรือสมัครสมาชิกกับ",
   "noAccount": "ยังไม่มีบัญชี?",
   "alreadyAccount": "มีบัญชีอยู่แล้ว?",
-  "developerSession": "สร้างเซสชันนักพัฒนา",
   "welcomeBotaniq": "ยินดีต้อนรับสู่ Botaniq",
   "loginOptionsSubtitle": "เข้าสู่ระบบหรือลงทะเบียนเพื่อสำรองข้อมูลโรงงาน ตารางเวลา และการตั้งค่าของคุณ",
   "notificationAccessTitle": "อย่าพลาดการรดน้ำ",
@@ -560,5 +547,117 @@
   "weatherCloudyTip": "สภาพอากาศที่มีเมฆมากจะทำให้การระเหยช้าลง น้ำน้อยลงเล็กน้อย",
   "weatherRainyTip": "ฝนตกและชื้น หลีกเลี่ยงการรดน้ำต้นไม้กลางแจ้งมากเกินไป",
   "weatherStormTip": "สภาพอากาศที่มีพายุ—ย้ายกระถางที่ละเอียดอ่อนไปยังจุดกำบัง",
-  "weatherSnowTip": "หนาวเย็นและมีหิมะตก—ปกป้องพืชจากการเปลี่ยนแปลงของอุณหภูมิ"
+  "weatherSnowTip": "หนาวเย็นและมีหิมะตก—ปกป้องพืชจากการเปลี่ยนแปลงของอุณหภูมิ",
+  "accountCreatedPleaseLogIn": "Account created — please log in with your new email and password.",
+  "profileGlobalRank": "Global Rank #{rank}",
+  "@profileGlobalRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "profileGlobalRankUnranked": "Not ranked yet",
+  "profileViewLeaderboard": "See the leaderboard",
+  "leaderboardTitle": "Gardener Leaderboard",
+  "leaderboardEmptyState": "No completed care tasks yet — be the first to appear here.",
+  "leaderboardYou": "You",
+  "leaderboardCompletedTasks": "{count} tasks",
+  "@leaderboardCompletedTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inboxTitle": "Inbox",
+  "inboxEmptyState": "All caught up! No plants need watering right now.",
+  "notificationWateringSinglePlant": "{plantName} needs watering today.",
+  "@notificationWateringSinglePlant": {
+    "placeholders": {
+      "plantName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationWateringMultiplePlants": "{count} plants need water today: {plantNames}",
+  "@notificationWateringMultiplePlants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plantNames": {
+        "type": "String"
+      }
+    }
+  },
+  "termsContentBody": "You keep ownership of the photos, notes, and other content you submit. By submitting content you grant us a worldwide, royalty-free, non-exclusive, sublicensable license to host, store, reproduce, analyze, and use it to operate, secure, and improve Botaniq (including improving plant identification, diagnosis, and other AI-assisted features), for as long as we hold the content. You are responsible for having the right to share whatever you upload.",
+  "termsContentTitle": "3. Your Content and License to Us",
+  "termsLawBody": "These Terms are governed by the laws of the jurisdiction in which we operate, without regard to conflict-of-law principles, and any dispute will be resolved under that jurisdiction's applicable procedures to the fullest extent permitted by law. We may update these Terms and our data practices at any time by posting the revised version in the app.",
+  "termsLawTitle": "8. Governing Law and Changes",
+  "termsLiabilityBody": "Botaniq is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we and our service providers are not liable for any indirect, incidental, special, or consequential damages, or for any loss of data, plants, or property arising from your use of the service, and our total liability for any claim is limited to the amount you paid us, if any, in the twelve months before the claim. You agree to indemnify and hold us harmless from claims arising from your use of the service, your content, or your violation of these Terms or applicable law.",
+  "termsLiabilityTitle": "6. Disclaimers, Liability, and Indemnity",
+  "termsRetentionBody": "Requesting account deletion in the app anonymizes your account: your name, email, and profile photo are permanently removed and cannot be reattached to your identity, while your sign-in and remaining app data stay linked to the same anonymized account so you can keep using it if you sign in again. We may retain data — including in anonymized, aggregated, or backup form — for as long as needed for security, fraud-prevention, legal, accounting, or dispute-resolution purposes, even after a deletion request, to the fullest extent permitted by applicable law.",
+  "termsRetentionTitle": "4. Account Deletion and Data Retention",
+  "chatGeneralSubtitle": "General plant chat",
+  "chatWelcomeGeneral": "Hello! 🌿 I’m your AI Plant Doctor. Ask me anything about plant care, or send a photo of any plant and I’ll take a look.",
+  "healthyGeneralChatSubtitle": "No plant selected? Chat freely about care, symptoms, or send a photo.",
+  "healthyGeneralChatTitle": "Ask the AI anything",
+  "chatQuickTopics": "Or ask about",
+  "chatStartConversation": "Start the conversation",
+  "paywallAnnualBadge": "Save {percent}% with the annual plan",
+  "@paywallAnnualBadge": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallBenefitChat": "Unlimited chat with the AI Plant Doctor",
+  "paywallBenefitReminders": "Personalized care reminders",
+  "paywallBenefitScan": "Unlimited plant identification and diagnosis",
+  "paywallBodyGeneric": "You've used your 2 free analyses. With Premium you can identify, diagnose, and chat with the AI Plant Doctor without limits.",
+  "paywallBodyWithContext": "You were just exploring {context}. You've used your 2 free analyses — with Premium you can keep going without limits.",
+  "@paywallBodyWithContext": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallCta": "Go Premium",
+  "paywallDismiss": "Not now",
+  "paywallEyebrow": "You've used your 2 free analyses 🌱",
+  "paywallTitle": "Go Premium to keep going",
+  "chatPaywallContextGeneral": "chatting with the AI Plant Doctor",
+  "chatPaywallContextPlant": "diagnosing {name}",
+  "@chatPaywallContextPlant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scannerPaywallContext": "identifying a new plant",
+  "settingsPremiumBannerSubtitle": "Unlimited scans and AI chat",
+  "settingsPremiumBannerTitle": "Go Premium",
+  "subscriptionComparisonColumnFeature": "Feature",
+  "subscriptionComparisonLimited": "2 free uses",
+  "subscriptionComparisonRowChat": "AI Plant Doctor chat",
+  "subscriptionComparisonRowGarden": "Garden tracking & watering reminders",
+  "subscriptionComparisonRowLeaderboard": "Gardener leaderboard",
+  "subscriptionComparisonRowScan": "Plant scanning & diagnosis",
+  "subscriptionComparisonTitle": "Free vs. Premium",
+  "subscriptionComparisonUnlimited": "Unlimited",
+  "subscriptionPerDay": "{price} / day",
+  "@subscriptionPerDay": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionTrustCancel": "Cancel anytime",
+  "subscriptionTrustInstant": "Activates instantly",
+  "subscriptionTrustSecure": "Secure payment"
 }

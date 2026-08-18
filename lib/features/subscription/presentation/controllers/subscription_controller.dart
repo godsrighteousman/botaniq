@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -45,11 +46,16 @@ class SubscriptionController extends ChangeNotifier
 
   SubscriptionStatus _status = SubscriptionStatus.initial;
   PurchasesErrorCode? _lastErrorCode;
+  String? _lastErrorDetail;
   bool _isPurchasing = false;
   bool _isRestoring = false;
 
   SubscriptionStatus get status => _status;
   PurchasesErrorCode? get lastErrorCode => _lastErrorCode;
+
+  /// Ham hata metni — yalnızca teşhis amaçlı, `kDebugMode` altında UI'da
+  /// gösterilir. Üretimde kullanıcıya asla teknik hata metni gösterilmez.
+  String? get lastErrorDetail => _lastErrorDetail;
   bool get isLoading => _status == SubscriptionStatus.loading;
   bool get isReady => _status == SubscriptionStatus.ready;
   bool get isPurchasing => _isPurchasing;
@@ -87,6 +93,87 @@ class SubscriptionController extends ChangeNotifier
     return ((1 - (annualPrice / regularAnnualPrice)) * 100).round();
   }
 
+  /// Yıllık planın gerçek mağaza fiyatından hesaplanan gün başına maliyeti —
+  /// uydurma bir rakam değil, `StoreProduct.price`/365'ten türetilir.
+  String? get annualDailyPriceLabel {
+    final annualProduct = annualPackage?.storeProduct;
+    final price = annualProduct?.price;
+    final currencyCode = annualProduct?.currencyCode;
+    if (price == null || currencyCode == null || price <= 0) return null;
+    try {
+      final formatter = NumberFormat.simpleCurrency(name: currencyCode);
+      return formatter.format(price / 365);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Uygulama bu süreç boyunca zaten bir kez otomatik ödeme duvarı gösterdi mi.
+  bool _launchPaywallShown = false;
+
+  /// Uygulama girişinde tam ekran ödeme duvarının otomatik gösterilip
+  /// gösterilmeyeceği: yalnızca abonelik ürünleri başarıyla yüklendiğinde
+  /// (paketler dolu, sayfa güvenle açılabilir), kullanıcı premium değilken
+  /// ve bu süreçte daha önce gösterilmediyse `true` döner.
+  bool get shouldShowLaunchPaywall =>
+      !_launchPaywallShown &&
+      status == SubscriptionStatus.ready &&
+      !isPremium;
+
+  /// Otomatik ödeme duvarı gösterildiğinde çağrılır; aynı süreçte tekrar
+  /// otomatik açılmasını engeller (kullanıcı istediği zaman elle açabilir).
+  void markLaunchPaywallShown() => _launchPaywallShown = true;
+
+  /// Kalan ücretsiz AI hakkını (0-2) sunucudan getirir; premium kullanıcılar
+  /// için anlamsızdır. Yalnızca gösterim amaçlı — hak düşürmez.
+  Future<int?> fetchRemainingFreeQueries() async {
+    try {
+      for (final table in const ['users', 'profiles']) {
+        try {
+          final userId = Supabase.instance.client.auth.currentUser?.id;
+          if (userId == null) return null;
+          final row = await Supabase.instance.client
+              .from(table)
+              .select('free_ai_queries_used')
+              .eq('id', userId)
+              .maybeSingle()
+              .timeout(const Duration(seconds: 5));
+          final used = row?['free_ai_queries_used'];
+          if (used is int) return (2 - used).clamp(0, 2);
+        } catch (_) {
+          // Eski kurulumlarda yalnızca tablolardan biri bulunabilir.
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Bir AI çağrısına (tarama/teşhis/sohbet) izin verilip verilmeyeceğine
+  /// karar verir. Premium kullanıcılar her zaman geçer. Değilse, sunucudaki
+  /// `consume_free_ai_query` RPC'sini çağırır — bu hem kontrol hem düşürme
+  /// işlemini tek atomik adımda yapar, böylece istemci tarafında hile ile
+  /// atlatılamaz ve art arda hızlı iki dokunuş iki hakkı aynı anda
+  /// düşüremez.
+  ///
+  /// Ağ hatasında kullanıcıyı bloklamak yerine geçişe izin verir — bağlantı
+  /// sorunuyla gerçek bir bahçıvanı uygulamanın dışında bırakmak, nadir bir
+  /// aşım riskinden çok daha kötü bir kullanıcı deneyimidir.
+  Future<bool> consumeAiQuotaOrPrompt() async {
+    if (isPremium) return true;
+    try {
+      final response = await Supabase.instance.client
+          .rpc('consume_free_ai_query')
+          .timeout(const Duration(seconds: 8));
+      final rows = response as List;
+      if (rows.isEmpty) return true;
+      final row = rows.first as Map<String, dynamic>;
+      return row['allowed'] == true;
+    } catch (error) {
+      debugPrint('Ücretsiz AI kotası kontrol edilemedi: $error');
+      return true;
+    }
+  }
+
   void bindToAuth(GoTrueClient auth) {
     _authSubscription?.cancel();
     _authSubscription = auth.onAuthStateChange.listen((event) {
@@ -108,6 +195,7 @@ class SubscriptionController extends ChangeNotifier
       _offering = null;
       _selectedPackage = null;
       _lastErrorCode = null;
+      _lastErrorDetail = null;
       _status = SubscriptionStatus.signedOut;
       notifyListeners();
       return;
@@ -120,6 +208,7 @@ class SubscriptionController extends ChangeNotifier
     _currentUserId = userId;
     _status = SubscriptionStatus.loading;
     _lastErrorCode = null;
+    _lastErrorDetail = null;
     notifyListeners();
 
     try {
@@ -143,6 +232,7 @@ class SubscriptionController extends ChangeNotifier
     } catch (error) {
       debugPrint('RevenueCat başlatılamadı: $error');
       if (generation != _syncGeneration) return;
+      _lastErrorDetail = error.toString();
       _status = SubscriptionStatus.failed;
       notifyListeners();
     }
@@ -155,6 +245,7 @@ class SubscriptionController extends ChangeNotifier
     final generation = ++_syncGeneration;
     _status = SubscriptionStatus.loading;
     _lastErrorCode = null;
+    _lastErrorDetail = null;
     notifyListeners();
 
     try {
@@ -177,6 +268,7 @@ class SubscriptionController extends ChangeNotifier
     } catch (error) {
       debugPrint('Abonelik bilgileri yenilenemedi: $error');
       if (generation != _syncGeneration) return;
+      _lastErrorDetail = error.toString();
       _status = SubscriptionStatus.failed;
       notifyListeners();
     }
@@ -208,6 +300,7 @@ class SubscriptionController extends ChangeNotifier
     if (isBusy || package == _selectedPackage) return;
     _selectedPackage = package;
     _lastErrorCode = null;
+    _lastErrorDetail = null;
     notifyListeners();
   }
 
@@ -220,6 +313,7 @@ class SubscriptionController extends ChangeNotifier
 
     _isPurchasing = true;
     _lastErrorCode = null;
+    _lastErrorDetail = null;
     notifyListeners();
     try {
       final customerInfo = await _service.purchase(package);
@@ -257,6 +351,7 @@ class SubscriptionController extends ChangeNotifier
     }
     _isRestoring = true;
     _lastErrorCode = null;
+    _lastErrorDetail = null;
     notifyListeners();
     try {
       final customerInfo = await _service.restorePurchases();
@@ -326,6 +421,7 @@ class SubscriptionController extends ChangeNotifier
 
   void _setPlatformFailure(PlatformException error) {
     _lastErrorCode = PurchasesErrorHelper.getErrorCode(error);
+    _lastErrorDetail = '${error.code}: ${error.message}';
     _status = SubscriptionStatus.failed;
     notifyListeners();
   }

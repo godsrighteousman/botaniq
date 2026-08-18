@@ -271,6 +271,87 @@ class AppLocalizationsTr extends AppLocalizations {
   String get subscriptionFree => 'Ücretsiz';
 
   @override
+  String get subscriptionComparisonTitle => 'Ücretsiz ve Premium karşılaştır';
+
+  @override
+  String get subscriptionComparisonColumnFeature => 'Özellik';
+
+  @override
+  String get subscriptionComparisonRowScan => 'Bitki tarama ve teşhis';
+
+  @override
+  String get subscriptionComparisonRowChat => 'AI Bitki Doktoru sohbeti';
+
+  @override
+  String get subscriptionComparisonRowGarden =>
+      'Bahçe takibi ve sulama hatırlatmaları';
+
+  @override
+  String get subscriptionComparisonRowLeaderboard => 'Bahçıvan sıralaması';
+
+  @override
+  String get subscriptionComparisonLimited => '2 ücretsiz kullanım';
+
+  @override
+  String get subscriptionComparisonUnlimited => 'Sınırsız';
+
+  @override
+  String get subscriptionTrustCancel => 'İstediğin an iptal et';
+
+  @override
+  String get subscriptionTrustSecure => 'Güvenli ödeme';
+
+  @override
+  String get subscriptionTrustInstant => 'Anında aktifleşir';
+
+  @override
+  String subscriptionPerDay(String price) {
+    return '$price / gün';
+  }
+
+  @override
+  String get settingsPremiumBannerTitle => 'Premium\'a Geç';
+
+  @override
+  String get settingsPremiumBannerSubtitle => 'Sınırsız tarama ve AI sohbeti';
+
+  @override
+  String get paywallEyebrow => '2 ücretsiz analizini kullandın 🌱';
+
+  @override
+  String get paywallTitle => 'Devam etmek için Premium\'a geç';
+
+  @override
+  String paywallBodyWithContext(String context) {
+    return 'Az önce $context ile ilgileniyordun. 2 ücretsiz analizini kullandın — Premium\'la sınırsız devam edebilirsin.';
+  }
+
+  @override
+  String get paywallBodyGeneric =>
+      '2 ücretsiz analizini kullandın. Premium\'la her bitkini sınırsız tanıyabilir, teşhis edebilir ve AI Bitki Doktoru\'yla sohbet edebilirsin.';
+
+  @override
+  String get paywallBenefitScan => 'Sınırsız bitki tanıma ve teşhis';
+
+  @override
+  String get paywallBenefitChat => 'AI Bitki Doktoru ile sınırsız sohbet';
+
+  @override
+  String get paywallBenefitReminders =>
+      'Kişiselleştirilmiş bakım hatırlatıcıları';
+
+  @override
+  String paywallAnnualBadge(int percent) {
+    return 'Yıllık planla %$percent tasarruf et';
+  }
+
+  @override
+  String get paywallCta => 'Premium\'a Geç';
+
+  @override
+  String get paywallDismiss => 'Şimdi değil';
+
+  @override
   String get homeGoodMorning => 'Merhaba,';
 
   @override
@@ -296,6 +377,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get homeSmartCareReminders => 'Akıllı Bakım Hatırlatıcıları';
+
+  @override
+  String get inboxTitle => 'Gelen Kutusu';
+
+  @override
+  String get inboxEmptyState => 'Harika! Şu anda sulanması gereken bitkin yok.';
 
   @override
   String get homeWatering => 'Sulama';
@@ -395,9 +482,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profileSupportLegal => 'Destek & Yasal';
 
   @override
-  String get profileHelpCenter => 'Yardım Merkezi';
-
-  @override
   String get profileTerms => 'Kullanım Koşulları & Politikalar';
 
   @override
@@ -411,6 +495,32 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profileGardenPassport => 'BAHÇE PASAPORTU';
+
+  @override
+  String profileGlobalRank(int rank) {
+    return 'Küresel Sıra #$rank';
+  }
+
+  @override
+  String get profileGlobalRankUnranked => 'Henüz sıralı değil';
+
+  @override
+  String get profileViewLeaderboard => 'Liderlik tablosunu gör';
+
+  @override
+  String get leaderboardTitle => 'Bahçıvan Liderlik Tablosu';
+
+  @override
+  String get leaderboardEmptyState =>
+      'Henüz tamamlanmış bakım görevi yok — burada ilk sen olabilirsin.';
+
+  @override
+  String get leaderboardYou => 'Sen';
+
+  @override
+  String leaderboardCompletedTasks(int count) {
+    return '$count görev';
+  }
 
   @override
   String get profileThisWeek => 'Bu hafta';
@@ -430,9 +540,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get profileNotificationPrefsSubtitle =>
       'Hangi bakım anlarının sana ulaşacağını seç';
-
-  @override
-  String get profileHelpCenterSubtitle => 'Yanıtlar ve hızlı yönlendirmeler';
 
   @override
   String get profileTermsSubtitle => 'Gizlilik, koşullar ve politikalar';
@@ -588,6 +695,16 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get notificationWateringSubtitle =>
       'Sulama zamanı geldiğinde haber al';
+
+  @override
+  String notificationWateringSinglePlant(String plantName) {
+    return '$plantName bugün su istiyor.';
+  }
+
+  @override
+  String notificationWateringMultiplePlants(int count, String plantNames) {
+    return '$count bitki bugün suya ihtiyaç duyuyor: $plantNames';
+  }
 
   @override
   String get notificationFertilizerTitle => 'Gübre Hatırlatıcıları';
@@ -885,9 +1002,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get clinicUrgencyCritical => 'Kritik';
 
   @override
-  String get healthTrendingTips => 'Trend Sağlık Tüyoları';
-
-  @override
   String get healthHumidityArticleTitle =>
       'Kışa Hazırlık: Nem Dengesini Korumak';
 
@@ -896,21 +1010,11 @@ class AppLocalizationsTr extends AppLocalizations {
       'Soğuk aylarda bitkilerini kaloriferin kuru havasından nasıl korursun?';
 
   @override
-  String get healthWeeklySpotlight => 'Haftanın Hastası & Şifası';
-
-  @override
   String get healthAphidTitle => 'Yaprak Biti İstilası';
 
   @override
   String get healthAphidSubtitle =>
       'Erken evre müdahalesi ve doğal Neem Yağı kürü.';
-
-  @override
-  String get healthDiscoverLoadError =>
-      'Keşfet içerikleri şu anda yüklenemedi. Aşağı çekerek yeniden deneyebilirsin.';
-
-  @override
-  String get healthDiscoverEmpty => 'Yayınlanmış keşfet içeriği henüz yok.';
 
   @override
   String get healthDiscoverRetry => 'Yeniden Dene';
@@ -975,26 +1079,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get homeLoadingPlants => 'Bitkiler yükleniyor...';
 
   @override
-  String get homeNotifications => 'Bildirimler';
-
-  @override
-  String get homeWateringTime => 'Sulama Zamanı';
-
-  @override
   String get homeWateringNotification => 'Ev bitkilerinin sulanması gerekiyor.';
-
-  @override
-  String get homeWelcome => 'Hoş geldin!';
-
-  @override
-  String get homeWelcomeNotification =>
-      'Botaniq\'e hoş geldin. İlk bitkini ekleyerek başla.';
-
-  @override
-  String get homeTenMinutesAgo => '10 dakika önce';
-
-  @override
-  String get homeOneDayAgo => '1 gün önce';
 
   @override
   String get homeQuickActions => 'Hızlı İşlemler';
@@ -1331,6 +1416,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get scannerFailed => 'Tarama başarısız oldu. Lütfen tekrar dene.';
 
   @override
+  String get scannerPaywallContext => 'bir bitki taraması';
+
+  @override
+  String get chatPaywallContextGeneral => 'AI Bitki Doktoru sohbeti';
+
+  @override
+  String chatPaywallContextPlant(String name) {
+    return '$name teşhisi';
+  }
+
+  @override
   String scannerError(String error) {
     return 'Bir hata oluştu: $error';
   }
@@ -1387,6 +1483,26 @@ class AppLocalizationsTr extends AppLocalizations {
   String chatWelcome(String name) {
     return 'Merhaba! 🌿 Ben AI Bitki Doktorun. $name hakkında nasıl yardımcı olabilirim?\n\nFotoğraftan teşhis koyabilir veya bakım sorularını yanıtlayabilirim.';
   }
+
+  @override
+  String get chatWelcomeGeneral =>
+      'Merhaba! 🌿 Ben AI Bitki Doktorun. Bitki bakımıyla ilgili bana istediğini sorabilir ya da herhangi bir bitkinin fotoğrafını gönderebilirsin.';
+
+  @override
+  String get chatGeneralSubtitle => 'Genel bitki sohbeti';
+
+  @override
+  String get healthyGeneralChatTitle => 'AI\'ya her şeyi sor';
+
+  @override
+  String get healthyGeneralChatSubtitle =>
+      'Bitki seçmene gerek yok — bakım, belirtiler hakkında sohbet et veya fotoğraf gönder.';
+
+  @override
+  String get chatStartConversation => 'Sohbete Başla';
+
+  @override
+  String get chatQuickTopics => 'Ya da şunları sorabilirsin';
 
   @override
   String chatContinueWelcome(String name) {
@@ -1535,6 +1651,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get fillAllFields => 'Lütfen tüm alanları doldur.';
 
   @override
+  String get accountCreatedPleaseLogIn =>
+      'Hesabın oluşturuldu — yeni e-posta ve şifrenle giriş yapabilirsin.';
+
+  @override
   String authError(String error) {
     return 'Bir hata oluştu: $error';
   }
@@ -1550,9 +1670,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get alreadyAccount => 'Zaten hesabın var mı? ';
-
-  @override
-  String get developerSession => 'Geliştirici Oturumu Oluştur';
 
   @override
   String get welcomeBotaniq => 'Botaniq’e Hoş Geldin';

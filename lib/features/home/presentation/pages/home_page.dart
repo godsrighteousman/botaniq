@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import 'photo_instruction_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../garden/presentation/pages/garden_page.dart';
 import '../../../healthy/presentation/pages/healthy_page.dart';
+import '../../../subscription/presentation/controllers/subscription_controller.dart';
+import '../../../subscription/presentation/pages/subscription_page.dart';
 import '../../../../core/services/care_notification_service.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
@@ -22,23 +25,27 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   static const _accentGreen = Color(0xFF0ED761);
-  static const _textSecondary = Color(0xFF7A8F82);
+  Color get _textSecondary => Theme.of(context).colorScheme.onSurfaceVariant;
 
   int _currentIndex = 0;
   int _clinicInitialTabIndex = 0;
   int _clinicNavigationVersion = 0;
   late final HomeController _homeController;
+  late final SubscriptionController _subscriptionController;
 
   @override
   void initState() {
     super.initState();
     _homeController = HomeController();
+    _subscriptionController = context.read<SubscriptionController>();
+    _subscriptionController.addListener(_maybeShowLaunchPaywall);
     CareNotificationService.instance.destination.addListener(
       _handleNotificationDestination,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleNotificationDestination();
       CareNotificationService.instance.requestPermissionOnceAndRefresh();
+      _maybeShowLaunchPaywall();
     });
   }
 
@@ -47,8 +54,27 @@ class _HomePageState extends State<HomePage> {
     CareNotificationService.instance.destination.removeListener(
       _handleNotificationDestination,
     );
+    _subscriptionController.removeListener(_maybeShowLaunchPaywall);
     _homeController.dispose();
     super.dispose();
+  }
+
+  /// Uygulama açılışında, abonelik ürünleri yüklenip kullanıcının premium
+  /// olmadığı kesinleştiğinde (ve bu süreçte daha önce gösterilmediyse) tam
+  /// ekran ödeme duvarını otomatik olarak açar. Kapatma butonu her zaman
+  /// görünür kalır — kullanıcı istediği an vazgeçebilir.
+  void _maybeShowLaunchPaywall() {
+    if (!mounted || !_subscriptionController.shouldShowLaunchPaywall) return;
+    _subscriptionController.markLaunchPaywallShown();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const SubscriptionPage(),
+          fullscreenDialog: true,
+        ),
+      );
+    });
   }
 
   void _handleNotificationDestination() {
@@ -68,7 +94,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9F6),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _buildBody(),
       floatingActionButton: _buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -165,7 +191,7 @@ class _HomePageState extends State<HomePage> {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),

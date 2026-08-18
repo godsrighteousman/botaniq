@@ -168,7 +168,9 @@ class CareNotificationService {
   Future<List<Map<String, dynamic>>> _loadPlants(String userId) async {
     final response = await Supabase.instance.client
         .from('plants')
-        .select('id, last_watered_at, watering_interval_days')
+        .select(
+          'id, custom_name, name, last_watered_at, watering_interval_days',
+        )
         .eq('user_id', userId);
     return List<Map<String, dynamic>>.from(response);
   }
@@ -248,6 +250,34 @@ class CareNotificationService {
     if (firstDueDate == null) return;
 
     final firstReminderDay = firstDueDate.isAfter(today) ? firstDueDate : today;
+
+    // O gün suya ihtiyaç duyacak bitkilerin adlarını çıkar, bildirimi
+    // "Sulama Hatırlatıcıları / Bitkilerinizi sulama zamanı" gibi jenerik
+    // bir metin yerine bitkiye özel bir metinle gönder.
+    final duePlantNames = <String>[];
+    for (final plant in plants) {
+      final dueDate = WateringScheduleService.fromPlant(
+        plant,
+        now: today,
+      ).dueDate;
+      if (!WateringScheduleService.isSameLocalDay(dueDate, firstReminderDay)) {
+        continue;
+      }
+      final name = (plant['custom_name'] ?? plant['name'] ?? '')
+          .toString()
+          .trim();
+      if (name.isNotEmpty) duePlantNames.add(name);
+    }
+
+    final body = switch (duePlantNames.length) {
+      0 => localizations.homeWateringNotification,
+      1 => localizations.notificationWateringSinglePlant(duePlantNames.first),
+      _ => localizations.notificationWateringMultiplePlants(
+        duePlantNames.length,
+        duePlantNames.join(', '),
+      ),
+    };
+
     for (var slot = 0; slot < hours.length; slot++) {
       var scheduledDate = tz.TZDateTime(
         tz.local,
@@ -263,7 +293,7 @@ class CareNotificationService {
       await _notifications.zonedSchedule(
         id: _waterNotificationBaseId + slot,
         title: localizations.notificationWateringTitle,
-        body: localizations.homeWateringNotification,
+        body: body,
         payload: 'garden',
         scheduledDate: scheduledDate,
         notificationDetails: NotificationDetails(

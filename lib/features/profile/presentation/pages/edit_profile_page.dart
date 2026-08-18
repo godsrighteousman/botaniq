@@ -34,10 +34,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   bool _isSaving = false;
 
   final Color _accentGreen = const Color(0xFF86D5A6);
-  final Color _primaryText = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF8B9E93);
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _cardBg = Colors.white;
+  Color get _primaryText => Theme.of(context).colorScheme.onSurface;
+  Color get _textSecondary => Theme.of(context).colorScheme.onSurfaceVariant;
+  Color get _lightBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _cardBg => Theme.of(context).colorScheme.surface;
 
   @override
   void initState() {

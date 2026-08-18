@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
-import 'features/localization/presentation/pages/language_selection_page.dart';
 import 'core/config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/locale/locale_provider.dart';
@@ -83,10 +82,6 @@ class BotaniqApp extends StatelessWidget {
       home: StreamBuilder<AuthState>(
         stream: Supabase.instance.client.auth.onAuthStateChange,
         builder: (context, snapshot) {
-          if (!preferences.hasCompletedInitialSelection) {
-            return const LanguageSelectionPage();
-          }
-
           final session =
               snapshot.data?.session ??
               Supabase.instance.client.auth.currentSession;

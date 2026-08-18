@@ -16,10 +16,10 @@ class NotificationsSettingsPage extends StatefulWidget {
 
 class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
   final Color _accentGreen = const Color(0xFF86D5A6);
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _cardBg = Colors.white;
-  final Color _primaryText = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF8B9E93);
+  Color get _lightBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _cardBg => Theme.of(context).colorScheme.surface;
+  Color get _primaryText => Theme.of(context).colorScheme.onSurface;
+  Color get _textSecondary => Theme.of(context).colorScheme.onSurfaceVariant;
 
   bool _waterReminders = true;
   bool _fertilizeReminders = false;

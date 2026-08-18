@@ -5,22 +5,22 @@ import 'package:botaniq/l10n/app_localizations.dart';
 class TermsPage extends StatelessWidget {
   const TermsPage({super.key});
 
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _primaryText = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF6E6E73);
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final lightBg = theme.scaffoldBackgroundColor;
+    final primaryText = theme.colorScheme.onSurface;
+    final textSecondary = theme.colorScheme.onSurfaceVariant;
     return Scaffold(
-      backgroundColor: _lightBg,
+      backgroundColor: lightBg,
       appBar: AppBar(
-        backgroundColor: _lightBg,
+        backgroundColor: lightBg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Color(0xFF2C3E35),
+            color: primaryText,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
@@ -28,7 +28,7 @@ class TermsPage extends StatelessWidget {
         title: Text(
           l10n.termsTitle,
           style: GoogleFonts.outfit(
-            color: const Color(0xFF2C3E35),
+            color: primaryText,
             fontSize: 22,
             fontWeight: FontWeight.w600,
           ),
@@ -45,34 +45,34 @@ class TermsPage extends StatelessWidget {
               Text(
                 l10n.termsUpdated,
                 style: GoogleFonts.inter(
-                  color: _textSecondary,
+                  color: textSecondary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 24),
-              _buildSectionTitle(l10n.termsUseTitle),
-              _buildParagraph(l10n.termsUseBody),
-              _buildSectionTitle(l10n.termsPrivacyTitle),
-              _buildParagraph(l10n.termsPrivacyBody),
-              _buildSectionTitle(l10n.termsContentTitle),
-              _buildParagraph(l10n.termsContentBody),
-              _buildSectionTitle(l10n.termsRetentionTitle),
-              _buildParagraph(l10n.termsRetentionBody),
-              _buildSectionTitle(l10n.termsPlantTitle),
-              _buildParagraph(l10n.termsPlantBody),
-              _buildSectionTitle(l10n.termsLiabilityTitle),
-              _buildParagraph(l10n.termsLiabilityBody),
-              _buildSectionTitle(l10n.termsPremiumTitle),
-              _buildParagraph(l10n.termsPremiumBody),
-              _buildSectionTitle(l10n.termsLawTitle),
-              _buildParagraph(l10n.termsLawBody),
+              _buildSectionTitle(l10n.termsUseTitle, primaryText),
+              _buildParagraph(l10n.termsUseBody, textSecondary),
+              _buildSectionTitle(l10n.termsPrivacyTitle, primaryText),
+              _buildParagraph(l10n.termsPrivacyBody, textSecondary),
+              _buildSectionTitle(l10n.termsContentTitle, primaryText),
+              _buildParagraph(l10n.termsContentBody, textSecondary),
+              _buildSectionTitle(l10n.termsRetentionTitle, primaryText),
+              _buildParagraph(l10n.termsRetentionBody, textSecondary),
+              _buildSectionTitle(l10n.termsPlantTitle, primaryText),
+              _buildParagraph(l10n.termsPlantBody, textSecondary),
+              _buildSectionTitle(l10n.termsLiabilityTitle, primaryText),
+              _buildParagraph(l10n.termsLiabilityBody, textSecondary),
+              _buildSectionTitle(l10n.termsPremiumTitle, primaryText),
+              _buildParagraph(l10n.termsPremiumBody, textSecondary),
+              _buildSectionTitle(l10n.termsLawTitle, primaryText),
+              _buildParagraph(l10n.termsLawBody, textSecondary),
               const SizedBox(height: 32),
               Center(
                 child: Text(
                   l10n.termsClosing,
                   style: GoogleFonts.inter(
-                    color: _primaryText,
+                    color: primaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     fontStyle: FontStyle.italic,
@@ -87,13 +87,13 @@ class TermsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, Color color) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Text(
         title,
         style: GoogleFonts.outfit(
-          color: _primaryText,
+          color: color,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
@@ -101,16 +101,12 @@ class TermsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildParagraph(String text) {
+  Widget _buildParagraph(String text, Color color) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),
       child: Text(
         text,
-        style: GoogleFonts.inter(
-          color: _textSecondary,
-          fontSize: 15,
-          height: 1.6,
-        ),
+        style: GoogleFonts.inter(color: color, fontSize: 15, height: 1.6),
       ),
     );
   }

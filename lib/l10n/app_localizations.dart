@@ -589,6 +589,150 @@ abstract class AppLocalizations {
   /// **'Free'**
   String get subscriptionFree;
 
+  /// No description provided for @subscriptionComparisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Free vs. Premium'**
+  String get subscriptionComparisonTitle;
+
+  /// No description provided for @subscriptionComparisonColumnFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature'**
+  String get subscriptionComparisonColumnFeature;
+
+  /// No description provided for @subscriptionComparisonRowScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant scanning & diagnosis'**
+  String get subscriptionComparisonRowScan;
+
+  /// No description provided for @subscriptionComparisonRowChat.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Plant Doctor chat'**
+  String get subscriptionComparisonRowChat;
+
+  /// No description provided for @subscriptionComparisonRowGarden.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden tracking & watering reminders'**
+  String get subscriptionComparisonRowGarden;
+
+  /// No description provided for @subscriptionComparisonRowLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Gardener leaderboard'**
+  String get subscriptionComparisonRowLeaderboard;
+
+  /// No description provided for @subscriptionComparisonLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'2 free uses'**
+  String get subscriptionComparisonLimited;
+
+  /// No description provided for @subscriptionComparisonUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get subscriptionComparisonUnlimited;
+
+  /// No description provided for @subscriptionTrustCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel anytime'**
+  String get subscriptionTrustCancel;
+
+  /// No description provided for @subscriptionTrustSecure.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure payment'**
+  String get subscriptionTrustSecure;
+
+  /// No description provided for @subscriptionTrustInstant.
+  ///
+  /// In en, this message translates to:
+  /// **'Activates instantly'**
+  String get subscriptionTrustInstant;
+
+  /// No description provided for @subscriptionPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / day'**
+  String subscriptionPerDay(String price);
+
+  /// No description provided for @settingsPremiumBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Premium'**
+  String get settingsPremiumBannerTitle;
+
+  /// No description provided for @settingsPremiumBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited scans and AI chat'**
+  String get settingsPremiumBannerSubtitle;
+
+  /// No description provided for @paywallEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used your 2 free analyses 🌱'**
+  String get paywallEyebrow;
+
+  /// No description provided for @paywallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Premium to keep going'**
+  String get paywallTitle;
+
+  /// No description provided for @paywallBodyWithContext.
+  ///
+  /// In en, this message translates to:
+  /// **'You were mid-way through {context}. You\'ve used your 2 free analyses — with Premium you can keep going without limits.'**
+  String paywallBodyWithContext(String context);
+
+  /// No description provided for @paywallBodyGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used your 2 free analyses. With Premium you can identify, diagnose, and chat with the AI Plant Doctor without limits.'**
+  String get paywallBodyGeneric;
+
+  /// No description provided for @paywallBenefitScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited plant identification and diagnosis'**
+  String get paywallBenefitScan;
+
+  /// No description provided for @paywallBenefitChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited chat with the AI Plant Doctor'**
+  String get paywallBenefitChat;
+
+  /// No description provided for @paywallBenefitReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalized care reminders'**
+  String get paywallBenefitReminders;
+
+  /// No description provided for @paywallAnnualBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {percent}% with the annual plan'**
+  String paywallAnnualBadge(int percent);
+
+  /// No description provided for @paywallCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Premium'**
+  String get paywallCta;
+
+  /// No description provided for @paywallDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get paywallDismiss;
+
   /// Hello text
   ///
   /// In en, this message translates to:
@@ -636,6 +780,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Smart Care Reminders'**
   String get homeSmartCareReminders;
+
+  /// No description provided for @inboxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get inboxTitle;
+
+  /// No description provided for @inboxEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up! No plants need watering right now.'**
+  String get inboxEmptyState;
 
   /// Watering task label
   ///
@@ -829,12 +985,6 @@ abstract class AppLocalizations {
   /// **'Support & Legal'**
   String get profileSupportLegal;
 
-  /// Profile help center menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Help Center'**
-  String get profileHelpCenter;
-
   /// Profile terms of usage menu item
   ///
   /// In en, this message translates to:
@@ -865,6 +1015,48 @@ abstract class AppLocalizations {
   /// **'GARDEN PASSPORT'**
   String get profileGardenPassport;
 
+  /// No description provided for @profileGlobalRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Rank #{rank}'**
+  String profileGlobalRank(int rank);
+
+  /// No description provided for @profileGlobalRankUnranked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not ranked yet'**
+  String get profileGlobalRankUnranked;
+
+  /// No description provided for @profileViewLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'See the leaderboard'**
+  String get profileViewLeaderboard;
+
+  /// No description provided for @leaderboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gardener Leaderboard'**
+  String get leaderboardTitle;
+
+  /// No description provided for @leaderboardEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed care tasks yet — be the first to appear here.'**
+  String get leaderboardEmptyState;
+
+  /// No description provided for @leaderboardYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get leaderboardYou;
+
+  /// No description provided for @leaderboardCompletedTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tasks'**
+  String leaderboardCompletedTasks(int count);
+
   /// No description provided for @profileThisWeek.
   ///
   /// In en, this message translates to:
@@ -894,12 +1086,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose which care moments reach you'**
   String get profileNotificationPrefsSubtitle;
-
-  /// No description provided for @profileHelpCenterSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Answers and quick guidance'**
-  String get profileHelpCenterSubtitle;
 
   /// No description provided for @profileTermsSubtitle.
   ///
@@ -1176,6 +1362,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get notified when it’s time to water'**
   String get notificationWateringSubtitle;
+
+  /// No description provided for @notificationWateringSinglePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'{plantName} needs watering today.'**
+  String notificationWateringSinglePlant(String plantName);
+
+  /// No description provided for @notificationWateringMultiplePlants.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plants need water today: {plantNames}'**
+  String notificationWateringMultiplePlants(int count, String plantNames);
 
   /// No description provided for @notificationFertilizerTitle.
   ///
@@ -1699,12 +1897,6 @@ abstract class AppLocalizations {
   /// **'Critical'**
   String get clinicUrgencyCritical;
 
-  /// No description provided for @healthTrendingTips.
-  ///
-  /// In en, this message translates to:
-  /// **'Trending Health Tips'**
-  String get healthTrendingTips;
-
   /// No description provided for @healthHumidityArticleTitle.
   ///
   /// In en, this message translates to:
@@ -1717,12 +1909,6 @@ abstract class AppLocalizations {
   /// **'How to protect your plants from dry radiator air during cold months.'**
   String get healthHumidityArticleSubtitle;
 
-  /// No description provided for @healthWeeklySpotlight.
-  ///
-  /// In en, this message translates to:
-  /// **'Patient & Remedy of the Week'**
-  String get healthWeeklySpotlight;
-
   /// No description provided for @healthAphidTitle.
   ///
   /// In en, this message translates to:
@@ -1734,18 +1920,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Early intervention and a natural Neem Oil treatment.'**
   String get healthAphidSubtitle;
-
-  /// No description provided for @healthDiscoverLoadError.
-  ///
-  /// In en, this message translates to:
-  /// **'Discover content could not be loaded right now. Pull down to try again.'**
-  String get healthDiscoverLoadError;
-
-  /// No description provided for @healthDiscoverEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'There is no published discover content yet.'**
-  String get healthDiscoverEmpty;
 
   /// No description provided for @healthDiscoverRetry.
   ///
@@ -1855,47 +2029,11 @@ abstract class AppLocalizations {
   /// **'Loading plants...'**
   String get homeLoadingPlants;
 
-  /// No description provided for @homeNotifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get homeNotifications;
-
-  /// No description provided for @homeWateringTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Watering Time'**
-  String get homeWateringTime;
-
   /// No description provided for @homeWateringNotification.
   ///
   /// In en, this message translates to:
   /// **'Your indoor plants need watering.'**
   String get homeWateringNotification;
-
-  /// No description provided for @homeWelcome.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome!'**
-  String get homeWelcome;
-
-  /// No description provided for @homeWelcomeNotification.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to Botaniq. Start by adding your first plant.'**
-  String get homeWelcomeNotification;
-
-  /// No description provided for @homeTenMinutesAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'10 min ago'**
-  String get homeTenMinutesAgo;
-
-  /// No description provided for @homeOneDayAgo.
-  ///
-  /// In en, this message translates to:
-  /// **'1 day ago'**
-  String get homeOneDayAgo;
 
   /// No description provided for @homeQuickActions.
   ///
@@ -2503,6 +2641,24 @@ abstract class AppLocalizations {
   /// **'Scanning failed. Please try again.'**
   String get scannerFailed;
 
+  /// No description provided for @scannerPaywallContext.
+  ///
+  /// In en, this message translates to:
+  /// **'identifying a new plant'**
+  String get scannerPaywallContext;
+
+  /// No description provided for @chatPaywallContextGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'chatting with the AI Plant Doctor'**
+  String get chatPaywallContextGeneral;
+
+  /// No description provided for @chatPaywallContextPlant.
+  ///
+  /// In en, this message translates to:
+  /// **'diagnosing {name}'**
+  String chatPaywallContextPlant(String name);
+
   /// No description provided for @scannerError.
   ///
   /// In en, this message translates to:
@@ -2598,6 +2754,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hello! 🌿 I’m your AI Plant Doctor. How can I help with {name}?\n\nI can diagnose a photo or answer your care questions.'**
   String chatWelcome(String name);
+
+  /// No description provided for @chatWelcomeGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello! 🌿 I’m your AI Plant Doctor. Ask me anything about plant care, or send a photo of any plant and I’ll take a look.'**
+  String get chatWelcomeGeneral;
+
+  /// No description provided for @chatGeneralSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'General plant chat'**
+  String get chatGeneralSubtitle;
+
+  /// No description provided for @healthyGeneralChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the AI anything'**
+  String get healthyGeneralChatTitle;
+
+  /// No description provided for @healthyGeneralChatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No plant selected? Chat freely about care, symptoms, or send a photo.'**
+  String get healthyGeneralChatSubtitle;
+
+  /// No description provided for @chatStartConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the conversation'**
+  String get chatStartConversation;
+
+  /// No description provided for @chatQuickTopics.
+  ///
+  /// In en, this message translates to:
+  /// **'Or ask about'**
+  String get chatQuickTopics;
 
   /// No description provided for @chatContinueWelcome.
   ///
@@ -2875,6 +3067,12 @@ abstract class AppLocalizations {
   /// **'Please fill all fields.'**
   String get fillAllFields;
 
+  /// No description provided for @accountCreatedPleaseLogIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created — please log in with your new email and password.'**
+  String get accountCreatedPleaseLogIn;
+
   /// No description provided for @authError.
   ///
   /// In en, this message translates to:
@@ -2904,12 +3102,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Already have an account? '**
   String get alreadyAccount;
-
-  /// No description provided for @developerSession.
-  ///
-  /// In en, this message translates to:
-  /// **'Create Developer Session'**
-  String get developerSession;
 
   /// No description provided for @welcomeBotaniq.
   ///

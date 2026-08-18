@@ -2,359 +2,153 @@ import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../data/health_discover_service.dart';
-import '../../domain/health_discover_content.dart';
+import 'ai_chat_page.dart';
 
-class DiscoverHealthTab extends StatefulWidget {
+/// Klinik > Keşfet sekmesi.
+///
+/// Bilinçli olarak tek bir amaca odaklanır: kullanıcının önceden bir bitki
+/// seçmesine gerek kalmadan AI Bitki Doktoru'yla sohbete başlayabileceği
+/// tam sayfa bir giriş noktası. Önceki "İpuçları / Haftanın Bitkisi" içerik
+/// listesi kaldırıldı; bu ekranın tek görevi sohbeti başlatmak.
+class DiscoverHealthTab extends StatelessWidget {
   const DiscoverHealthTab({super.key});
 
-  @override
-  State<DiscoverHealthTab> createState() => _DiscoverHealthTabState();
-}
-
-class _DiscoverHealthTabState extends State<DiscoverHealthTab> {
-  static const _ink = Color(0xFF2C3E35);
-  static const _muted = Color(0xFF6E6E73);
   static const _green = Color(0xFF4FA976);
+  static const _greenDeep = Color(0xFF2E6B4F);
 
-  final HealthDiscoverService _service = HealthDiscoverService.fromSupabase();
-  Future<List<HealthDiscoverContent>>? _contentFuture;
-  String? _languageCode;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final nextLanguageCode = Localizations.localeOf(context).languageCode;
-    if (_contentFuture == null || _languageCode != nextLanguageCode) {
-      _languageCode = nextLanguageCode;
-      _contentFuture = _service.fetchPublished(languageCode: nextLanguageCode);
-    }
-  }
-
-  Future<void> _refresh() async {
-    final future = _service.fetchPublished(languageCode: _languageCode ?? 'tr');
-    setState(() => _contentFuture = future);
-    await future;
+  void _openChat(BuildContext context, {String? initialPrompt}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AiChatPage(
+          isGeneralChat: true,
+          initialPrompt: initialPrompt,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<HealthDiscoverContent>>(
-      future: _contentFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting &&
-            !snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator(color: _green));
-        }
-        if (snapshot.hasError) {
-          return _buildMessageState(
-            icon: Icons.cloud_off_rounded,
-            message: AppLocalizations.of(context)!.healthDiscoverLoadError,
-            showRetry: true,
-          );
-        }
-
-        final content = snapshot.data ?? const <HealthDiscoverContent>[];
-        if (content.isEmpty) {
-          return _buildMessageState(
-            icon: Icons.local_florist_outlined,
-            message: AppLocalizations.of(context)!.healthDiscoverEmpty,
-          );
-        }
-
-        final tips = content
-            .where((item) => item.type == HealthDiscoverContentType.tip)
-            .toList(growable: false);
-        final spotlights = content
-            .where((item) => item.type == HealthDiscoverContentType.spotlight)
-            .toList(growable: false);
-
-        return RefreshIndicator(
-          color: _green,
-          onRefresh: _refresh,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            children: [
-              if (tips.isNotEmpty) ...[
-                _buildSectionTitle(
-                  AppLocalizations.of(context)!.healthTrendingTips,
-                ),
-                const SizedBox(height: 16),
-                for (var index = 0; index < tips.length; index++) ...[
-                  _buildTipCard(tips[index]),
-                  if (index != tips.length - 1) const SizedBox(height: 16),
-                ],
-              ],
-              if (tips.isNotEmpty && spotlights.isNotEmpty)
-                const SizedBox(height: 32),
-              if (spotlights.isNotEmpty) ...[
-                _buildSectionTitle(
-                  AppLocalizations.of(context)!.healthWeeklySpotlight,
-                ),
-                const SizedBox(height: 16),
-                for (var index = 0; index < spotlights.length; index++) ...[
-                  _buildSpotlight(spotlights[index]),
-                  if (index != spotlights.length - 1)
-                    const SizedBox(height: 12),
-                ],
-              ],
-              const SizedBox(height: 100),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMessageState({
-    required IconData icon,
-    required String message,
-    bool showRetry = false,
-  }) {
     final l10n = AppLocalizations.of(context)!;
-    return RefreshIndicator(
-      color: _green,
-      onRefresh: _refresh,
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(32, 100, 32, 32),
-        children: [
-          Icon(icon, size: 48, color: const Color(0xFF8B9E93)),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(color: _muted, fontSize: 14, height: 1.5),
-          ),
-          if (showRetry) ...[
-            const SizedBox(height: 18),
-            Center(
-              child: OutlinedButton.icon(
-                onPressed: _refresh,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(l10n.healthDiscoverRetry),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+    final theme = Theme.of(context);
+    final ink = theme.colorScheme.onSurface;
+    final muted = theme.colorScheme.onSurfaceVariant;
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.outfit(
-        color: _ink,
-        fontSize: 20,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
+    final quickTopics = <String>[
+      l10n.chatQuestionYellowing,
+      l10n.chatQuestionWatering,
+      l10n.chatQuestionFertilizer,
+      l10n.chatQuestionTreatment,
+    ];
 
-  Widget _buildTipCard(HealthDiscoverContent content) {
-    final accent = _parseColor(content.accentColor);
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(28),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: content.body.isEmpty ? null : () => _showDetails(content),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (content.imageUrl != null)
-              Image.network(
-                content.imageUrl!,
-                height: 168,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _imageFallback(
-                  height: 168,
-                  icon: _iconFor(content.iconName),
-                  accent: accent,
-                ),
-              )
-            else
-              _imageFallback(
-                height: 120,
-                icon: _iconFor(content.iconName),
-                accent: accent,
-              ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    content.title,
-                    style: GoogleFonts.outfit(
-                      color: _ink,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (content.subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      content.subtitle,
-                      style: GoogleFonts.inter(
-                        color: _muted,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                  if (content.body.isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    Icon(Icons.arrow_forward_rounded, size: 20, color: accent),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _imageFallback({
-    required double height,
-    required IconData icon,
-    required Color accent,
-  }) {
-    return Container(
-      height: height,
-      width: double.infinity,
-      color: accent.withValues(alpha: 0.1),
-      alignment: Alignment.center,
-      child: Icon(icon, color: accent, size: 42),
-    );
-  }
-
-  Widget _buildSpotlight(HealthDiscoverContent content) {
-    final accent = _parseColor(content.accentColor);
-    return Material(
-      color: accent.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(28),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(28),
-        onTap: content.body.isEmpty ? null : () => _showDetails(content),
-        child: Padding(
-          padding: const EdgeInsets.all(22),
-          child: Row(
+    return SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                width: 92,
+                height: 92,
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _iconFor(content.iconName),
-                  color: accent,
-                  size: 30,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      content.title,
-                      style: GoogleFonts.outfit(
-                        color: _ink,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  gradient: const LinearGradient(
+                    colors: [_green, _greenDeep],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _green.withValues(alpha: 0.28),
+                      blurRadius: 28,
+                      offset: const Offset(0, 12),
                     ),
-                    if (content.subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        content.subtitle,
-                        style: GoogleFonts.inter(
-                          color: _muted,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
-              ),
-              if (content.body.isNotEmpty)
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF8B9E93),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showDetails(HealthDiscoverContent content) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) => DraggableScrollableSheet(
-        initialChildSize: 0.58,
-        minChildSize: 0.35,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-            children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD7E1DA),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
+                child: const Icon(
+                  Icons.eco_rounded,
+                  color: Colors.white,
+                  size: 44,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               Text(
-                content.title,
+                l10n.healthyGeneralChatTitle,
+                textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
-                  color: _ink,
-                  fontSize: 26,
+                  color: ink,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              if (content.subtitle.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Text(
-                  content.subtitle,
-                  style: GoogleFonts.inter(
-                    color: _muted,
-                    fontSize: 15,
-                    height: 1.5,
+              const SizedBox(height: 10),
+              Text(
+                l10n.healthyGeneralChatSubtitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: muted,
+                  fontSize: 14.5,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => _openChat(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _green,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.chat_bubble_rounded, size: 20),
+                      const SizedBox(width: 10),
+                      Text(
+                        l10n.chatStartConversation,
+                        style: GoogleFonts.inter(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-              const SizedBox(height: 22),
-              Text(
-                content.body,
-                style: GoogleFonts.inter(
-                  color: _ink,
-                  fontSize: 15,
-                  height: 1.7,
+              ),
+              const SizedBox(height: 36),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  l10n.chatQuickTopics,
+                  style: GoogleFonts.outfit(
+                    color: ink,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
+              ),
+              const SizedBox(height: 14),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final topic in quickTopics)
+                    _TopicChip(
+                      label: topic,
+                      ink: ink,
+                      onTap: () => _openChat(context, initialPrompt: topic),
+                    ),
+                ],
               ),
             ],
           ),
@@ -362,23 +156,45 @@ class _DiscoverHealthTabState extends State<DiscoverHealthTab> {
       ),
     );
   }
+}
 
-  IconData _iconFor(String? name) {
-    return switch (name) {
-      'bug' => Icons.bug_report_rounded,
-      'water' => Icons.water_drop_rounded,
-      'light' => Icons.wb_sunny_rounded,
-      'health' => Icons.health_and_safety_rounded,
-      'leaf' => Icons.eco_rounded,
-      _ => Icons.star_rounded,
-    };
-  }
+class _TopicChip extends StatelessWidget {
+  const _TopicChip({
+    required this.label,
+    required this.ink,
+    required this.onTap,
+  });
 
-  Color _parseColor(String? hex) {
-    if (hex == null || hex.length != 7) {
-      return _green;
-    }
-    final value = int.tryParse(hex.substring(1), radix: 16);
-    return value == null ? _green : Color(0xFF000000 | value);
+  final String label;
+  final Color ink;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              color: ink,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

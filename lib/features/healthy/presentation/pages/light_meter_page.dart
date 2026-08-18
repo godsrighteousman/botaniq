@@ -17,7 +17,7 @@ class LightMeterPage extends StatefulWidget {
 
 class _LightMeterPageState extends State<LightMeterPage>
     with SingleTickerProviderStateMixin {
-  final Color _bgHint = const Color(0xFFF9FAF9);
+  Color get _bgHint => Theme.of(context).scaffoldBackgroundColor;
 
   double _currentLux = 0.0;
   bool _isProcessingImage = false;

@@ -6,7 +6,6 @@ import '../../../../core/services/auth_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'where_are_your_plants_page.dart'; // The next step after signup onboarding
 import 'login_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -171,21 +170,35 @@ class _SignUpPageState extends State<SignUpPage> {
                               .timeout(const Duration(seconds: 10));
 
                           if (res.user != null) {
-                            // Insert or update profile data
-                            await Supabase.instance.client
-                                .from('users')
-                                .upsert({
-                                  'id': res.user!.id,
-                                  'full_name': '$firstName $lastName',
-                                  'email': email,
-                                });
+                            // Profil satırı (public.users/public.profiles)
+                            // artık auth.users üzerindeki on_auth_user_created
+                            // trigger'ı tarafından sunucu tarafında
+                            // oluşturuluyor (bkz.
+                            // supabase/migrations/20260817130000_fix_missing_signup_trigger.sql).
+                            // Burada istemciden ayrıca upsert denemiyoruz:
+                            // e-posta onayı açıkken signUp() henüz oturum
+                            // döndürmez, bu durumda yetkisiz bir istemci
+                            // upsert'i sadece kullanıcıya gereksiz bir hata
+                            // gösterirdi — hesap sunucu tarafında zaten
+                            // doğru şekilde oluşmuş olur.
+
+                            // Hesap oluşturuldu ama kullanıcıyı otomatik
+                            // içeri almıyoruz — yalnızca yerel oturumu
+                            // kapatıyoruz (auth.users/public.users'daki
+                            // hesap kaydına dokunulmaz). Kullanıcı az
+                            // önce belirlediği e-posta/şifreyle giriş
+                            // ekranından kendi giriş yapar.
+                            await Supabase.instance.client.auth.signOut(
+                              scope: SignOutScope.local,
+                            );
 
                             if (mounted) {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const WhereAreYourPlantsPage(),
+                                  builder: (context) => const LoginPage(
+                                    showAccountCreatedMessage: true,
+                                  ),
                                 ),
                               );
                             }
@@ -193,10 +206,11 @@ class _SignUpPageState extends State<SignUpPage> {
                         } catch (error) {
                           debugPrint('Email sign-up failed: $error');
                           if (mounted) {
+                            final message = error is AuthException
+                                ? error.message
+                                : error.toString();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.subscriptionErrorGeneric),
-                              ),
+                              SnackBar(content: Text(l10n.authError(message))),
                             );
                           }
                         } finally {

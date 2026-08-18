@@ -15,9 +15,9 @@ class SearchHistoryPage extends StatefulWidget {
 
 class _SearchHistoryPageState extends State<SearchHistoryPage> {
   final Color _accentGreen = const Color(0xFF0ED761);
-  final Color _lightBg = const Color(0xFFF5F9F6);
-  final Color _primaryText = const Color(0xFF1B3A2A);
-  final Color _textSecondary = const Color(0xFF7A8F82);
+  Color get _lightBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _primaryText => Theme.of(context).colorScheme.onSurface;
+  Color get _textSecondary => Theme.of(context).colorScheme.onSurfaceVariant;
 
   List<Map<String, dynamic>> _historyList = [];
   bool _isLoading = true;

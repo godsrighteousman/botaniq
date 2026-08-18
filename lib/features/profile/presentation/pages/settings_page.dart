@@ -8,8 +8,7 @@ import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/locale/supported_app_locale.dart';
 import '../../../../core/services/care_notification_service.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
-import '../../../subscription/presentation/controllers/subscription_controller.dart';
-import '../../../subscription/presentation/pages/subscription_page.dart';
+import '../../../subscription/presentation/widgets/subscription_panel.dart';
 import 'edit_profile_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -61,6 +60,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildHeader(),
                     const SizedBox(height: 18),
                     _buildIntroCard(localeProvider),
+                    const SizedBox(height: 28),
+                    _buildPremiumSection(),
                     const SizedBox(height: 28),
                     _buildSectionHeading(
                       _l10n.preferences,
@@ -210,6 +211,19 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  /// Premium içeriği artık ayrı bir sayfaya yönlendirmiyor — planlar, fiyatlar
+  /// ve satın alma butonu doğrudan Ayarlar sayfası içinde listeleniyor.
+  Widget _buildPremiumSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeading(_l10n.premium, _l10n.settingsPremiumBannerSubtitle),
+        const SizedBox(height: 10),
+        const SubscriptionPanel(),
+      ],
+    );
+  }
+
   Widget _buildStatusDot(IconData icon, bool active, Color color) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -303,7 +317,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildAccountCard() {
-    final subscription = context.watch<SubscriptionController>();
     return _buildGroupCard([
       _SettingsRow(
         icon: Icons.person_outline_rounded,
@@ -321,17 +334,6 @@ class _SettingsPageState extends State<SettingsPage> {
         title: _l10n.changePassword,
         subtitle: _l10n.settingsPasswordSubtitle,
         onTap: _showPasswordResetConfirmation,
-      ),
-      _SettingsRow(
-        icon: Icons.diamond_outlined,
-        iconColor: _warm,
-        title: _l10n.subscriptionManagement,
-        subtitle: _l10n.settingsSubscriptionSubtitle,
-        badge: subscription.isPremium ? _l10n.premium : _l10n.subscriptionFree,
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SubscriptionPage()),
-        ),
       ),
     ]);
   }

@@ -1,6 +1,5 @@
 {
   "@@locale": "tr",
-
   "appTitle": "Botaniq",
   "settings": "Ayarlar",
   "preferences": "Tercihler",
@@ -51,12 +50,30 @@
   "subscriptionMonthlyPlan": "Aylık",
   "subscriptionAnnualPlan": "Yıllık",
   "subscriptionPerMonth": "{price} / ay",
-  "@subscriptionPerMonth": { "placeholders": { "price": { "type": "String" } } },
+  "@subscriptionPerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionPerYear": "{price} / yıl",
-  "@subscriptionPerYear": { "placeholders": { "price": { "type": "String" } } },
+  "@subscriptionPerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionBestValue": "EN AVANTAJLI",
   "subscriptionSavePercent": "%{percent} tasarruf",
-  "@subscriptionSavePercent": { "placeholders": { "percent": { "type": "int" } } },
+  "@subscriptionSavePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "subscriptionContinue": "Premium’a Geç",
   "subscriptionRestorePurchases": "Satın Almaları Geri Yükle",
   "subscriptionRestoring": "Geri yükleniyor...",
@@ -64,9 +81,21 @@
   "subscriptionActiveTitle": "Premium üyeliğin aktif",
   "subscriptionActiveSubtitle": "Tüm premium özelliklerden yararlanabilirsin.",
   "subscriptionRenewsOn": "{date} tarihinde yenilenir",
-  "@subscriptionRenewsOn": { "placeholders": { "date": { "type": "String" } } },
+  "@subscriptionRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionExpiresOn": "{date} tarihine kadar aktif",
-  "@subscriptionExpiresOn": { "placeholders": { "date": { "type": "String" } } },
+  "@subscriptionExpiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionAutoRenewDisclosure": "Ödeme Apple veya Google hesabından alınır. Abonelik, mevcut dönem bitmeden en az 24 saat önce iptal edilmezse otomatik yenilenir. Mağaza hesap ayarlarından istediğin zaman yönetebilir veya iptal edebilirsin.",
   "subscriptionTermsLink": "Kullanım Koşulları",
   "subscriptionPrivacyLink": "Gizlilik Politikası",
@@ -83,7 +112,51 @@
   "subscriptionProductsUnavailable": "Aylık ve yıllık ürünler mağazadan alınamadı. RevenueCat offering ayarlarını kontrol et.",
   "subscriptionRetry": "Tekrar Dene",
   "subscriptionFree": "Ücretsiz",
-
+  "subscriptionComparisonTitle": "Ücretsiz ve Premium karşılaştır",
+  "subscriptionComparisonColumnFeature": "Özellik",
+  "subscriptionComparisonRowScan": "Bitki tarama ve teşhis",
+  "subscriptionComparisonRowChat": "AI Bitki Doktoru sohbeti",
+  "subscriptionComparisonRowGarden": "Bahçe takibi ve sulama hatırlatmaları",
+  "subscriptionComparisonRowLeaderboard": "Bahçıvan sıralaması",
+  "subscriptionComparisonLimited": "2 ücretsiz kullanım",
+  "subscriptionComparisonUnlimited": "Sınırsız",
+  "subscriptionTrustCancel": "İstediğin an iptal et",
+  "subscriptionTrustSecure": "Güvenli ödeme",
+  "subscriptionTrustInstant": "Anında aktifleşir",
+  "subscriptionPerDay": "{price} / gün",
+  "@subscriptionPerDay": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPremiumBannerTitle": "Premium'a Geç",
+  "settingsPremiumBannerSubtitle": "Sınırsız tarama ve AI sohbeti",
+  "paywallEyebrow": "2 ücretsiz analizini kullandın 🌱",
+  "paywallTitle": "Devam etmek için Premium'a geç",
+  "paywallBodyWithContext": "Az önce {context} ile ilgileniyordun. 2 ücretsiz analizini kullandın — Premium'la sınırsız devam edebilirsin.",
+  "@paywallBodyWithContext": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallBodyGeneric": "2 ücretsiz analizini kullandın. Premium'la her bitkini sınırsız tanıyabilir, teşhis edebilir ve AI Bitki Doktoru'yla sohbet edebilirsin.",
+  "paywallBenefitScan": "Sınırsız bitki tanıma ve teşhis",
+  "paywallBenefitChat": "AI Bitki Doktoru ile sınırsız sohbet",
+  "paywallBenefitReminders": "Kişiselleştirilmiş bakım hatırlatıcıları",
+  "paywallAnnualBadge": "Yıllık planla %{percent} tasarruf et",
+  "@paywallAnnualBadge": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallCta": "Premium'a Geç",
+  "paywallDismiss": "Şimdi değil",
   "homeGoodMorning": "Merhaba,",
   "homePersonalGreeting": "{greeting}, {name} 👋",
   "homeEmptyGarden": "Bahçeniz henüz boş",
@@ -92,30 +165,28 @@
   "homeMyPlants": "Bitkilerim",
   "homeViewAll": "Tümünü Gör",
   "homeSmartCareReminders": "Akıllı Bakım Hatırlatıcıları",
+  "inboxTitle": "Gelen Kutusu",
+  "inboxEmptyState": "Harika! Şu anda sulanması gereken bitkin yok.",
   "homeWatering": "Sulama",
   "homeWateringSubtitle": "Toprak takibi",
   "homeFertilizing": "Gübreleme",
   "homeFertilizingSubtitle": "Besin alarmları",
-
   "gardenTitle": "Bahçem",
   "gardenAllPlants": "Tüm Bitkiler",
   "gardenNeedsWater": "Su İstiyor",
   "gardenIndoor": "Ev İçi",
   "gardenNoPlants": "Henüz bitki yok.\nİlk bitkinizi eklemek için + simgesine dokunun!",
   "gardenNoPlantsCategory": "Bu kategoride bitki bulunmuyor.",
-
   "discoverTitle": "Keşfet",
   "discoverSearchHint": "Bitki, makale, rehber ara...",
   "discoverLatestArticles": "Son Makaleler",
   "discoverSeeAll": "Tümünü gör",
   "discoverTrendingGuides": "Popüler Rehberler",
-
   "healthyTitle": "Bakım Merkezi",
   "healthySubtitle": "Bitkilerinin ruhuna dokun, onlarla konuş.",
   "healthyTabDoctor": "Doktor",
   "healthyTabHospital": "Hastane",
   "healthyTabDiscover": "Keşfet",
-
   "profileTitle": "Profilim",
   "profileEditProfile": "Profili Düzenle",
   "profileOverview": "Genel Bakış",
@@ -128,25 +199,43 @@
   "profileAppSettings": "Uygulama Ayarları",
   "profileNotificationPrefs": "Bildirim Tercihleri",
   "profileSupportLegal": "Destek & Yasal",
-  "profileHelpCenter": "Yardım Merkezi",
   "profileTerms": "Kullanım Koşulları & Politikalar",
   "profileSignOut": "Çıkış Yap",
   "profileDeleteAccount": "Hesabı Sil",
   "profileSubtitle": "Bahçe hikâyen, gelişimin ve kişisel alanın.",
   "profileGardenPassport": "BAHÇE PASAPORTU",
+  "profileGlobalRank": "Küresel Sıra #{rank}",
+  "@profileGlobalRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "profileGlobalRankUnranked": "Henüz sıralı değil",
+  "profileViewLeaderboard": "Liderlik tablosunu gör",
+  "leaderboardTitle": "Bahçıvan Liderlik Tablosu",
+  "leaderboardEmptyState": "Henüz tamamlanmış bakım görevi yok — burada ilk sen olabilirsin.",
+  "leaderboardYou": "Sen",
+  "leaderboardCompletedTasks": "{count} görev",
+  "@leaderboardCompletedTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "profileThisWeek": "Bu hafta",
   "profileQuietWeek": "Sakin bir hafta — sıradaki bakım anın burada belirecek.",
   "profileActiveWeek": "Bakım ritmin canlı ve büyümeye devam ediyor.",
   "profileAppSettingsSubtitle": "Dil, birimler ve yapay zekâ bağlantısı",
   "profileNotificationPrefsSubtitle": "Hangi bakım anlarının sana ulaşacağını seç",
-  "profileHelpCenterSubtitle": "Yanıtlar ve hızlı yönlendirmeler",
   "profileTermsSubtitle": "Gizlilik, koşullar ve politikalar",
   "profileAccountActions": "Hesap işlemleri",
   "profileSignOutQuestion": "Hesabından çıkış yapmak istediğine emin misin?",
   "profileDeleteAccountWarning": "Hesabın silinir; kişisel bilgilerin (ad, e-posta, profil fotoğrafı) kalıcı olarak kaldırılır ve hesabın anonim hâle getirilir. Bu işlem geri alınamaz.",
   "cancel": "İptal",
   "continueAction": "Devam et",
-
   "profileTitleNew": "Yeni Bahçıvan 🌱",
   "profileTitleSprout": "Filiz Dostu 🌿",
   "profileTitleLeaf": "Yaprak Sever ☘️",
@@ -157,19 +246,16 @@
   "profileNextLevelSkilled": "Yetenekli Bahçıvan olmaya {count} bitki kaldı.",
   "profileNextLevelMaster": "Yeşil Başparmak Ustası olmaya {count} bitki kaldı.",
   "profileNextLevelMax": "Bahçenizin zirvesindesiniz, tebrikler!",
-
   "navHome": "Ana Sayfa",
   "navGarden": "Bahçe",
   "navClinic": "Klinik",
   "navProfile": "Profil",
   "scanPlant": "Bitki Tara",
-
   "deletePlantTitle": "Bu bitki silinsin mi?",
   "deletePlantMessage": "Bitki, bakım görevleri ve Klinik kayıtları hesabından kalıcı olarak kaldırılacak.",
   "deletePlantAction": "Bitkiyi Sil",
   "deletePlantNotFound": "Bitki bulunamadı veya daha önce silinmiş.",
   "deletePlantError": "Bitki silinemedi: {error}",
-
   "profileChoosePhoto": "Profil Fotoğrafı Seç",
   "profileFullName": "Ad Soyad",
   "profileFullNameHint": "Adını ve soyadını gir",
@@ -188,9 +274,27 @@
   "profileSaveChanges": "Değişiklikleri Kaydet",
   "profileUpdated": "Profilin güncellendi.",
   "profileSaveError": "Profil kaydedilemedi: {error}",
-
   "notificationWateringTitle": "Sulama Hatırlatıcıları",
   "notificationWateringSubtitle": "Sulama zamanı geldiğinde haber al",
+  "notificationWateringSinglePlant": "{plantName} bugün su istiyor.",
+  "@notificationWateringSinglePlant": {
+    "placeholders": {
+      "plantName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationWateringMultiplePlants": "{count} bitki bugün suya ihtiyaç duyuyor: {plantNames}",
+  "@notificationWateringMultiplePlants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plantNames": {
+        "type": "String"
+      }
+    }
+  },
   "notificationFertilizerTitle": "Gübre Hatırlatıcıları",
   "notificationFertilizerSubtitle": "Bitkilerin için mevsimsel besin uyarıları",
   "notificationTitle": "Bildirimler",
@@ -200,7 +304,6 @@
   "notificationWeatherSubtitle": "Aşırı hava koşulu uyarıları",
   "notificationArticlesTitle": "Yeni Makaleler",
   "notificationArticlesSubtitle": "Bahçen için ipuçları ve öneriler",
-
   "gardenMyPlantFallback": "Bitkim",
   "gardenClinicBadge": "Klinikte",
   "wateringNever": "Son sulama: Henüz yok",
@@ -211,7 +314,6 @@
   "wateringDueToday": "Bugün sulanmalı",
   "wateringDueTomorrow": "Yarın sulanmalı",
   "wateringDueInDays": "{days, plural, =0{Bugün sulanmalı} other{{days} gün sonra sulanmalı}}",
-
   "plantUnknown": "Bilinmeyen Bitki",
   "plantSpeciesFallback": "Bitki Türü",
   "plantDifficultyMedium": "Orta",
@@ -253,7 +355,6 @@
   "plantFertilizeSuccess": "🌱 Gübre verildi! Bitkin teşekkür eder!",
   "plantWaterError": "Sulama kaydedilemedi: {error}",
   "plantFertilizeError": "Gübre kaydedilemedi: {error}",
-
   "clinicQuickTools": "Hızlı Araçlar",
   "clinicDoctorHero": "AI Bitki Doktoru\nHizmetinizde",
   "clinicStartConsultation": "Danışmanlığı Başlat",
@@ -281,17 +382,11 @@
   "clinicUrgencyLow": "Düşük",
   "clinicUrgencyMedium": "Orta",
   "clinicUrgencyCritical": "Kritik",
-
-  "healthTrendingTips": "Trend Sağlık Tüyoları",
   "healthHumidityArticleTitle": "Kışa Hazırlık: Nem Dengesini Korumak",
   "healthHumidityArticleSubtitle": "Soğuk aylarda bitkilerini kaloriferin kuru havasından nasıl korursun?",
-  "healthWeeklySpotlight": "Haftanın Hastası & Şifası",
   "healthAphidTitle": "Yaprak Biti İstilası",
   "healthAphidSubtitle": "Erken evre müdahalesi ve doğal Neem Yağı kürü.",
-  "healthDiscoverLoadError": "Keşfet içerikleri şu anda yüklenemedi. Aşağı çekerek yeniden deneyebilirsin.",
-  "healthDiscoverEmpty": "Yayınlanmış keşfet içeriği henüz yok.",
   "healthDiscoverRetry": "Yeniden Dene",
-
   "lightMeterTitle": "Işık Ölçer",
   "lightMeterInstructionTitle": "Işığı Ölçmek İçin",
   "lightMeterInstruction": "Telefonun ön kamerasını bitkinin\nbulunduğu alana ve ışık kaynağına doğru tut.",
@@ -308,15 +403,8 @@
   "lightMediumRecommendation": "Monstera, Ficus ve Antoryum için ideal ortamdır.",
   "lightHighRecommendation": "Aloe, kaktüs ve sardunya gibi güneşi sevenlere uygundur.",
   "lightVeryHighRecommendation": "Dış mekân bitkileri ve sukulentler için en iyi noktadır.",
-
   "homeLoadingPlants": "Bitkiler yükleniyor...",
-  "homeNotifications": "Bildirimler",
-  "homeWateringTime": "Sulama Zamanı",
   "homeWateringNotification": "Ev bitkilerinin sulanması gerekiyor.",
-  "homeWelcome": "Hoş geldin!",
-  "homeWelcomeNotification": "Botaniq'e hoş geldin. İlk bitkini ekleyerek başla.",
-  "homeTenMinutesAgo": "10 dakika önce",
-  "homeOneDayAgo": "1 gün önce",
   "homeQuickActions": "Hızlı İşlemler",
   "homeIdentifyCamera": "Kameranla bitkiyi tanı",
   "homeTomorrow": "Yarın",
@@ -335,14 +423,12 @@
   "homeTodayTasks": "Bugünün Görevleri",
   "homeTomorrowTasks": "Yarının Görevleri",
   "homeDateTasks": "{date} Görevleri",
-
   "commonSkip": "Atla",
   "commonContinue": "Devam Et",
   "commonClose": "Kapat",
   "commonDelete": "Sil",
   "commonBack": "Vazgeç",
   "commonUnknown": "Bilinmeyen",
-
   "wizardSaveGarden": "Kaydet ve Bahçeye Ekle",
   "wizardPlantAdded": "{name} bahçene eklendi! 🌿",
   "wizardRoomTitle": "Bitkin nerede?",
@@ -391,7 +477,6 @@
   "wizardFewDaysAgo": "Birkaç gün önce",
   "wizardWeekAgo": "Bir hafta önce",
   "wizardMoreWeekAgo": "Bir haftadan uzun süre önce",
-
   "historyTitle": "Arama Geçmişi",
   "historyClearTitle": "Geçmişi Temizle",
   "historyClearMessage": "Tüm arama ve tarama geçmişin silinecek. Emin misin?",
@@ -409,24 +494,31 @@
   "historyHoursAgo": "{hours} saat önce",
   "historyYesterday": "Dün",
   "historyPlantRecord": "Bitki Arama Kaydı",
-
   "photoWholeSpecimen": "Bitkinin veya mantarın\ntamamının fotoğrafı",
   "photoWholeSpecimenSubtitle": "Daha doğru tanımlama için örneğin tamamını kadrajın ortasında tut.",
   "photoCorrect": "Doğru",
   "photoTooClose": "Çok Yakın",
   "photoInstructions": "Yönergeler",
   "photoOpenCamera": "Anladım, Kamerayı Aç",
-
   "scannerPlant": "Bitki",
   "scannerMushroom": "Mantar",
   "scannerIdentifyingPlant": "Bitki Tanımlanıyor...",
   "scannerIdentifyingMushroom": "Mantar Tanımlanıyor...",
   "scannerCapture": "Fotoğrafı Çek ve Tara",
   "scannerFailed": "Tarama başarısız oldu. Lütfen tekrar dene.",
+  "scannerPaywallContext": "bir bitki taraması",
+  "chatPaywallContextGeneral": "AI Bitki Doktoru sohbeti",
+  "chatPaywallContextPlant": "{name} teşhisi",
+  "@chatPaywallContextPlant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "scannerError": "Bir hata oluştu: {error}",
   "scannerUnknownPlant": "Bilinmeyen Bitki",
   "scannerUnknownMushroom": "Bilinmeyen Mantar",
-
   "scheduleTitle": "Takvim",
   "scheduleTodayTask": "Bugünün Görevleri",
   "scheduleNoTasks": "Bugün için görev yok!",
@@ -435,12 +527,17 @@
   "scheduleRemindLater": "Sonra Hatırlat",
   "scheduleDone": "Tamamlandı",
   "scheduleCareFallback": "Bitkinin bakımını yap.",
-
   "chatDoctorTitle": "AI Bitki Doktoru",
   "chatPatient": "Hasta: {name}",
   "chatAnalyzing": "Analiz ediliyor...",
   "chatHint": "{name} hakkında sor...",
   "chatWelcome": "Merhaba! 🌿 Ben AI Bitki Doktorun. {name} hakkında nasıl yardımcı olabilirim?\n\nFotoğraftan teşhis koyabilir veya bakım sorularını yanıtlayabilirim.",
+  "chatWelcomeGeneral": "Merhaba! 🌿 Ben AI Bitki Doktorun. Bitki bakımıyla ilgili bana istediğini sorabilir ya da herhangi bir bitkinin fotoğrafını gönderebilirsin.",
+  "chatGeneralSubtitle": "Genel bitki sohbeti",
+  "healthyGeneralChatTitle": "AI'ya her şeyi sor",
+  "healthyGeneralChatSubtitle": "Bitki seçmene gerek yok — bakım, belirtiler hakkında sohbet et veya fotoğraf gönder.",
+  "chatStartConversation": "Sohbete Başla",
+  "chatQuickTopics": "Ya da şunları sorabilirsin",
   "chatContinueWelcome": "Merhaba! {name} hakkında devam edelim. 🌱",
   "chatQuestionYellowing": "Yapraklardaki sararmanın sebebi ne?",
   "chatQuestionTreatment": "Bu bitkiyi nasıl tedavi edebilirim?",
@@ -459,7 +556,6 @@
   "chatTreatmentLabel": "Tedavi",
   "chatUrgencyLabel": "Aciliyet",
   "chatRecoveryLabel": "Tahmini İyileşme",
-
   "discoverMonsteraTitle": "Monstera Büyütmenin Sırrı",
   "discoverIndoorPlants": "İç Mekân Bitkileri",
   "discoverSucculentWatering": "Sukulent Sulama Rehberi",
@@ -470,7 +566,6 @@
   "discoverPests": "Yaygın Zararlılar ve Tedavileri",
   "discoverRepotting": "Saksı Değişimi: Ne Zaman ve Nasıl?",
   "discoverMinutesRead": "{minutes} dk okuma",
-
   "skip": "Atla",
   "skipForNow": "Şimdilik atla",
   "continueLabel": "Devam Et",
@@ -489,22 +584,20 @@
   "forgotPassword": "Şifreni mi unuttun?",
   "enterEmailPassword": "Lütfen e-posta adresini ve şifreni gir.",
   "fillAllFields": "Lütfen tüm alanları doldur.",
+  "accountCreatedPleaseLogIn": "Hesabın oluşturuldu — yeni e-posta ve şifrenle giriş yapabilirsin.",
   "authError": "Bir hata oluştu: {error}",
   "loginWith": "Veya şununla giriş yap",
   "signUpWith": "Veya şununla kayıt ol",
   "noAccount": "Hesabın yok mu? ",
   "alreadyAccount": "Zaten hesabın var mı? ",
-  "developerSession": "Geliştirici Oturumu Oluştur",
   "welcomeBotaniq": "Botaniq’e Hoş Geldin",
   "loginOptionsSubtitle": "Bitkilerini, takvimlerini ve tercihlerini yedeklemek için giriş yap veya kayıt ol.",
-
   "notificationAccessTitle": "Sulamayı kaçırma",
   "notificationAccessSubtitle": "Yeşil dostlarının bakım zamanı geldiğinde sana nazikçe hatırlatalım. Bitki bakımı kolay ve stressiz olsun.",
   "notificationTurnOn": "Hatırlatıcıları Aç",
   "creatingClimate": "Mikro iklimin inceleniyor...",
   "creatingSchedules": "Bakım takvimlerin hazırlanıyor...",
   "creatingSanctuary": "Yeşil alanın hazırlanıyor...",
-
   "locationAccessTitle": "Konum Erişimi",
   "locationAccessSubtitle": "Bitki bakımını bulunduğun yerin mikro iklimine göre kişiselleştir.",
   "locationRecommendation": "Yerel Öneriler",
@@ -514,7 +607,6 @@
   "locationAlerts": "Don ve Sıcaklık Uyarıları",
   "locationAlertsSubtitle": "Aşırı hava olaylarından önce haber al",
   "locationEnable": "Konum Erişimini Aç",
-
   "wherePlantsTitle": "Bitkilerin nerede?",
   "wherePlantsSubtitle": "Bakım takvimini kişiselleştirmek için uygun olanların tümünü seç.",
   "locationIndoor": "İç Mekân",
@@ -523,7 +615,6 @@
   "locationBalconySubtitle": "Balkon veya terastaki saksı bitkileri",
   "locationGarden": "Bahçe",
   "locationGardenSubtitle": "Topraktaki bitkiler ve çiçek tarhları",
-
   "helpTitleBefore": "Sana hangi konuda\n",
   "helpTitleHighlight": "yardımcı ",
   "helpTitleAfter": "olalım?",
@@ -533,7 +624,6 @@
   "helpIdentify": "Tür\ntanımlama",
   "helpJournal": "Büyüme\ngünlüğü",
   "helpOther": "Başka bir şey",
-
   "journeyTitle": "Yeşil Yolculuğun",
   "journeySubtitle": "Bitkilerine vermek istediğin bakım seviyesini seç.",
   "journeyCasualLabel": "SAKİN",
@@ -545,7 +635,6 @@
   "journeyObsessedLabel": "TUTKUN",
   "journeyObsessedTitle": "Usta Bitki Ebeveyni",
   "journeyObsessedSubtitle": "Bitkilerim için yaşıyorum; iç mekân ormanım için uzman takvimleri istiyorum.",
-
   "masteryTitleBefore": "Son zamanlarda ",
   "masteryTitleHighlight": "bitki bakımın\n",
   "masteryTitleAfter": "nasıl?",
@@ -558,7 +647,6 @@
   "masteryGrowthSubtitle": "Arkadaşlarımın çoğunun yaprakları var. Monstera ile Pothos’u ayırt ederim.",
   "masteryWhisperer": "Bitki Fısıldayan",
   "masteryWhispererSubtitle": "Nadir bitkileri çoğaltır ve botanik Latince konuşurum.",
-
   "onboardingOneTitle": "Bitkilerine\nBir Uzman Gibi\n",
   "onboardingOneHighlight": "Bak",
   "onboardingOneSubtitle": "Şehir ormanın için akıllı takvimler ve anında tanımlama.",
@@ -582,7 +670,6 @@
   "onboardingHealthyGrowth": "Sağlıklı Büyüme",
   "onboardingCommunity": "50.000+ bitki ebeveynine katıl",
   "onboardingAgreement": "DEVAM EDEREK KOŞULLARI VE GİZLİLİK POLİTİKASINI KABUL EDERSİN",
-
   "termsTitle": "Koşullar ve Politikalar",
   "termsUpdated": "Son güncelleme: Ağustos 2026",
   "termsUseTitle": "1. Kullanım Koşulları",

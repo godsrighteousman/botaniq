@@ -9,12 +9,16 @@ class HomeHeader extends StatelessWidget {
   final String userName;
   final VoidCallback onNotificationsTap;
   final VoidCallback onSignOutTap;
+  final VoidCallback onThemeToggleTap;
+  final bool isDarkMode;
 
   const HomeHeader({
     super.key,
     required this.userName,
     required this.onNotificationsTap,
     required this.onSignOutTap,
+    required this.onThemeToggleTap,
+    required this.isDarkMode,
   });
 
   @override
@@ -59,6 +63,14 @@ class HomeHeader extends StatelessWidget {
         Row(
           children: [
             _ActionButton(
+              icon: isDarkMode
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+              tooltip: isDarkMode ? l10n.themeLight : l10n.themeDark,
+              onTap: onThemeToggleTap,
+            ),
+            const SizedBox(width: 10),
+            _ActionButton(
               icon: Icons.notifications_none_rounded,
               onTap: onNotificationsTap,
             ),
@@ -81,12 +93,13 @@ class HomeHeader extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final String? tooltip;
 
-  const _ActionButton({required this.icon, required this.onTap});
+  const _ActionButton({required this.icon, required this.onTap, this.tooltip});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final button = GestureDetector(
       onTap: onTap,
       child: Container(
         width: 44,
@@ -106,5 +119,7 @@ class _ActionButton extends StatelessWidget {
         child: Icon(icon, color: const Color(0xFF3B4D43), size: 20),
       ),
     );
+    if (tooltip == null) return button;
+    return Tooltip(message: tooltip!, child: button);
   }
 }

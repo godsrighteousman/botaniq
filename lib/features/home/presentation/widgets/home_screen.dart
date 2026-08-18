@@ -10,6 +10,7 @@ import '../../../../core/measurement/measurement_formatter.dart';
 import '../../domain/care_task_planner.dart';
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
+import '../pages/inbox_page.dart';
 import 'home_header.dart';
 import 'horizontal_calendar.dart';
 import 'task_list_section.dart';
@@ -83,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: RefreshIndicator(
         onRefresh: _ctrl.refresh,
         color: const Color(0xFF0ED761),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
@@ -94,9 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                 child: HomeHeader(
                   userName: _ctrl.userName.value,
-                  onNotificationsTap: () =>
-                      _showNotificationsBottomSheet(context),
+                  onNotificationsTap: () => _openInbox(context),
                   onSignOutTap: () => _showSignOutDialog(context),
+                  onThemeToggleTap: () => _toggleTheme(context),
+                  isDarkMode: Theme.of(context).brightness == Brightness.dark,
                 ),
               ),
             ),
@@ -203,9 +205,9 @@ class _HomeScreenState extends State<HomeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFFE8F5EE)),
+        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest),
       ),
       child: Column(
         children: [
@@ -221,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             l10n.homeLoadingPlants,
             style: GoogleFonts.inter(
-              color: const Color(0xFF7A8F82),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -233,138 +235,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ── Dialogs & Bottom Sheets ──
 
-  void _showNotificationsBottomSheet(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(32),
-              topRight: Radius.circular(32),
-            ),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.homeNotifications,
-                    style: GoogleFonts.outfit(
-                      color: const Color(0xFF1B3A2A),
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F9F6),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFE8F5EE)),
-                      ),
-                      child: const Icon(
-                        Icons.close_rounded,
-                        color: Color(0xFF5C7165),
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildNotificationItem(
-                l10n.homeWateringTime,
-                l10n.homeWateringNotification,
-                l10n.homeTenMinutesAgo,
-                Icons.water_drop_rounded,
-                const Color(0xFF5A9FFE),
-              ),
-              const SizedBox(height: 12),
-              _buildNotificationItem(
-                l10n.homeWelcome,
-                l10n.homeWelcomeNotification,
-                l10n.homeOneDayAgo,
-                Icons.emoji_nature_rounded,
-                const Color(0xFF0ED761),
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        );
-      },
+  void _openInbox(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const InboxPage()),
     );
   }
 
-  Widget _buildNotificationItem(
-    String title,
-    String body,
-    String time,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F9F6),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE8F5EE)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xFF1B3A2A),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  body,
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF5C7165),
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  time,
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFF7A8F82),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+  void _toggleTheme(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Aynı LocaleProvider instance'ı Ayarlar sayfasındaki tema seçiciyle
+    // paylaşılır, bu yüzden burada ikinci bir tema durumu oluşturulmuyor —
+    // tek doğruluk kaynağı korunuyor.
+    context.read<LocaleProvider>().setThemePreference(
+      isDark ? AppThemePreference.light : AppThemePreference.dark,
     );
   }
 
@@ -373,18 +257,20 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           l10n.profileSignOut,
           style: GoogleFonts.outfit(
-            color: const Color(0xFF1B3A2A),
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           l10n.profileSignOutQuestion,
-          style: GoogleFonts.inter(color: const Color(0xFF5C7165)),
+          style: GoogleFonts.inter(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         actions: [
           TextButton(
@@ -392,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               l10n.cancel,
               style: GoogleFonts.inter(
-                color: const Color(0xFF5C7165),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -437,9 +323,9 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(32),
               topRight: Radius.circular(32),
             ),
@@ -456,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 72,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
-                      color: const Color(0xFFE8F5EE),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       image: task.imageUrl.isNotEmpty
                           ? DecorationImage(
                               image: NetworkImage(task.imageUrl),
@@ -482,7 +368,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? l10n.plantUnknown
                               : task.plantName,
                           style: GoogleFonts.outfit(
-                            color: const Color(0xFF1B3A2A),
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
@@ -546,7 +432,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   l10n.homeInstructions,
                   style: GoogleFonts.outfit(
-                    color: const Color(0xFF1B3A2A),
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -563,7 +449,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? l10n.homeWateringNotification
                       : l10n.scheduleCareFallback,
                   style: GoogleFonts.inter(
-                    color: const Color(0xFF5C7165),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 14,
                     height: 1.5,
                   ),
@@ -577,9 +463,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F9F6),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFE8F5EE)),
+                    border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                   ),
                   child: Row(
                     children: [
@@ -587,7 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         task.taskType.toLowerCase() == 'water'
                             ? Icons.water_drop_rounded
                             : Icons.eco_rounded,
-                        color: const Color(0xFF5C7165),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 12),
                       Text(
@@ -595,7 +481,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           measurements.displayLegacyAmount(task.amount),
                         ),
                         style: GoogleFonts.inter(
-                          color: const Color(0xFF1B3A2A),
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -615,7 +501,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF5F9F6),
+                          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
@@ -624,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Text(
                           l10n.homeLater,
                           style: GoogleFonts.inter(
-                            color: const Color(0xFF1B3A2A),
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                           ),

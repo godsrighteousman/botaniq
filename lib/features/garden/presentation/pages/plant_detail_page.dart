@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'add_plant_wizard.dart';
 import '../../../../core/services/openai_service.dart';
+import '../../../../core/services/plant_care_action_service.dart';
 import '../../../../core/services/watering_schedule_service.dart';
 import '../../../../core/services/care_notification_service.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
@@ -29,10 +30,10 @@ class PlantDetailPage extends StatefulWidget {
 class _PlantDetailPageState extends State<PlantDetailPage>
     with TickerProviderStateMixin {
   final Color _accentGreen = const Color(0xFF86D5A6);
-  final Color _lightBg = const Color(0xFFF9FAF9);
-  final Color _cardBg = Colors.white;
-  final Color _primaryText = const Color(0xFF2C3E35);
-  final Color _textSecondary = const Color(0xFF8B9E93);
+  Color get _lightBg => Theme.of(context).scaffoldBackgroundColor;
+  Color get _cardBg => Theme.of(context).colorScheme.surface;
+  Color get _primaryText => Theme.of(context).colorScheme.onSurface;
+  Color get _textSecondary => Theme.of(context).colorScheme.onSurfaceVariant;
 
   // Bakım aksiyonu durumları
   bool _isWatered = false;
@@ -190,36 +191,9 @@ class _PlantDetailPageState extends State<PlantDetailPage>
     try {
       final now = DateTime.now();
 
-      // 1. plants.last_watered_at güncelle
-      await Supabase.instance.client
-          .from('plants')
-          .update({'last_watered_at': now.toIso8601String().substring(0, 10)})
-          .eq('id', plantId);
-
-      // 2. Bugüne kadar bekleyen eski sulama görevlerini kapat.
-      await Supabase.instance.client
-          .from('care_tasks')
-          .update({
-            'is_completed': true,
-            'completed_at': now.toUtc().toIso8601String(),
-          })
-          .eq('plant_id', plantId)
-          .eq('task_type', 'water')
-          .eq('is_completed', false)
-          .lte('due_date', now.toUtc().toIso8601String());
-
-      // 3. Gerçek sulama geçmişini kaydet.
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId != null) {
-        await Supabase.instance.client.from('care_tasks').insert({
-          'plant_id': plantId,
-          'user_id': userId,
-          'task_type': 'water',
-          'due_date': now.toUtc().toIso8601String(),
-          'is_completed': true,
-          'completed_at': now.toUtc().toIso8601String(),
-        });
-      }
+      // Sulama işlemi tüm ekranlarda (bitki detayı + Inbox) aynı davransın
+      // diye tek bir paylaşılan serviste tanımlı.
+      await PlantCareActionService.markPlantWatered(plantId);
 
       if (mounted) {
         setState(() {
@@ -233,7 +207,6 @@ class _PlantDetailPageState extends State<PlantDetailPage>
         _playCareAnimation(_CareAnimationType.water);
         HapticFeedback.heavyImpact();
         _showSuccessSnack(AppLocalizations.of(context)!.plantWaterSuccess);
-        CareNotificationService.instance.refreshSchedules();
       }
     } catch (e) {
       if (mounted) {

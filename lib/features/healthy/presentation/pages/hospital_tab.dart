@@ -16,7 +16,7 @@ class HospitalTab extends StatefulWidget {
 
 class _HospitalTabState extends State<HospitalTab> {
   final Color _primaryGreen = const Color(0xFF4FA976);
-  final Color _cardBg = Colors.white;
+  Color get _cardBg => Theme.of(context).colorScheme.surface;
 
   List<Map<String, dynamic>> _sickPlants = [];
   bool _isLoading = true;
@@ -92,7 +92,7 @@ class _HospitalTabState extends State<HospitalTab> {
                     Text(
                       l10n.clinicTitle,
                       style: GoogleFonts.outfit(
-                        color: const Color(0xFF2C3E35),
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                       ),
@@ -157,7 +157,7 @@ class _HospitalTabState extends State<HospitalTab> {
               l10n.clinicAllHealthy,
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
-                color: const Color(0xFF2C3E35),
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
               ),
@@ -167,7 +167,7 @@ class _HospitalTabState extends State<HospitalTab> {
               l10n.clinicEmpty,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                color: const Color(0xFF8B9E93),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -262,7 +262,7 @@ class _HospitalTabState extends State<HospitalTab> {
                               child: Text(
                                 name,
                                 style: GoogleFonts.outfit(
-                                  color: const Color(0xFF2C3E35),
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -308,7 +308,7 @@ class _HospitalTabState extends State<HospitalTab> {
                         Text(
                           diagnosis,
                           style: GoogleFonts.inter(
-                            color: const Color(0xFF6E6E73),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontSize: 13,
                           ),
                           maxLines: 2,
@@ -320,7 +320,10 @@ class _HospitalTabState extends State<HospitalTab> {
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+            Divider(
+              height: 1,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -328,16 +331,16 @@ class _HospitalTabState extends State<HospitalTab> {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.receipt_long_rounded,
-                        color: Color(0xFF8B9E93),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 16,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         l10n.clinicPrescription,
                         style: GoogleFonts.inter(
-                          color: const Color(0xFF8B9E93),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -348,7 +351,7 @@ class _HospitalTabState extends State<HospitalTab> {
                   Text(
                     prescription,
                     style: GoogleFonts.inter(
-                      color: const Color(0xFF2C3E35),
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -362,7 +365,7 @@ class _HospitalTabState extends State<HospitalTab> {
                       Text(
                         l10n.clinicRecovery,
                         style: GoogleFonts.inter(
-                          color: const Color(0xFF8B9E93),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 12,
                         ),
                       ),
@@ -381,7 +384,7 @@ class _HospitalTabState extends State<HospitalTab> {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: recoveryProgress,
-                      backgroundColor: const Color(0xFFF1F5F9),
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                       color: _primaryGreen,
                       minHeight: 8,
                     ),

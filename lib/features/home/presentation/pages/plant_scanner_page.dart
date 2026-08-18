@@ -6,10 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:camera/camera.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/services/openai_service.dart';
 import '../../../../core/services/search_history_service.dart';
 import '../../../garden/presentation/pages/add_plant_wizard.dart';
+import '../../../subscription/presentation/controllers/subscription_controller.dart';
+import '../../../subscription/presentation/widgets/paywall_prompt.dart';
 
 class PlantScannerPage extends StatefulWidget {
   const PlantScannerPage({super.key});
@@ -72,6 +75,19 @@ class _PlantScannerPageState extends State<PlantScannerPage>
 
   Future<void> _takePhoto() async {
     if (!_isCameraInitialized || _cameraController == null || _isIdentifying) {
+      return;
+    }
+
+    final allowed = await context
+        .read<SubscriptionController>()
+        .consumeAiQuotaOrPrompt();
+    if (!allowed) {
+      if (mounted) {
+        await showPaywallPrompt(
+          context,
+          contextLabel: AppLocalizations.of(context)!.scannerPaywallContext,
+        );
+      }
       return;
     }
 

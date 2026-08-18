@@ -1,59 +1,77 @@
 {
   "@@locale": "en",
-
   "appTitle": "Botaniq",
-  "@appTitle": { "description": "Application title" },
-
+  "@appTitle": {
+    "description": "Application title"
+  },
   "settings": "Settings",
-  "@settings": { "description": "Settings page title" },
-
+  "@settings": {
+    "description": "Settings page title"
+  },
   "preferences": "Preferences",
-  "@preferences": { "description": "Preferences section header" },
-
+  "@preferences": {
+    "description": "Preferences section header"
+  },
   "darkMode": "Dark Mode",
-  "@darkMode": { "description": "Dark mode toggle label" },
-
+  "@darkMode": {
+    "description": "Dark mode toggle label"
+  },
   "metricSystem": "Metric System",
-  "@metricSystem": { "description": "Metric system toggle label" },
-
+  "@metricSystem": {
+    "description": "Metric system toggle label"
+  },
   "metricSystemSubtitle": "Use Celsius and Meters",
-  "@metricSystemSubtitle": { "description": "Metric system subtitle" },
-
+  "@metricSystemSubtitle": {
+    "description": "Metric system subtitle"
+  },
   "account": "Account",
-  "@account": { "description": "Account section header" },
-
+  "@account": {
+    "description": "Account section header"
+  },
   "editProfile": "Edit Profile",
-  "@editProfile": { "description": "Edit profile action" },
-
+  "@editProfile": {
+    "description": "Edit profile action"
+  },
   "changePassword": "Change Password",
-  "@changePassword": { "description": "Change password action" },
-
+  "@changePassword": {
+    "description": "Change password action"
+  },
   "subscriptionManagement": "Subscription Management",
-  "@subscriptionManagement": { "description": "Subscription management action" },
-
+  "@subscriptionManagement": {
+    "description": "Subscription management action"
+  },
   "premium": "Premium",
-  "@premium": { "description": "Premium badge label" },
-
+  "@premium": {
+    "description": "Premium badge label"
+  },
   "language": "Language",
-  "@language": { "description": "Language setting label" },
-
+  "@language": {
+    "description": "Language setting label"
+  },
   "languageSubtitle": "Change app language",
-  "@languageSubtitle": { "description": "Language setting subtitle" },
-
+  "@languageSubtitle": {
+    "description": "Language setting subtitle"
+  },
   "selectLanguage": "Select Language",
-  "@selectLanguage": { "description": "Bottom sheet title for language selection" },
-
+  "@selectLanguage": {
+    "description": "Bottom sheet title for language selection"
+  },
   "systemLanguage": "System Language",
-  "@systemLanguage": { "description": "Option to follow device system language" },
-
+  "@systemLanguage": {
+    "description": "Option to follow device system language"
+  },
   "english": "English",
-  "@english": { "description": "English language option" },
-
+  "@english": {
+    "description": "English language option"
+  },
   "turkish": "Türkçe",
-  "@turkish": { "description": "Turkish language option" },
-
+  "@turkish": {
+    "description": "Turkish language option"
+  },
   "languageChanged": "Language changed successfully.",
-  "@languageChanged": { "description": "Snackbar after changing language" },
+  "@languageChanged": {
+    "description": "Snackbar after changing language"
+  },
   "languageSearchHint": "Search languages",
   "languageRecommended": "Recommended",
   "languageWelcomeTitle": "Choose your language",
@@ -86,12 +104,30 @@
   "subscriptionMonthlyPlan": "Monthly",
   "subscriptionAnnualPlan": "Annual",
   "subscriptionPerMonth": "{price} / month",
-  "@subscriptionPerMonth": { "placeholders": { "price": { "type": "String" } } },
+  "@subscriptionPerMonth": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionPerYear": "{price} / year",
-  "@subscriptionPerYear": { "placeholders": { "price": { "type": "String" } } },
+  "@subscriptionPerYear": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionBestValue": "BEST VALUE",
   "subscriptionSavePercent": "Save {percent}%",
-  "@subscriptionSavePercent": { "placeholders": { "percent": { "type": "int" } } },
+  "@subscriptionSavePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "subscriptionContinue": "Unlock Premium",
   "subscriptionRestorePurchases": "Restore Purchases",
   "subscriptionRestoring": "Restoring...",
@@ -99,9 +135,21 @@
   "subscriptionActiveTitle": "Your Premium membership is active",
   "subscriptionActiveSubtitle": "You have access to every premium feature.",
   "subscriptionRenewsOn": "Renews on {date}",
-  "@subscriptionRenewsOn": { "placeholders": { "date": { "type": "String" } } },
+  "@subscriptionRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionExpiresOn": "Active until {date}",
-  "@subscriptionExpiresOn": { "placeholders": { "date": { "type": "String" } } },
+  "@subscriptionExpiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "subscriptionAutoRenewDisclosure": "Payment is charged to your Apple or Google account. The subscription renews automatically unless canceled at least 24 hours before the end of the current period. You can manage or cancel it anytime in your store account settings.",
   "subscriptionTermsLink": "Terms of Use",
   "subscriptionPrivacyLink": "Privacy Policy",
@@ -118,120 +166,267 @@
   "subscriptionProductsUnavailable": "Monthly and annual products could not be loaded. Check the RevenueCat offering configuration.",
   "subscriptionRetry": "Try Again",
   "subscriptionFree": "Free",
-
+  "subscriptionComparisonTitle": "Free vs. Premium",
+  "subscriptionComparisonColumnFeature": "Feature",
+  "subscriptionComparisonRowScan": "Plant scanning & diagnosis",
+  "subscriptionComparisonRowChat": "AI Plant Doctor chat",
+  "subscriptionComparisonRowGarden": "Garden tracking & watering reminders",
+  "subscriptionComparisonRowLeaderboard": "Gardener leaderboard",
+  "subscriptionComparisonLimited": "2 free uses",
+  "subscriptionComparisonUnlimited": "Unlimited",
+  "subscriptionTrustCancel": "Cancel anytime",
+  "subscriptionTrustSecure": "Secure payment",
+  "subscriptionTrustInstant": "Activates instantly",
+  "subscriptionPerDay": "{price} / day",
+  "@subscriptionPerDay": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPremiumBannerTitle": "Go Premium",
+  "settingsPremiumBannerSubtitle": "Unlimited scans and AI chat",
+  "paywallEyebrow": "You've used your 2 free analyses 🌱",
+  "paywallTitle": "Go Premium to keep going",
+  "paywallBodyWithContext": "You were mid-way through {context}. You've used your 2 free analyses — with Premium you can keep going without limits.",
+  "@paywallBodyWithContext": {
+    "placeholders": {
+      "context": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallBodyGeneric": "You've used your 2 free analyses. With Premium you can identify, diagnose, and chat with the AI Plant Doctor without limits.",
+  "paywallBenefitScan": "Unlimited plant identification and diagnosis",
+  "paywallBenefitChat": "Unlimited chat with the AI Plant Doctor",
+  "paywallBenefitReminders": "Personalized care reminders",
+  "paywallAnnualBadge": "Save {percent}% with the annual plan",
+  "@paywallAnnualBadge": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallCta": "Go Premium",
+  "paywallDismiss": "Not now",
   "homeGoodMorning": "Hello,",
   "homePersonalGreeting": "{greeting}, {name} 👋",
   "@homePersonalGreeting": {
     "description": "Personalized greeting shown in the home header",
     "placeholders": {
-      "greeting": {"type": "String"},
-      "name": {"type": "String"}
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
     }
   },
-  "@homeGoodMorning": { "description": "Hello text" },
+  "@homeGoodMorning": {
+    "description": "Hello text"
+  },
   "homeEmptyGarden": "Your garden is empty",
-  "@homeEmptyGarden": { "description": "Empty garden text" },
+  "@homeEmptyGarden": {
+    "description": "Empty garden text"
+  },
   "homeEmptyGardenSubtitle": "Start building your green sanctuary\nby adding your first plant.",
-  "@homeEmptyGardenSubtitle": { "description": "Empty garden detail description" },
+  "@homeEmptyGardenSubtitle": {
+    "description": "Empty garden detail description"
+  },
   "homeAddFirstPlant": "Add First Plant",
-  "@homeAddFirstPlant": { "description": "Hero button to add first plant" },
+  "@homeAddFirstPlant": {
+    "description": "Hero button to add first plant"
+  },
   "homeMyPlants": "My Plants",
-  "@homeMyPlants": { "description": "My Plants title" },
+  "@homeMyPlants": {
+    "description": "My Plants title"
+  },
   "homeViewAll": "View All",
-  "@homeViewAll": { "description": "View all plants label" },
+  "@homeViewAll": {
+    "description": "View all plants label"
+  },
   "homeSmartCareReminders": "Smart Care Reminders",
-  "@homeSmartCareReminders": { "description": "Smart Care Reminders section" },
+  "@homeSmartCareReminders": {
+    "description": "Smart Care Reminders section"
+  },
+  "inboxTitle": "Inbox",
+  "inboxEmptyState": "All caught up! No plants need watering right now.",
   "homeWatering": "Watering",
-  "@homeWatering": { "description": "Watering task label" },
+  "@homeWatering": {
+    "description": "Watering task label"
+  },
   "homeWateringSubtitle": "Soil tracking",
-  "@homeWateringSubtitle": { "description": "Watering details" },
+  "@homeWateringSubtitle": {
+    "description": "Watering details"
+  },
   "homeFertilizing": "Fertilizing",
-  "@homeFertilizing": { "description": "Fertilizing task label" },
+  "@homeFertilizing": {
+    "description": "Fertilizing task label"
+  },
   "homeFertilizingSubtitle": "Nutrient alerts",
-  "@homeFertilizingSubtitle": { "description": "Fertilizing details" },
-
+  "@homeFertilizingSubtitle": {
+    "description": "Fertilizing details"
+  },
   "gardenTitle": "My Garden",
-  "@gardenTitle": { "description": "Garden title" },
+  "@gardenTitle": {
+    "description": "Garden title"
+  },
   "gardenAllPlants": "All Plants",
-  "@gardenAllPlants": { "description": "All Plants filter chip" },
+  "@gardenAllPlants": {
+    "description": "All Plants filter chip"
+  },
   "gardenNeedsWater": "Needs Water",
-  "@gardenNeedsWater": { "description": "Needs Water filter chip" },
+  "@gardenNeedsWater": {
+    "description": "Needs Water filter chip"
+  },
   "gardenIndoor": "Indoor",
-  "@gardenIndoor": { "description": "Indoor plants filter chip" },
+  "@gardenIndoor": {
+    "description": "Indoor plants filter chip"
+  },
   "gardenNoPlants": "No plants yet.\nTap + to add your first plant!",
-  "@gardenNoPlants": { "description": "No plants in garden card message" },
+  "@gardenNoPlants": {
+    "description": "No plants in garden card message"
+  },
   "gardenNoPlantsCategory": "No plants in this category.",
-  "@gardenNoPlantsCategory": { "description": "No plants in categorised filter message" },
-
+  "@gardenNoPlantsCategory": {
+    "description": "No plants in categorised filter message"
+  },
   "discoverTitle": "Discover",
-  "@discoverTitle": { "description": "Discover title" },
+  "@discoverTitle": {
+    "description": "Discover title"
+  },
   "discoverSearchHint": "Search plants, articles, guides...",
-  "@discoverSearchHint": { "description": "Discover tab search textfield hint" },
+  "@discoverSearchHint": {
+    "description": "Discover tab search textfield hint"
+  },
   "discoverLatestArticles": "Latest Articles",
-  "@discoverLatestArticles": { "description": "Discover latest articles header" },
+  "@discoverLatestArticles": {
+    "description": "Discover latest articles header"
+  },
   "discoverSeeAll": "See all",
-  "@discoverSeeAll": { "description": "Discover see all articles label" },
+  "@discoverSeeAll": {
+    "description": "Discover see all articles label"
+  },
   "discoverTrendingGuides": "Trending Guides",
-  "@discoverTrendingGuides": { "description": "Discover trending guides header" },
-
+  "@discoverTrendingGuides": {
+    "description": "Discover trending guides header"
+  },
   "healthyTitle": "Care Center",
-  "@healthyTitle": { "description": "Healthy tab header title" },
+  "@healthyTitle": {
+    "description": "Healthy tab header title"
+  },
   "healthySubtitle": "Touch the soul of your plants, talk to them.",
-  "@healthySubtitle": { "description": "Healthy tab status description" },
+  "@healthySubtitle": {
+    "description": "Healthy tab status description"
+  },
   "healthyTabDoctor": "Doctor",
-  "@healthyTabDoctor": { "description": "Tab item for Doctor" },
+  "@healthyTabDoctor": {
+    "description": "Tab item for Doctor"
+  },
   "healthyTabHospital": "Hospital",
-  "@healthyTabHospital": { "description": "Tab item for Hospital" },
+  "@healthyTabHospital": {
+    "description": "Tab item for Hospital"
+  },
   "healthyTabDiscover": "Discover",
-  "@healthyTabDiscover": { "description": "Tab item for Discover" },
-
+  "@healthyTabDiscover": {
+    "description": "Tab item for Discover"
+  },
   "profileTitle": "My Profile",
-  "@profileTitle": { "description": "Profile tab title" },
+  "@profileTitle": {
+    "description": "Profile tab title"
+  },
   "profileEditProfile": "Edit Profile",
-  "@profileEditProfile": { "description": "Edit profile details label" },
+  "@profileEditProfile": {
+    "description": "Edit profile details label"
+  },
   "profileOverview": "Overview",
-  "@profileOverview": { "description": "Profile overview submenu" },
+  "@profileOverview": {
+    "description": "Profile overview submenu"
+  },
   "profileSettingsTab": "Settings",
-  "@profileSettingsTab": { "description": "Profile settings submenu" },
+  "@profileSettingsTab": {
+    "description": "Profile settings submenu"
+  },
   "profileGardenerLevel": "Gardener Level",
-  "@profileGardenerLevel": { "description": "Profile level indicator" },
+  "@profileGardenerLevel": {
+    "description": "Profile level indicator"
+  },
   "profileTotalPlants": "Total Plants",
-  "@profileTotalPlants": { "description": "Total plants registered by user" },
+  "@profileTotalPlants": {
+    "description": "Total plants registered by user"
+  },
   "profileCompletedTasks": "Completed Tasks",
-  "@profileCompletedTasks": { "description": "Total completed tasks in care schedules" },
+  "@profileCompletedTasks": {
+    "description": "Total completed tasks in care schedules"
+  },
   "profileWeeklyActivity": "Weekly Care Activity",
-  "@profileWeeklyActivity": { "description": "Profile weekly activity section" },
+  "@profileWeeklyActivity": {
+    "description": "Profile weekly activity section"
+  },
   "profileGeneral": "General",
-  "@profileGeneral": { "description": "General settings section" },
+  "@profileGeneral": {
+    "description": "General settings section"
+  },
   "profileAppSettings": "App Settings",
-  "@profileAppSettings": { "description": "Profile app settings item" },
+  "@profileAppSettings": {
+    "description": "Profile app settings item"
+  },
   "profileNotificationPrefs": "Notification Preferences",
-  "@profileNotificationPrefs": { "description": "Profile notification settings item" },
+  "@profileNotificationPrefs": {
+    "description": "Profile notification settings item"
+  },
   "profileSupportLegal": "Support & Legal",
-  "@profileSupportLegal": { "description": "Profile support and legal section header" },
-  "profileHelpCenter": "Help Center",
-  "@profileHelpCenter": { "description": "Profile help center menu item" },
+  "@profileSupportLegal": {
+    "description": "Profile support and legal section header"
+  },
   "profileTerms": "Terms of Use & Policies",
-  "@profileTerms": { "description": "Profile terms of usage menu item" },
+  "@profileTerms": {
+    "description": "Profile terms of usage menu item"
+  },
   "profileSignOut": "Sign Out",
-  "@profileSignOut": { "description": "Sign out item text" },
+  "@profileSignOut": {
+    "description": "Sign out item text"
+  },
   "profileDeleteAccount": "Delete Account",
-  "@profileDeleteAccount": { "description": "Delete account item text" },
+  "@profileDeleteAccount": {
+    "description": "Delete account item text"
+  },
   "profileSubtitle": "Your garden story, progress and personal space.",
   "profileGardenPassport": "GARDEN PASSPORT",
+  "profileGlobalRank": "Global Rank #{rank}",
+  "@profileGlobalRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "profileGlobalRankUnranked": "Not ranked yet",
+  "profileViewLeaderboard": "See the leaderboard",
+  "leaderboardTitle": "Gardener Leaderboard",
+  "leaderboardEmptyState": "No completed care tasks yet — be the first to appear here.",
+  "leaderboardYou": "You",
+  "leaderboardCompletedTasks": "{count} tasks",
+  "@leaderboardCompletedTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "profileThisWeek": "This week",
   "profileQuietWeek": "A quiet week — your next care moment will appear here.",
   "profileActiveWeek": "Your care rhythm is alive and growing.",
   "profileAppSettingsSubtitle": "Language, units and AI connection",
   "profileNotificationPrefsSubtitle": "Choose which care moments reach you",
-  "profileHelpCenterSubtitle": "Answers and quick guidance",
   "profileTermsSubtitle": "Privacy, terms and policies",
   "profileAccountActions": "Account actions",
   "profileSignOutQuestion": "Are you sure you want to sign out?",
   "profileDeleteAccountWarning": "Your account will be deleted: your personal information (name, email, profile photo) is permanently removed and your account is anonymized. This cannot be undone.",
   "cancel": "Cancel",
   "continueAction": "Continue",
-
   "profileTitleNew": "New Gardener 🌱",
   "profileTitleSprout": "Sprout Friend 🌿",
   "profileTitleLeaf": "Leaf Lover ☘️",
@@ -263,13 +458,11 @@
     }
   },
   "profileNextLevelMax": "You are at the top of your garden, congratulations!",
-
   "navHome": "Home",
   "navGarden": "Garden",
   "navClinic": "Clinic",
   "navProfile": "Profile",
   "scanPlant": "Scan Plant",
-
   "deletePlantTitle": "Remove this plant?",
   "deletePlantMessage": "The plant, its care tasks and Clinic records will be permanently removed from your account.",
   "deletePlantAction": "Remove Plant",
@@ -277,10 +470,11 @@
   "deletePlantError": "The plant could not be removed: {error}",
   "@deletePlantError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
-
   "profileChoosePhoto": "Choose Profile Photo",
   "profileFullName": "Full Name",
   "profileFullNameHint": "Enter your full name",
@@ -292,7 +486,9 @@
   "profileLoadError": "Could not load profile: {error}",
   "@profileLoadError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "languageEnglish": "English",
@@ -306,12 +502,32 @@
   "profileSaveError": "Profile could not be saved: {error}",
   "@profileSaveError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
-
   "notificationWateringTitle": "Watering Reminders",
   "notificationWateringSubtitle": "Get notified when it’s time to water",
+  "notificationWateringSinglePlant": "{plantName} needs watering today.",
+  "@notificationWateringSinglePlant": {
+    "placeholders": {
+      "plantName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationWateringMultiplePlants": "{count} plants need water today: {plantNames}",
+  "@notificationWateringMultiplePlants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plantNames": {
+        "type": "String"
+      }
+    }
+  },
   "notificationFertilizerTitle": "Fertilizer Reminders",
   "notificationFertilizerSubtitle": "Seasonal feeding alerts for your plants",
   "notificationTitle": "Notifications",
@@ -321,27 +537,32 @@
   "notificationWeatherSubtitle": "Extreme weather warnings",
   "notificationArticlesTitle": "New Articles",
   "notificationArticlesSubtitle": "Tips and tricks for your garden",
-
   "gardenMyPlantFallback": "My Plant",
   "gardenClinicBadge": "In Clinic",
   "wateringNever": "Last watered: Never",
   "wateringLastDate": "Last watered: {date}",
   "@wateringLastDate": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
   "wateringInterval": "Every {days} days",
   "@wateringInterval": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "wateringNeverDue": "Not watered yet • Water today",
   "wateringOverdue": "{days, plural, =0{Water today} one{1 day overdue} other{{days} days overdue}}",
   "@wateringOverdue": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
   "wateringDueToday": "Water today",
@@ -349,10 +570,11 @@
   "wateringDueInDays": "{days, plural, =0{Water today} one{Water in 1 day} other{Water in {days} days}}",
   "@wateringDueInDays": {
     "placeholders": {
-      "days": { "type": "int" }
+      "days": {
+        "type": "int"
+      }
     }
   },
-
   "plantUnknown": "Unknown Plant",
   "plantSpeciesFallback": "Plant Species",
   "plantDifficultyMedium": "Medium",
@@ -378,7 +600,9 @@
   "plantWateringFrequencyValue": "Water {interval}.",
   "@plantWateringFrequencyValue": {
     "placeholders": {
-      "interval": { "type": "String" }
+      "interval": {
+        "type": "String"
+      }
     }
   },
   "plantNextWatering": "Next Watering",
@@ -400,16 +624,19 @@
   "plantWaterError": "Watering could not be saved: {error}",
   "@plantWaterError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "plantFertilizeError": "Fertilizing could not be saved: {error}",
   "@plantFertilizeError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
-
   "clinicQuickTools": "Quick Tools",
   "clinicDoctorHero": "AI Plant Doctor\nAt Your Service",
   "clinicStartConsultation": "Start Consultation",
@@ -426,7 +653,9 @@
   "clinicSickCount": "{count} Sick",
   "@clinicSickCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "clinicAllHealthy": "All Your Plants Are Healthy! 🌿",
@@ -442,17 +671,11 @@
   "clinicUrgencyLow": "Low",
   "clinicUrgencyMedium": "Medium",
   "clinicUrgencyCritical": "Critical",
-
-  "healthTrendingTips": "Trending Health Tips",
   "healthHumidityArticleTitle": "Winter Prep: Keeping Humidity Balanced",
   "healthHumidityArticleSubtitle": "How to protect your plants from dry radiator air during cold months.",
-  "healthWeeklySpotlight": "Patient & Remedy of the Week",
   "healthAphidTitle": "Aphid Infestation",
   "healthAphidSubtitle": "Early intervention and a natural Neem Oil treatment.",
-  "healthDiscoverLoadError": "Discover content could not be loaded right now. Pull down to try again.",
-  "healthDiscoverEmpty": "There is no published discover content yet.",
   "healthDiscoverRetry": "Try Again",
-
   "lightMeterTitle": "Light Meter",
   "lightMeterInstructionTitle": "To Measure Light",
   "lightMeterInstruction": "Point the phone’s front camera toward\nthe plant’s position and light source.",
@@ -469,15 +692,8 @@
   "lightMediumRecommendation": "Ideal for Monstera, Ficus and Anthurium.",
   "lightHighRecommendation": "Suitable for sun-loving Aloe, cacti and geraniums.",
   "lightVeryHighRecommendation": "Best for outdoor plants and succulents.",
-
   "homeLoadingPlants": "Loading plants...",
-  "homeNotifications": "Notifications",
-  "homeWateringTime": "Watering Time",
   "homeWateringNotification": "Your indoor plants need watering.",
-  "homeWelcome": "Welcome!",
-  "homeWelcomeNotification": "Welcome to Botaniq. Start by adding your first plant.",
-  "homeTenMinutesAgo": "10 min ago",
-  "homeOneDayAgo": "1 day ago",
   "homeQuickActions": "Quick Actions",
   "homeIdentifyCamera": "Identify with your camera",
   "homeTomorrow": "Tomorrow",
@@ -488,7 +704,9 @@
   "homeRequiredAmount": "Required: {amount}",
   "@homeRequiredAmount": {
     "placeholders": {
-      "amount": { "type": "String" }
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "homeLater": "Later",
@@ -497,7 +715,9 @@
   "homeSickCount": "{count} Sick",
   "@homeSickCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "homeGreetingMorning": "Good Morning",
@@ -508,22 +728,24 @@
   "homeDateTasks": "{date} Tasks",
   "@homeDateTasks": {
     "placeholders": {
-      "date": { "type": "String" }
+      "date": {
+        "type": "String"
+      }
     }
   },
-
   "commonSkip": "Skip",
   "commonContinue": "Continue",
   "commonClose": "Close",
   "commonDelete": "Delete",
   "commonBack": "Go Back",
   "commonUnknown": "Unknown",
-
   "wizardSaveGarden": "Save & Add to Garden",
   "wizardPlantAdded": "{name} was added to your garden! 🌿",
   "@wizardPlantAdded": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "wizardRoomTitle": "Where is your plant?",
@@ -552,13 +774,17 @@
   "wizardHour": "{count} hour",
   "@wizardHour": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "wizardHours": "{count} hours",
   "@wizardHours": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "wizardSixPlusHours": "6+ hours",
@@ -582,7 +808,6 @@
   "wizardFewDaysAgo": "A few days ago",
   "wizardWeekAgo": "A week ago",
   "wizardMoreWeekAgo": "More than a week ago",
-
   "historyTitle": "Search History",
   "historyClearTitle": "Clear History",
   "historyClearMessage": "All search and scan history will be deleted. Are you sure?",
@@ -599,40 +824,53 @@
   "historyMinutesAgo": "{minutes} min ago",
   "@historyMinutesAgo": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "historyHoursAgo": "{hours} hours ago",
   "@historyHoursAgo": {
     "placeholders": {
-      "hours": { "type": "int" }
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "historyYesterday": "Yesterday",
   "historyPlantRecord": "Plant Search Record",
-
   "photoWholeSpecimen": "Photo of the whole\nplant or mushroom",
   "photoWholeSpecimenSubtitle": "Keep the whole specimen centered in the frame for better identification.",
   "photoCorrect": "Correct",
   "photoTooClose": "Too Close",
   "photoInstructions": "Instructions",
   "photoOpenCamera": "I Understand, Open Camera",
-
   "scannerPlant": "Plant",
   "scannerMushroom": "Mushroom",
   "scannerIdentifyingPlant": "Identifying Plant...",
   "scannerIdentifyingMushroom": "Identifying Mushroom...",
   "scannerCapture": "Take Photo & Scan",
   "scannerFailed": "Scanning failed. Please try again.",
+  "scannerPaywallContext": "identifying a new plant",
+  "chatPaywallContextGeneral": "chatting with the AI Plant Doctor",
+  "chatPaywallContextPlant": "diagnosing {name}",
+  "@chatPaywallContextPlant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "scannerError": "An error occurred: {error}",
   "@scannerError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "scannerUnknownPlant": "Unknown Plant",
   "scannerUnknownMushroom": "Unknown Mushroom",
-
   "scheduleTitle": "Schedule",
   "scheduleTodayTask": "Today’s Tasks",
   "scheduleNoTasks": "No tasks for today!",
@@ -640,37 +878,52 @@
   "scheduleRequired": "Required: {amount}",
   "@scheduleRequired": {
     "placeholders": {
-      "amount": { "type": "String" }
+      "amount": {
+        "type": "String"
+      }
     }
   },
   "scheduleRemindLater": "Remind Later",
   "scheduleDone": "Done",
   "scheduleCareFallback": "Take care of your plant.",
-
   "chatDoctorTitle": "AI Plant Doctor",
   "chatPatient": "Patient: {name}",
   "@chatPatient": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "chatAnalyzing": "Analyzing...",
   "chatHint": "Ask about {name}...",
   "@chatHint": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "chatWelcome": "Hello! 🌿 I’m your AI Plant Doctor. How can I help with {name}?\n\nI can diagnose a photo or answer your care questions.",
   "@chatWelcome": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
+  "chatWelcomeGeneral": "Hello! 🌿 I’m your AI Plant Doctor. Ask me anything about plant care, or send a photo of any plant and I’ll take a look.",
+  "chatGeneralSubtitle": "General plant chat",
+  "healthyGeneralChatTitle": "Ask the AI anything",
+  "healthyGeneralChatSubtitle": "No plant selected? Chat freely about care, symptoms, or send a photo.",
+  "chatStartConversation": "Start the conversation",
+  "chatQuickTopics": "Or ask about",
   "chatContinueWelcome": "Hello! Let’s continue with {name}. 🌱",
   "@chatContinueWelcome": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "chatQuestionYellowing": "What is causing the yellow leaves?",
@@ -686,7 +939,9 @@
   "chatError": "Sorry, an error occurred: {error}. Please try again.",
   "@chatError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "chatCareTips": "Care Tips",
@@ -695,7 +950,6 @@
   "chatTreatmentLabel": "Treatment",
   "chatUrgencyLabel": "Urgency",
   "chatRecoveryLabel": "Estimated Recovery",
-
   "discoverMonsteraTitle": "The Secret to Monstera Growth",
   "discoverIndoorPlants": "Indoor Plants",
   "discoverSucculentWatering": "Watering Guide for Succulents",
@@ -708,10 +962,11 @@
   "discoverMinutesRead": "{minutes} min read",
   "@discoverMinutesRead": {
     "placeholders": {
-      "minutes": { "type": "int" }
+      "minutes": {
+        "type": "int"
+      }
     }
   },
-
   "skip": "Skip",
   "skipForNow": "Skip for now",
   "continueLabel": "Continue",
@@ -730,27 +985,27 @@
   "forgotPassword": "Forgot Password?",
   "enterEmailPassword": "Please enter your email and password.",
   "fillAllFields": "Please fill all fields.",
+  "accountCreatedPleaseLogIn": "Account created — please log in with your new email and password.",
   "authError": "Something went wrong: {error}",
   "@authError": {
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "loginWith": "Or log in with",
   "signUpWith": "Or sign up with",
   "noAccount": "Don’t have an account? ",
   "alreadyAccount": "Already have an account? ",
-  "developerSession": "Create Developer Session",
   "welcomeBotaniq": "Welcome to Botaniq",
   "loginOptionsSubtitle": "Log in or sign up to back up your plants, schedules, and preferences.",
-
   "notificationAccessTitle": "Don’t miss a watering",
   "notificationAccessSubtitle": "We’ll gently remind you when it’s time to care for your green friends. Plant care made effortless and stress-free.",
   "notificationTurnOn": "Turn on Reminders",
   "creatingClimate": "Analyzing your micro-climate...",
   "creatingSchedules": "Customizing care schedules...",
   "creatingSanctuary": "Preparing your green sanctuary...",
-
   "locationAccessTitle": "Location Access",
   "locationAccessSubtitle": "Personalize plant care based on your local micro-climate.",
   "locationRecommendation": "Local Recommendations",
@@ -760,7 +1015,6 @@
   "locationAlerts": "Frost & Heat Alerts",
   "locationAlertsSubtitle": "Get notified before extreme weather hits",
   "locationEnable": "Enable Location Access",
-
   "wherePlantsTitle": "Where are your plants?",
   "wherePlantsSubtitle": "Select all that apply to customize your care schedules.",
   "locationIndoor": "Indoor",
@@ -769,7 +1023,6 @@
   "locationBalconySubtitle": "Potted plants on a deck or terrace",
   "locationGarden": "Garden",
   "locationGardenSubtitle": "In-ground plants and flowerbeds",
-
   "helpTitleBefore": "What can we\n",
   "helpTitleHighlight": "help you ",
   "helpTitleAfter": "with?",
@@ -779,7 +1032,6 @@
   "helpIdentify": "Identify\nspecies",
   "helpJournal": "Growth\njournal",
   "helpOther": "Something else",
-
   "journeyTitle": "Your Green Journey",
   "journeySubtitle": "Select the level of care you wish to provide.",
   "journeyCasualLabel": "CASUAL",
@@ -791,7 +1043,6 @@
   "journeyObsessedLabel": "OBSESSED",
   "journeyObsessedTitle": "Plant Parent Extraordinaire",
   "journeyObsessedSubtitle": "I live for my plants and want expert schedules for my indoor jungle.",
-
   "masteryTitleBefore": "How’s your ",
   "masteryTitleHighlight": "green\nthumb ",
   "masteryTitleAfter": "lately?",
@@ -804,7 +1055,6 @@
   "masteryGrowthSubtitle": "Most of my friends have leaves. I know my Monsteras from my Pothos.",
   "masteryWhisperer": "Plant Whisperer",
   "masteryWhispererSubtitle": "I propagate rare plants and speak fluent botanical Latin.",
-
   "onboardingOneTitle": "Take Care\nof Your Plants\n",
   "onboardingOneHighlight": "Like a Pro",
   "onboardingOneSubtitle": "Smart schedules and instant identification for your urban jungle.",
@@ -828,7 +1078,6 @@
   "onboardingHealthyGrowth": "Healthy Growth",
   "onboardingCommunity": "Join 50,000+ plant parents",
   "onboardingAgreement": "BY CONTINUING, YOU AGREE TO OUR TERMS & PRIVACY POLICY",
-
   "termsTitle": "Terms & Policies",
   "termsUpdated": "Last updated: August 2026",
   "termsUseTitle": "1. Terms of Use",

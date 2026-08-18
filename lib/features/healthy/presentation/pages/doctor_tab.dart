@@ -61,7 +61,7 @@ class _DoctorTabState extends State<DoctorTab> {
           Text(
             l10n.clinicQuickTools,
             style: GoogleFonts.outfit(
-              color: const Color(0xFF2C3E35),
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -170,9 +170,9 @@ class _DoctorTabState extends State<DoctorTab> {
         return Container(
           height: MediaQuery.of(context).size.height * 0.65,
           padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(32),
               topRight: Radius.circular(32),
             ),
@@ -184,7 +184,7 @@ class _DoctorTabState extends State<DoctorTab> {
                 width: 48,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
+                  color: Theme.of(context).colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -193,7 +193,7 @@ class _DoctorTabState extends State<DoctorTab> {
                 l10n.clinicChoosePlant,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
-                  color: const Color(0xFF2C3E35),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                 ),
@@ -203,7 +203,7 @@ class _DoctorTabState extends State<DoctorTab> {
                 l10n.clinicChoosePlantSubtitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF6E6E73),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 14,
                 ),
               ),
@@ -223,7 +223,7 @@ class _DoctorTabState extends State<DoctorTab> {
                     l10n.clinicNoGardenPlants,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      color: const Color(0xFF8B9E93),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 14,
                     ),
                   ),
@@ -304,7 +304,7 @@ class _DoctorTabState extends State<DoctorTab> {
                   Text(
                     l10n.clinicNewPhoto,
                     style: GoogleFonts.outfit(
-                      color: const Color(0xFF2C3E35),
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -313,7 +313,7 @@ class _DoctorTabState extends State<DoctorTab> {
                   Text(
                     l10n.clinicNewPhotoSubtitle,
                     style: GoogleFonts.inter(
-                      color: const Color(0xFF8B9E93),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 12,
                     ),
                   ),
@@ -356,9 +356,9 @@ class _DoctorTabState extends State<DoctorTab> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
@@ -386,7 +386,7 @@ class _DoctorTabState extends State<DoctorTab> {
               child: Text(
                 name,
                 style: GoogleFonts.outfit(
-                  color: const Color(0xFF2C3E35),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -415,12 +415,12 @@ class _DoctorTabState extends State<DoctorTab> {
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Icon(
+      child: Icon(
         Icons.local_florist,
-        color: Color(0xFF8B9E93),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         size: 24,
       ),
     );
@@ -480,7 +480,7 @@ class _DoctorTabState extends State<DoctorTab> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -506,7 +506,7 @@ class _DoctorTabState extends State<DoctorTab> {
             Text(
               title,
               style: GoogleFonts.outfit(
-                color: const Color(0xFF2C3E35),
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 height: 1.2,
@@ -516,7 +516,7 @@ class _DoctorTabState extends State<DoctorTab> {
             Text(
               subtitle,
               style: GoogleFonts.inter(
-                color: const Color(0xFF8B9E93),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),

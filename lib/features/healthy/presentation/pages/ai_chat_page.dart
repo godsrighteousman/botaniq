@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/services/openai_service.dart';
 import '../../../../core/services/sick_plant_service.dart';
+import '../../../subscription/presentation/controllers/subscription_controller.dart';
+import '../../../subscription/presentation/widgets/paywall_prompt.dart';
 
 class AiChatPage extends StatefulWidget {
   final String plantName;
@@ -15,13 +18,29 @@ class AiChatPage extends StatefulWidget {
   final String? plantImageUrl;
   final String? sickPlantId; // Mevcut hasta bitkiye devam etmek için
 
+  /// Klinik > Keşfet'ten "herhangi bir bitki hakkında" başlatılan, önceden
+  /// belirli bir bitki seçilmemiş genel sohbet modu. Bu modda karşılama
+  /// mesajı ve başlık belirli bir bitki adına referans vermez; kullanıcı
+  /// sohbet sırasında bir fotoğraf paylaşırsa akış yine normal teşhis
+  /// koyma mantığına döner (plantId olmadan yeni bir kayıt oluşturulur).
+  final bool isGeneralChat;
+
+  /// Sayfa açılır açılmaz otomatik olarak gönderilecek ilk kullanıcı mesajı
+  /// (ör. Keşfet sekmesindeki hazır konu çiplerinden biri seçildiğinde).
+  final String? initialPrompt;
+
   const AiChatPage({
     super.key,
-    required this.plantName,
+    this.plantName = '',
     this.plantId,
     this.plantImageUrl,
     this.sickPlantId,
-  });
+    this.isGeneralChat = false,
+    this.initialPrompt,
+  }) : assert(
+         isGeneralChat || plantName != '',
+         'plantName is required unless isGeneralChat is true',
+       );
 
   @override
   State<AiChatPage> createState() => _AiChatPageState();
@@ -29,7 +48,7 @@ class AiChatPage extends StatefulWidget {
 
 class _AiChatPageState extends State<AiChatPage> {
   final Color _primaryGreen = const Color(0xFF4FA976);
-  final Color _bgHint = const Color(0xFFF9FAF9);
+  Color get _bgHint => Theme.of(context).scaffoldBackgroundColor;
 
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -58,11 +77,20 @@ class _AiChatPageState extends State<AiChatPage> {
     if (_currentSickPlantId == null && !_welcomeInitialized) {
       final l10n = AppLocalizations.of(context)!;
       _messages.add({
-        'content': l10n.chatWelcome(widget.plantName),
+        'content': widget.isGeneralChat
+            ? l10n.chatWelcomeGeneral
+            : l10n.chatWelcome(widget.plantName),
         'role': 'assistant',
         'image_url': null,
       });
       _welcomeInitialized = true;
+
+      final prompt = widget.initialPrompt?.trim();
+      if (prompt != null && prompt.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _sendMessage(prompt);
+        });
+      }
     }
   }
 
@@ -102,6 +130,22 @@ class _AiChatPageState extends State<AiChatPage> {
 
   Future<void> _sendMessage(String text, {String? imageBase64}) async {
     if (text.trim().isEmpty && imageBase64 == null) return;
+
+    final allowed = await context
+        .read<SubscriptionController>()
+        .consumeAiQuotaOrPrompt();
+    if (!allowed) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        await showPaywallPrompt(
+          context,
+          contextLabel: widget.isGeneralChat
+              ? l10n.chatPaywallContextGeneral
+              : l10n.chatPaywallContextPlant(_displayPlantName),
+        );
+      }
+      return;
+    }
 
     setState(() {
       _messages.add({
@@ -413,11 +457,11 @@ class _AiChatPageState extends State<AiChatPage> {
     return Scaffold(
       backgroundColor: _bgHint,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         leading: BackButton(
-          color: const Color(0xFF2C3E35),
+          color: Theme.of(context).colorScheme.onSurface,
           style: IconButton.styleFrom(iconSize: 18),
           onPressed: () => Navigator.pop(context, _currentSickPlantId != null),
         ),
@@ -426,13 +470,15 @@ class _AiChatPageState extends State<AiChatPage> {
             Text(
               l10n.chatDoctorTitle,
               style: GoogleFonts.outfit(
-                color: const Color(0xFF2C3E35),
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
-              l10n.chatPatient(_displayPlantName),
+              widget.isGeneralChat && _currentSickPlantId == null
+                  ? l10n.chatGeneralSubtitle
+                  : l10n.chatPatient(_displayPlantName),
               style: GoogleFonts.inter(
                 color: _primaryGreen,
                 fontSize: 13,
@@ -476,7 +522,7 @@ class _AiChatPageState extends State<AiChatPage> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -501,7 +547,7 @@ class _AiChatPageState extends State<AiChatPage> {
             Text(
               AppLocalizations.of(context)!.chatAnalyzing,
               style: GoogleFonts.inter(
-                color: const Color(0xFF8B9E93),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
@@ -523,7 +569,9 @@ class _AiChatPageState extends State<AiChatPage> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isUser ? _primaryGreen : Colors.white,
+          color: isUser
+              ? _primaryGreen
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadiusDirectional.only(
             topStart: const Radius.circular(24),
             topEnd: const Radius.circular(24),
@@ -557,7 +605,7 @@ class _AiChatPageState extends State<AiChatPage> {
                     matchTextDirection: false,
                     errorBuilder: (_, _, _) => Container(
                       height: 80,
-                      color: const Color(0xFFF1F5F9),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       child: const Center(
                         child: Icon(Icons.image_not_supported),
                       ),
@@ -568,7 +616,7 @@ class _AiChatPageState extends State<AiChatPage> {
             Text(
               text,
               style: GoogleFonts.inter(
-                color: isUser ? Colors.white : const Color(0xFF2C3E35),
+                color: isUser ? Colors.white : Theme.of(context).colorScheme.onSurface,
                 fontSize: 15,
                 height: 1.5,
               ),
@@ -603,14 +651,14 @@ class _AiChatPageState extends State<AiChatPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               child: Text(
                 reply,
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF435A4D),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -625,9 +673,13 @@ class _AiChatPageState extends State<AiChatPage> {
   Widget _buildMessageInput() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 32),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+        ),
       ),
       child: Row(
         children: [
@@ -643,7 +695,7 @@ class _AiChatPageState extends State<AiChatPage> {
               ),
               child: Icon(
                 Icons.camera_alt_rounded,
-                color: _isLoading ? const Color(0xFF8B9E93) : _primaryGreen,
+                color: _isLoading ? Theme.of(context).colorScheme.onSurfaceVariant : _primaryGreen,
                 size: 22,
               ),
             ),
@@ -656,14 +708,14 @@ class _AiChatPageState extends State<AiChatPage> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 Icons.photo_library_rounded,
                 color: _isLoading
-                    ? const Color(0xFF8B9E93)
-                    : const Color(0xFF6E6E73),
+                    ? Theme.of(context).colorScheme.onSurfaceVariant
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 22,
               ),
             ),
@@ -684,13 +736,13 @@ class _AiChatPageState extends State<AiChatPage> {
                     context,
                   )!.chatHint(widget.plantName),
                   hintStyle: GoogleFonts.inter(
-                    color: const Color(0xFF8B9E93),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 14,
                   ),
                   border: InputBorder.none,
                 ),
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF2C3E35),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 15,
                 ),
                 onSubmitted: _isLoading ? null : _sendMessage,
@@ -706,7 +758,7 @@ class _AiChatPageState extends State<AiChatPage> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: _isLoading ? const Color(0xFF8B9E93) : _primaryGreen,
+                color: _isLoading ? Theme.of(context).colorScheme.onSurfaceVariant : _primaryGreen,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(

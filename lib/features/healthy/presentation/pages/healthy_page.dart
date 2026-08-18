@@ -20,7 +20,7 @@ class _HealthyPageState extends State<HealthyPage>
   int _hospitalRefreshVersion = 0;
 
   final Color _primaryGreen = const Color(0xFF4FA976);
-  final Color _bgHint = const Color(0xFFF9FAF9);
+  Color get _bgHint => Theme.of(context).scaffoldBackgroundColor;
 
   @override
   void initState() {
@@ -95,7 +95,7 @@ class _HealthyPageState extends State<HealthyPage>
           Text(
             AppLocalizations.of(context)!.healthyTitle,
             style: GoogleFonts.outfit(
-              color: const Color(0xFF2C3E35),
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 32,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.5,
@@ -105,7 +105,7 @@ class _HealthyPageState extends State<HealthyPage>
           Text(
             AppLocalizations.of(context)!.healthySubtitle,
             style: GoogleFonts.inter(
-              color: const Color(0xFF8B9E93),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
@@ -120,7 +120,7 @@ class _HealthyPageState extends State<HealthyPage>
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -137,7 +137,7 @@ class _HealthyPageState extends State<HealthyPage>
           borderRadius: BorderRadius.circular(20),
         ),
         labelColor: _primaryGreen,
-        unselectedLabelColor: const Color(0xFF8B9E93),
+        unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
         labelStyle: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w600,

@@ -275,6 +275,87 @@ class AppLocalizationsPt extends AppLocalizations {
   String get subscriptionFree => 'Grátis';
 
   @override
+  String get subscriptionComparisonTitle => 'Free vs. Premium';
+
+  @override
+  String get subscriptionComparisonColumnFeature => 'Feature';
+
+  @override
+  String get subscriptionComparisonRowScan => 'Plant scanning & diagnosis';
+
+  @override
+  String get subscriptionComparisonRowChat => 'AI Plant Doctor chat';
+
+  @override
+  String get subscriptionComparisonRowGarden =>
+      'Garden tracking & watering reminders';
+
+  @override
+  String get subscriptionComparisonRowLeaderboard => 'Gardener leaderboard';
+
+  @override
+  String get subscriptionComparisonLimited => '2 free uses';
+
+  @override
+  String get subscriptionComparisonUnlimited => 'Unlimited';
+
+  @override
+  String get subscriptionTrustCancel => 'Cancel anytime';
+
+  @override
+  String get subscriptionTrustSecure => 'Secure payment';
+
+  @override
+  String get subscriptionTrustInstant => 'Activates instantly';
+
+  @override
+  String subscriptionPerDay(String price) {
+    return '$price / day';
+  }
+
+  @override
+  String get settingsPremiumBannerTitle => 'Go Premium';
+
+  @override
+  String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
+
+  @override
+  String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
+
+  @override
+  String get paywallTitle => 'Go Premium to keep going';
+
+  @override
+  String paywallBodyWithContext(String context) {
+    return 'You were just exploring $context. You\'ve used your 2 free analyses — with Premium you can keep going without limits.';
+  }
+
+  @override
+  String get paywallBodyGeneric =>
+      'You\'ve used your 2 free analyses. With Premium you can identify, diagnose, and chat with the AI Plant Doctor without limits.';
+
+  @override
+  String get paywallBenefitScan =>
+      'Unlimited plant identification and diagnosis';
+
+  @override
+  String get paywallBenefitChat => 'Unlimited chat with the AI Plant Doctor';
+
+  @override
+  String get paywallBenefitReminders => 'Personalized care reminders';
+
+  @override
+  String paywallAnnualBadge(int percent) {
+    return 'Save $percent% with the annual plan';
+  }
+
+  @override
+  String get paywallCta => 'Go Premium';
+
+  @override
+  String get paywallDismiss => 'Not now';
+
+  @override
   String get homeGoodMorning => 'Olá,';
 
   @override
@@ -300,6 +381,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get homeSmartCareReminders => 'Lembretes de cuidados inteligentes';
+
+  @override
+  String get inboxTitle => 'Inbox';
+
+  @override
+  String get inboxEmptyState =>
+      'All caught up! No plants need watering right now.';
 
   @override
   String get homeWatering => 'Rega';
@@ -400,9 +488,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileSupportLegal => 'Suporte e Jurídico';
 
   @override
-  String get profileHelpCenter => 'Central de Ajuda';
-
-  @override
   String get profileTerms => 'Termos de Utilização e Políticas';
 
   @override
@@ -417,6 +502,32 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileGardenPassport => 'PASSAPORTE DE JARDIM';
+
+  @override
+  String profileGlobalRank(int rank) {
+    return 'Global Rank #$rank';
+  }
+
+  @override
+  String get profileGlobalRankUnranked => 'Not ranked yet';
+
+  @override
+  String get profileViewLeaderboard => 'See the leaderboard';
+
+  @override
+  String get leaderboardTitle => 'Gardener Leaderboard';
+
+  @override
+  String get leaderboardEmptyState =>
+      'No completed care tasks yet — be the first to appear here.';
+
+  @override
+  String get leaderboardYou => 'You';
+
+  @override
+  String leaderboardCompletedTasks(int count) {
+    return '$count tasks';
+  }
 
   @override
   String get profileThisWeek => 'Esta semana';
@@ -435,9 +546,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get profileNotificationPrefsSubtitle =>
       'Escolha quais os momentos de cuidado que lhe chegam';
-
-  @override
-  String get profileHelpCenterSubtitle => 'Respostas e orientação rápida';
 
   @override
   String get profileTermsSubtitle => 'Privacidade, termos e políticas';
@@ -593,6 +701,16 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get notificationWateringSubtitle =>
       'Seja notificado quando chegar a altura de regar';
+
+  @override
+  String notificationWateringSinglePlant(String plantName) {
+    return '$plantName needs watering today.';
+  }
+
+  @override
+  String notificationWateringMultiplePlants(int count, String plantNames) {
+    return '$count plants need water today: $plantNames';
+  }
 
   @override
   String get notificationFertilizerTitle => 'Lembretes de fertilizantes';
@@ -898,9 +1016,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get clinicUrgencyCritical => 'Crítico';
 
   @override
-  String get healthTrendingTips => 'Tendências de dicas de saúde';
-
-  @override
   String get healthHumidityArticleTitle =>
       'Preparação para o inverno: manter a humidade equilibrada';
 
@@ -909,22 +1024,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Como proteger as suas plantas do ar seco do radiador durante os meses frios.';
 
   @override
-  String get healthWeeklySpotlight => 'Doente e Remédio da Semana';
-
-  @override
   String get healthAphidTitle => 'Infestação de pulgões';
 
   @override
   String get healthAphidSubtitle =>
       'Intervenção precoce e tratamento natural com óleo de Neem.';
-
-  @override
-  String get healthDiscoverLoadError =>
-      'Não foi possível carregar o conteúdo do Discover de momento. Puxe para baixo para tentar novamente.';
-
-  @override
-  String get healthDiscoverEmpty =>
-      'Ainda não há conteúdo de descoberta publicado.';
 
   @override
   String get healthDiscoverRetry => 'Tente novamente';
@@ -989,27 +1093,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeLoadingPlants => 'Plantas de carga...';
 
   @override
-  String get homeNotifications => 'Notificações';
-
-  @override
-  String get homeWateringTime => 'Tempo de rega';
-
-  @override
   String get homeWateringNotification =>
       'As suas plantas de interior precisam de rega.';
-
-  @override
-  String get homeWelcome => 'Bem-vindo!';
-
-  @override
-  String get homeWelcomeNotification =>
-      'Bem-vindo ao Botaniq. Comece por adicionar a sua primeira planta.';
-
-  @override
-  String get homeTenMinutesAgo => 'Há 10 minutos';
-
-  @override
-  String get homeOneDayAgo => 'Há 1 dia';
 
   @override
   String get homeQuickActions => 'Ações rápidas';
@@ -1347,6 +1432,17 @@ class AppLocalizationsPt extends AppLocalizations {
       'Falha na digitalização. Por favor, tente novamente.';
 
   @override
+  String get scannerPaywallContext => 'identifying a new plant';
+
+  @override
+  String get chatPaywallContextGeneral => 'chatting with the AI Plant Doctor';
+
+  @override
+  String chatPaywallContextPlant(String name) {
+    return 'diagnosing $name';
+  }
+
+  @override
   String scannerError(String error) {
     return 'Ocorreu um erro: $error';
   }
@@ -1403,6 +1499,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String chatWelcome(String name) {
     return 'Olá! 🌿 Sou o seu médico de plantas de IA. Como posso ajudar com o $name?\n\nPosso diagnosticar uma foto ou responder às suas perguntas sobre cuidados.';
   }
+
+  @override
+  String get chatWelcomeGeneral =>
+      'Hello! 🌿 I’m your AI Plant Doctor. Ask me anything about plant care, or send a photo of any plant and I’ll take a look.';
+
+  @override
+  String get chatGeneralSubtitle => 'General plant chat';
+
+  @override
+  String get healthyGeneralChatTitle => 'Ask the AI anything';
+
+  @override
+  String get healthyGeneralChatSubtitle =>
+      'No plant selected? Chat freely about care, symptoms, or send a photo.';
+
+  @override
+  String get chatStartConversation => 'Start the conversation';
+
+  @override
+  String get chatQuickTopics => 'Or ask about';
 
   @override
   String chatContinueWelcome(String name) {
@@ -1553,6 +1669,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get fillAllFields => 'Por favor preencha todos os campos.';
 
   @override
+  String get accountCreatedPleaseLogIn =>
+      'Account created — please log in with your new email and password.';
+
+  @override
   String authError(String error) {
     return 'Algo correu mal: $error';
   }
@@ -1568,9 +1688,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get alreadyAccount => 'Já tem conta?';
-
-  @override
-  String get developerSession => 'Criar sessão de programador';
 
   @override
   String get welcomeBotaniq => 'Bem-vindo à Botaniq';
@@ -2027,6 +2144,87 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'As assinaturas estão disponíveis apenas nos aplicativos iOS e Android.';
 
   @override
+  String get subscriptionComparisonTitle => 'Free vs. Premium';
+
+  @override
+  String get subscriptionComparisonColumnFeature => 'Feature';
+
+  @override
+  String get subscriptionComparisonRowScan => 'Plant scanning & diagnosis';
+
+  @override
+  String get subscriptionComparisonRowChat => 'AI Plant Doctor chat';
+
+  @override
+  String get subscriptionComparisonRowGarden =>
+      'Garden tracking & watering reminders';
+
+  @override
+  String get subscriptionComparisonRowLeaderboard => 'Gardener leaderboard';
+
+  @override
+  String get subscriptionComparisonLimited => '2 free uses';
+
+  @override
+  String get subscriptionComparisonUnlimited => 'Unlimited';
+
+  @override
+  String get subscriptionTrustCancel => 'Cancel anytime';
+
+  @override
+  String get subscriptionTrustSecure => 'Secure payment';
+
+  @override
+  String get subscriptionTrustInstant => 'Activates instantly';
+
+  @override
+  String subscriptionPerDay(String price) {
+    return '$price / day';
+  }
+
+  @override
+  String get settingsPremiumBannerTitle => 'Go Premium';
+
+  @override
+  String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
+
+  @override
+  String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
+
+  @override
+  String get paywallTitle => 'Go Premium to keep going';
+
+  @override
+  String paywallBodyWithContext(String context) {
+    return 'You were just exploring $context. You\'ve used your 2 free analyses — with Premium you can keep going without limits.';
+  }
+
+  @override
+  String get paywallBodyGeneric =>
+      'You\'ve used your 2 free analyses. With Premium you can identify, diagnose, and chat with the AI Plant Doctor without limits.';
+
+  @override
+  String get paywallBenefitScan =>
+      'Unlimited plant identification and diagnosis';
+
+  @override
+  String get paywallBenefitChat => 'Unlimited chat with the AI Plant Doctor';
+
+  @override
+  String get paywallBenefitReminders => 'Personalized care reminders';
+
+  @override
+  String paywallAnnualBadge(int percent) {
+    return 'Save $percent% with the annual plan';
+  }
+
+  @override
+  String get paywallCta => 'Go Premium';
+
+  @override
+  String get paywallDismiss => 'Not now';
+
+  @override
   String get homeEmptyGarden => 'Seu jardim está vazio';
 
   @override
@@ -2035,6 +2233,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get homeMyPlants => 'Minhas plantas';
+
+  @override
+  String get inboxTitle => 'Inbox';
+
+  @override
+  String get inboxEmptyState =>
+      'All caught up! No plants need watering right now.';
 
   @override
   String get gardenTitle => 'Meu jardim';
@@ -2062,6 +2267,32 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get profileSubtitle =>
       'A história do seu jardim, progresso e espaço pessoal.';
+
+  @override
+  String profileGlobalRank(int rank) {
+    return 'Global Rank #$rank';
+  }
+
+  @override
+  String get profileGlobalRankUnranked => 'Not ranked yet';
+
+  @override
+  String get profileViewLeaderboard => 'See the leaderboard';
+
+  @override
+  String get leaderboardTitle => 'Gardener Leaderboard';
+
+  @override
+  String get leaderboardEmptyState =>
+      'No completed care tasks yet — be the first to appear here.';
+
+  @override
+  String get leaderboardYou => 'You';
+
+  @override
+  String leaderboardCompletedTasks(int count) {
+    return '$count tasks';
+  }
 
   @override
   String get profileQuietWeek =>
@@ -2135,6 +2366,16 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'Seja notificado quando chegar a hora de regar';
 
   @override
+  String notificationWateringSinglePlant(String plantName) {
+    return '$plantName needs watering today.';
+  }
+
+  @override
+  String notificationWateringMultiplePlants(int count, String plantNames) {
+    return '$count plants need water today: $plantNames';
+  }
+
+  @override
   String get notificationFertilizerSubtitle =>
       'Alertas de alimentação sazonal para suas plantas';
 
@@ -2192,13 +2433,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'Como proteger suas plantas do ar seco do radiador durante os meses frios.';
 
   @override
-  String get healthWeeklySpotlight => 'Paciente e Remédio da Semana';
-
-  @override
-  String get healthDiscoverLoadError =>
-      'Não foi possível carregar o conteúdo do Discover no momento. Puxe para baixo para tentar novamente.';
-
-  @override
   String get lightMeterInstruction =>
       'Aponte a câmera frontal do telefone para\na posição da planta e a fonte de luz.';
 
@@ -2232,16 +2466,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get homeWateringNotification =>
       'Suas plantas de interior precisam de rega.';
-
-  @override
-  String get homeWelcomeNotification =>
-      'Bem-vindo ao Botaniq. Comece adicionando sua primeira planta.';
-
-  @override
-  String get homeTenMinutesAgo => '10 minutos atrás';
-
-  @override
-  String get homeOneDayAgo => '1 dia atrás';
 
   @override
   String get homeIdentifyCamera => 'Identifique-se com sua câmera';
@@ -2337,6 +2561,17 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get photoOpenCamera => 'Eu entendo, abra a câmera';
 
   @override
+  String get scannerPaywallContext => 'identifying a new plant';
+
+  @override
+  String get chatPaywallContextGeneral => 'chatting with the AI Plant Doctor';
+
+  @override
+  String chatPaywallContextPlant(String name) {
+    return 'diagnosing $name';
+  }
+
+  @override
   String get scheduleNoTasks => 'Nenhuma tarefa para hoje!';
 
   @override
@@ -2348,6 +2583,26 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String chatWelcome(String name) {
     return 'Olá! 🌿 Sou seu médico de plantas de IA. Como posso ajudar com $name?\n\nPosso diagnosticar uma foto ou responder às suas perguntas sobre cuidados.';
   }
+
+  @override
+  String get chatWelcomeGeneral =>
+      'Hello! 🌿 I’m your AI Plant Doctor. Ask me anything about plant care, or send a photo of any plant and I’ll take a look.';
+
+  @override
+  String get chatGeneralSubtitle => 'General plant chat';
+
+  @override
+  String get healthyGeneralChatTitle => 'Ask the AI anything';
+
+  @override
+  String get healthyGeneralChatSubtitle =>
+      'No plant selected? Chat freely about care, symptoms, or send a photo.';
+
+  @override
+  String get chatStartConversation => 'Start the conversation';
+
+  @override
+  String get chatQuickTopics => 'Or ask about';
 
   @override
   String get chatQuestionYellowing => 'O que está causando as folhas amarelas?';
@@ -2378,6 +2633,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get enterEmailPassword => 'Por favor insira seu e-mail e senha.';
 
   @override
+  String get accountCreatedPleaseLogIn =>
+      'Account created — please log in with your new email and password.';
+
+  @override
   String authError(String error) {
     return 'Algo deu errado: $error';
   }
@@ -2390,9 +2649,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get alreadyAccount => 'Já tem uma conta?';
-
-  @override
-  String get developerSession => 'Criar sessão de desenvolvedor';
 
   @override
   String get loginOptionsSubtitle =>
@@ -2509,12 +2765,40 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
       'Coletamos apenas os dados pessoais necessários para fornecer cronogramas personalizados de cuidados com as plantas. Não vendemos os seus dados pessoais a terceiros.';
 
   @override
+  String get termsContentTitle => '3. Your Content and License to Us';
+
+  @override
+  String get termsContentBody =>
+      'You keep ownership of the photos, notes, and other content you submit. By submitting content you grant us a worldwide, royalty-free, non-exclusive, sublicensable license to host, store, reproduce, analyze, and use it to operate, secure, and improve Botaniq (including improving plant identification, diagnosis, and other AI-assisted features), for as long as we hold the content. You are responsible for having the right to share whatever you upload.';
+
+  @override
+  String get termsRetentionTitle => '4. Account Deletion and Data Retention';
+
+  @override
+  String get termsRetentionBody =>
+      'Requesting account deletion in the app anonymizes your account: your name, email, and profile photo are permanently removed and cannot be reattached to your identity, while your sign-in and remaining app data stay linked to the same anonymized account so you can keep using it if you sign in again. We may retain data — including in anonymized, aggregated, or backup form — for as long as needed for security, fraud-prevention, legal, accounting, or dispute-resolution purposes, even after a deletion request, to the fullest extent permitted by applicable law.';
+
+  @override
   String get termsPlantBody =>
       'Informações sobre cuidados com plantas, identificação e diagnóstico são fornecidas para fins informativos. Os resultados da IA ​​nem sempre estão corretos, portanto observe sua planta e procure um especialista para riscos graves.';
 
   @override
+  String get termsLiabilityTitle => '6. Disclaimers, Liability, and Indemnity';
+
+  @override
+  String get termsLiabilityBody =>
+      'Botaniq is provided \"as is\" and \"as available,\" without warranties of any kind, express or implied, including accuracy, reliability, or fitness for a particular purpose. To the fullest extent permitted by law, we and our service providers are not liable for any indirect, incidental, special, or consequential damages, or for any loss of data, plants, or property arising from your use of the service, and our total liability for any claim is limited to the amount you paid us, if any, in the twelve months before the claim. You agree to indemnify and hold us harmless from claims arising from your use of the service, your content, or your violation of these Terms or applicable law.';
+
+  @override
   String get termsPremiumBody =>
       'Sua assinatura Premium mensal ou anual é cobrada em sua conta Apple ou Google após a confirmação da compra. Ele é renovado automaticamente, a menos que seja cancelado pelo menos 24 horas antes do término do período atual. Você pode gerenciar ou cancelar nas configurações da conta da sua loja. As solicitações de reembolso são tratadas de acordo com a política da loja aplicável.';
+
+  @override
+  String get termsLawTitle => '8. Governing Law and Changes';
+
+  @override
+  String get termsLawBody =>
+      'These Terms are governed by the laws of the jurisdiction in which we operate, without regard to conflict-of-law principles, and any dispute will be resolved under that jurisdiction\'s applicable procedures to the fullest extent permitted by law. We may update these Terms and our data practices at any time by posting the revised version in the app.';
 
   @override
   String get termsClosing =>

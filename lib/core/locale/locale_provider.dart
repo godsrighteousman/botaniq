@@ -14,8 +14,6 @@ enum MeasurementSystemPreference { system, metric, imperial }
 class LocaleProvider extends ChangeNotifier {
   static const String prefKey = 'app_locale';
   static const String _prefModeKey = 'app_locale_mode';
-  static const String _initialSelectionKey =
-      'app_initial_language_selection_completed';
   static const String _themePreferenceKey = 'settings_theme_mode';
   static const String _legacyDarkModeKey = 'settings_dark_mode';
   static const String _measurementPreferenceKey = 'settings_measurement_system';
@@ -26,7 +24,6 @@ class LocaleProvider extends ChangeNotifier {
 
   Locale? _locale;
   Locale _recommendedLocale = SupportedAppLocales.fallback;
-  bool _hasCompletedInitialSelection = false;
   AppThemePreference _themePreference = AppThemePreference.system;
   MeasurementSystemPreference _measurementPreference =
       MeasurementSystemPreference.system;
@@ -38,7 +35,6 @@ class LocaleProvider extends ChangeNotifier {
   String? get currentLocaleTag =>
       _locale == null ? null : SupportedAppLocales.tagFor(_locale!);
   Locale get recommendedLocale => _recommendedLocale;
-  bool get hasCompletedInitialSelection => _hasCompletedInitialSelection;
   AppThemePreference get themePreference => _themePreference;
   ThemeMode get themeMode => switch (_themePreference) {
     AppThemePreference.system => ThemeMode.system,
@@ -77,12 +73,6 @@ class LocaleProvider extends ChangeNotifier {
       } else {
         _locale = _recommendedLocale;
       }
-
-      // A saved locale from an earlier Botaniq version is already an explicit
-      // user choice and must not send an existing user through the new gate.
-      _hasCompletedInitialSelection =
-          prefs.getBool(_initialSelectionKey) ??
-          (mode == 'system' || SupportedAppLocales.isSupportedTag(localTag));
 
       _themePreference = _parseThemePreference(
         prefs.getString(_themePreferenceKey),
@@ -173,16 +163,12 @@ class LocaleProvider extends ChangeNotifier {
           response?['language_code']?.toString();
       if (hasExplicitRemoteLocale && remoteLocaleValue == null) {
         _locale = null;
-        _hasCompletedInitialSelection = true;
         await prefs.remove(prefKey);
         await prefs.setString(_prefModeKey, 'system');
-        await prefs.setBool(_initialSelectionKey, true);
       } else if (SupportedAppLocales.isSupportedTag(remoteTag)) {
         _locale = SupportedAppLocales.parse(remoteTag);
-        _hasCompletedInitialSelection = true;
         await prefs.setString(prefKey, SupportedAppLocales.tagFor(_locale!));
         await prefs.setString(_prefModeKey, 'fixed');
-        await prefs.setBool(_initialSelectionKey, true);
       }
       if (supportsExtendedPreferences) {
         _themePreference = _parseThemePreference(
@@ -220,17 +206,6 @@ class LocaleProvider extends ChangeNotifier {
 
     // I/O arka planda — UI bloklanmaz
     await _persistLocale(localeTag);
-  }
-
-  Future<void> completeInitialSelection([String? localeTag]) async {
-    if (localeTag != null) {
-      _locale = SupportedAppLocales.byTag(localeTag)?.locale ?? _locale;
-    }
-    _hasCompletedInitialSelection = true;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_initialSelectionKey, true);
-    await _persistLocale(currentLocaleTag);
   }
 
   Future<void> setThemePreference(AppThemePreference preference) async {

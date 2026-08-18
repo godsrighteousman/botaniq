@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
@@ -10,7 +9,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'sign_up_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  /// Kayıt ol akışından geldiğimizde, kullanıcıya hesabının oluşturulduğunu
+  /// ve şimdi az önce belirlediği bilgilerle giriş yapması gerektiğini
+  /// bildiren kısa bir mesaj gösterir.
+  final bool showAccountCreatedMessage;
+
+  const LoginPage({super.key, this.showAccountCreatedMessage = false});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -21,6 +25,20 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showAccountCreatedMessage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.accountCreatedPleaseLogIn)),
+        );
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -162,10 +180,15 @@ class _LoginPageState extends State<LoginPage> {
                         } catch (error) {
                           debugPrint('Email sign-in failed: $error');
                           if (mounted) {
+                            // Jenerik bir mesaj yerine gerçek nedeni göster
+                            // (yanlış şifre, onaylanmamış hesap, ağ hatası
+                            // vb.) — kullanıcının kendi kendine teşhis
+                            // koyabilmesi için.
+                            final message = error is AuthException
+                                ? error.message
+                                : error.toString();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.subscriptionErrorGeneric),
-                              ),
+                              SnackBar(content: Text(l10n.authError(message))),
                             );
                           }
                         } finally {
@@ -213,62 +236,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              if (kDebugMode) ...[
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          setState(() => _isLoading = true);
-                          try {
-                            final timestamp =
-                                DateTime.now().millisecondsSinceEpoch;
-                            final devEmail = 'dev_$timestamp@botaniq.test';
-                            final devPassword = 'DevPassword123!';
-
-                            final AuthResponse res = await Supabase
-                                .instance
-                                .client
-                                .auth
-                                .signUp(email: devEmail, password: devPassword);
-
-                            if (res.user != null) {
-                              await Supabase.instance.client
-                                  .from('users')
-                                  .insert({
-                                    'id': res.user!.id,
-                                    'full_name': 'Developer',
-                                    'email': devEmail,
-                                  });
-                            }
-
-                            _finishAuthentication();
-                          } catch (error) {
-                            debugPrint('Developer sign-in failed: $error');
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.subscriptionErrorGeneric),
-                                ),
-                              );
-                            }
-                          } finally {
-                            if (mounted) {
-                              setState(() => _isLoading = false);
-                            }
-                          }
-                        },
-                  child: Text(
-                    l10n.developerSession,
-                    style: GoogleFonts.outfit(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ],
-
               const SizedBox(height: 48),
 
               // Divider

@@ -74,7 +74,6 @@ void main() {
 
     expect(provider.recommendedLocale, const Locale('de'));
     expect(provider.currentLocaleTag, 'de');
-    expect(provider.hasCompletedInitialSelection, isFalse);
   });
 
   testWidgets('legacy and new choices persist without resetting other prefs', (
@@ -91,7 +90,6 @@ void main() {
     await provider.loadSavedLocale();
 
     expect(provider.currentLocaleTag, 'tr');
-    expect(provider.hasCompletedInitialSelection, isTrue);
     expect(provider.themePreference, AppThemePreference.dark);
     expect(
       provider.measurementPreference,

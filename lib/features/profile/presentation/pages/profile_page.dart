@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/services/auth_service.dart';
 import 'edit_profile_page.dart';
+import 'leaderboard_page.dart';
 import 'notifications_settings_page.dart';
 import 'settings_page.dart';
 import 'terms_page.dart';
@@ -18,13 +19,13 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static const _background = Color(0xFFF5F9F6);
-  static const _surface = Colors.white;
-  static const _ink = Color(0xFF20352A);
-  static const _muted = Color(0xFF7A8F82);
+  Color get _background => Theme.of(context).scaffoldBackgroundColor;
+  Color get _surface => Theme.of(context).colorScheme.surface;
+  Color get _ink => Theme.of(context).colorScheme.onSurface;
+  Color get _muted => Theme.of(context).colorScheme.onSurfaceVariant;
   static const _green = Color(0xFF0ED761);
   static const _deepGreen = Color(0xFF174B32);
-  static const _softGreen = Color(0xFFDDF8E8);
+  Color get _softGreen => Theme.of(context).colorScheme.surfaceContainerHighest;
   static const _warm = Color(0xFFFFF3D8);
   static const _danger = Color(0xFFE96565);
 
@@ -37,6 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   int _totalPlantsCount = 0;
   int _completedTasksCount = 0;
+  int? _globalRank;
   List<double> _weeklyActivity = List.filled(7, 0);
   List<String> _activityDays = const [
     'Pzt',
@@ -58,7 +60,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
       _email = user.email ?? '';
-      await Future.wait([_fetchProfile(user), _fetchStatistics(user.id)]);
+      await Future.wait([
+        _fetchProfile(user),
+        _fetchStatistics(user.id),
+        _fetchGlobalRank(),
+      ]);
     }
     if (mounted) {
       setState(() => _isLoading = false);
@@ -196,6 +202,29 @@ class _ProfilePageState extends State<ProfilePage> {
       _activityDays = labels;
       _weeklyActivity = counts.map((count) => count / maxCount).toList();
     });
+  }
+
+  /// Kullanıcının tamamlanan bakım görevi sayısına göre küresel sırasını
+  /// getirir (bkz. get_my_leaderboard_rank RPC'si). Hiç tamamlanmış görevi
+  /// yoksa RPC boş sonuç döner — bu normaldir, "henüz sıralı değil" UI'ı
+  /// gösterilir.
+  Future<void> _fetchGlobalRank() async {
+    try {
+      final rows = await Supabase.instance.client
+          .rpc('get_my_leaderboard_rank')
+          .timeout(const Duration(seconds: 5));
+      if (rows is List && rows.isNotEmpty) {
+        final row = rows.first as Map<String, dynamic>;
+        final rank = row['rank'];
+        if (mounted) {
+          setState(() {
+            _globalRank = rank is int ? rank : int.tryParse('$rank');
+          });
+        }
+      }
+    } catch (error) {
+      debugPrint('Küresel sıra getirilemedi: $error');
+    }
   }
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -356,20 +385,20 @@ class _ProfilePageState extends State<ProfilePage> {
           Container(
             width: 62,
             height: 62,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: _softGreen,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.eco_rounded, color: _deepGreen, size: 28),
           ),
           const SizedBox(height: 16),
-          const SizedBox(
+          SizedBox(
             width: 90,
             child: LinearProgressIndicator(
               minHeight: 4,
-              borderRadius: BorderRadius.all(Radius.circular(8)),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
               color: _green,
-              backgroundColor: Color(0xFFDCE7DF),
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
         ],
@@ -416,7 +445,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => setState(() => _selectedTabIndex = 1),
-              child: const SizedBox(
+              child: SizedBox(
                 width: 48,
                 height: 48,
                 child: Icon(Icons.tune_rounded, color: _ink, size: 22),
@@ -509,7 +538,42 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LeaderboardPage()),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.public_rounded,
+                        color: _green,
+                        size: 15,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _globalRank != null
+                            ? _l10n.profileGlobalRank(_globalRank!)
+                            : _l10n.profileGlobalRankUnranked,
+                        style: GoogleFonts.inter(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: Colors.white.withValues(alpha: 0.5),
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
                 Row(
                   children: [
                     _buildAvatar(),
@@ -632,7 +696,7 @@ class _ProfilePageState extends State<ProfilePage> {
       height: 52,
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF1EC),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -757,70 +821,98 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildLevelCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LeaderboardPage()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: _cardDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: _softGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.workspace_premium_rounded,
-                  color: _deepGreen,
-                  size: 22,
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: _softGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.workspace_premium_rounded,
+                      color: _deepGreen,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _l10n.profileGardenerLevel,
+                          style: GoogleFonts.inter(
+                            color: _muted,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _gardenerTitle,
+                          style: GoogleFonts.outfit(
+                            color: _ink,
+                            fontSize: 19,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: _muted.withValues(alpha: 0.7),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: LinearProgressIndicator(
+                  value: _levelProgress.clamp(0, 1),
+                  minHeight: 10,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  valueColor: const AlwaysStoppedAnimation(_green),
                 ),
               ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _l10n.profileGardenerLevel,
-                      style: GoogleFonts.inter(
-                        color: _muted,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _gardenerTitle,
-                      style: GoogleFonts.outfit(
-                        color: _ink,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 10),
+              Text(
+                _nextLevelText,
+                style: GoogleFonts.inter(
+                  color: _muted,
+                  fontSize: 12,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _l10n.profileViewLeaderboard,
+                style: GoogleFonts.inter(
+                  color: _green,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: LinearProgressIndicator(
-              value: _levelProgress.clamp(0, 1),
-              minHeight: 10,
-              backgroundColor: const Color(0xFFEAF1EC),
-              valueColor: const AlwaysStoppedAnimation(_green),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            _nextLevelText,
-            style: GoogleFonts.inter(color: _muted, fontSize: 12, height: 1.4),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -962,7 +1054,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 12,
                 height: height,
                 decoration: BoxDecoration(
-                  color: percentage > 0 ? _green : const Color(0xFFE2EAE4),
+                  color: percentage > 0
+                      ? _green
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: percentage > 0
                       ? [
@@ -1026,13 +1120,6 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 10),
         _buildMenuSection([
           _ProfileMenuData(
-            icon: Icons.support_agent_rounded,
-            color: const Color(0xFF2D8BCB),
-            title: _l10n.profileHelpCenter,
-            subtitle: _l10n.profileHelpCenterSubtitle,
-            onTap: _showComingSoon,
-          ),
-          _ProfileMenuData(
             icon: Icons.policy_outlined,
             color: const Color(0xFFB56A10),
             title: _l10n.profileTerms,
@@ -1090,10 +1177,10 @@ class _ProfilePageState extends State<ProfilePage> {
           for (var index = 0; index < items.length; index++) ...[
             _buildMenuItem(items[index]),
             if (index != items.length - 1)
-              const Divider(
+              Divider(
                 height: 1,
                 thickness: 1,
-                color: Color(0xFFEDF2EE),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 indent: 72,
               ),
           ],
@@ -1167,7 +1254,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return BoxDecoration(
       color: _surface,
       borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: const Color(0xFFEAF0EB)),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       boxShadow: [
         BoxShadow(
           color: _ink.withValues(alpha: 0.045),
@@ -1186,17 +1273,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (result == true && mounted) {
       await _fetchUserData();
     }
-  }
-
-  void _showComingSoon() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_l10n.settingsComingSoon),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: _deepGreen,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-    );
   }
 
   void _showSignOutDialog(BuildContext context) {
