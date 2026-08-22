@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/splash/presentation/pages/splash_page.dart';
 import 'core/config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/locale/locale_provider.dart';
@@ -79,19 +80,49 @@ class BotaniqApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: preferences.themeMode,
-      home: StreamBuilder<AuthState>(
-        stream: Supabase.instance.client.auth.onAuthStateChange,
-        builder: (context, snapshot) {
-          final session =
-              snapshot.data?.session ??
-              Supabase.instance.client.auth.currentSession;
-          if (session != null) {
-            return const HomePage();
-          } else {
-            return const OnboardingPage();
-          }
-        },
-      ),
+      home: const _SplashGate(),
+    );
+  }
+}
+
+/// Uygulama her açıldığında kısa bir marka anı (logo + isim animasyonu)
+/// gösterir, ardından mevcut oturum-tabanlı yönlendirmeye (Ana Sayfa veya
+/// Onboarding) sorunsuzca devreder. Oturum kontrolü mantığı hiç değişmedi —
+/// sadece önüne, sabit süreli, saf görsel bir açılış ekranı eklendi.
+class _SplashGate extends StatefulWidget {
+  const _SplashGate();
+
+  @override
+  State<_SplashGate> createState() => _SplashGateState();
+}
+
+class _SplashGateState extends State<_SplashGate> {
+  bool _showSplash = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 1600), () {
+      if (mounted) setState(() => _showSplash = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showSplash) return const SplashPage();
+
+    return StreamBuilder<AuthState>(
+      stream: Supabase.instance.client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final session =
+            snapshot.data?.session ??
+            Supabase.instance.client.auth.currentSession;
+        if (session != null) {
+          return const HomePage();
+        } else {
+          return const OnboardingPage();
+        }
+      },
     );
   }
 }
