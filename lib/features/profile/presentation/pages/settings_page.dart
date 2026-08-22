@@ -1,6 +1,7 @@
 import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,7 +9,8 @@ import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/locale/supported_app_locale.dart';
 import '../../../../core/services/care_notification_service.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
-import '../../../subscription/presentation/widgets/subscription_panel.dart';
+import '../../../subscription/presentation/controllers/subscription_controller.dart';
+import '../../../subscription/presentation/pages/subscription_page.dart';
 import 'edit_profile_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -211,16 +213,173 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  /// Premium içeriği artık ayrı bir sayfaya yönlendirmiyor — planlar, fiyatlar
-  /// ve satın alma butonu doğrudan Ayarlar sayfası içinde listeleniyor.
+  /// Premium bölümü kompakt bir kart olarak gösterilir; tam plan/fiyat/
+  /// karşılaştırma içeriği artık burada değil, ayrı Abonelik sayfasında.
   Widget _buildPremiumSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeading(_l10n.premium, _l10n.settingsPremiumBannerSubtitle),
-        const SizedBox(height: 10),
-        const SubscriptionPanel(),
-      ],
+    final subscription = context.watch<SubscriptionController>();
+    return subscription.isPremium
+        ? _buildPremiumActiveBanner(subscription)
+        : _buildPremiumCtaBanner();
+  }
+
+  Widget _buildPremiumCtaBanner() {
+    return _buildPremiumBanner(
+      gradientColors: const [Color(0xFF0D3926), Color(0xFF19583A)],
+      title: _l10n.settingsPremiumBannerTitle,
+      subtitle: _l10n.settingsPremiumBannerSubtitle,
+      trailingLabel: null,
+    );
+  }
+
+  Widget _buildPremiumActiveBanner(SubscriptionController controller) {
+    final entitlement = controller.premiumEntitlement;
+    final expirationDate = controller.expirationDate;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final formattedDate = expirationDate == null
+        ? null
+        : DateFormat.yMMMd(locale).format(expirationDate);
+    final statusLine = formattedDate == null
+        ? _l10n.subscriptionActiveSubtitle
+        : (entitlement?.willRenew ?? false
+              ? _l10n.subscriptionRenewsOn(formattedDate)
+              : _l10n.subscriptionExpiresOn(formattedDate));
+
+    return _buildPremiumBanner(
+      gradientColors: const [Color(0xFF0C3A25), Color(0xFF187046)],
+      title: _l10n.subscriptionActiveTitle,
+      subtitle: statusLine,
+      trailingLabel: _l10n.subscriptionManage,
+    );
+  }
+
+  Widget _buildPremiumBanner({
+    required List<Color> gradientColors,
+    required String title,
+    required String subtitle,
+    required String? trailingLabel,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(28),
+      child: InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const SubscriptionPage()),
+        ),
+        borderRadius: BorderRadius.circular(28),
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(18, 18, 16, 18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: gradientColors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors.first.withValues(alpha: 0.28),
+                blurRadius: 22,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -18,
+                  bottom: -18,
+                  child: Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 90,
+                    color: _green.withValues(alpha: 0.1),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5B74A).withValues(alpha: 0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Color(0xFFF5B74A),
+                        size: 26,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withValues(alpha: 0.78),
+                              fontSize: 11.5,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (trailingLabel != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 11,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          trailingLabel,
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.14),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Color(0xFFF5B74A),
+                          size: 16,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -288,32 +447,150 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildPreferencesCard(LocaleProvider localeProvider) {
-    return _buildGroupCard([
-      _SettingsRow(
-        icon: Icons.dark_mode_outlined,
-        iconColor: _violet,
-        title: _l10n.darkMode,
-        subtitle: _l10n.settingsDarkModeSubtitle,
-        badge: _themeLabel(localeProvider.themePreference),
-        onTap: () => _showThemeBottomSheet(localeProvider),
+    return Container(
+      decoration: _cardDecoration(),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          _buildPreferenceSegmentRow(
+            icon: Icons.dark_mode_outlined,
+            iconColor: _violet,
+            title: _l10n.darkMode,
+            subtitle: _l10n.settingsDarkModeSubtitle,
+            control: _InlineSegmentedControl<AppThemePreference>(
+              accentColor: _violet,
+              selected: localeProvider.themePreference,
+              onChanged: localeProvider.setThemePreference,
+              options: [
+                _SegmentOption(
+                  AppThemePreference.system,
+                  Icons.brightness_auto,
+                  _l10n.preferenceSystem,
+                ),
+                _SegmentOption(
+                  AppThemePreference.light,
+                  Icons.light_mode_outlined,
+                  _l10n.themeLight,
+                ),
+                _SegmentOption(
+                  AppThemePreference.dark,
+                  Icons.dark_mode_outlined,
+                  _l10n.themeDark,
+                ),
+              ],
+            ),
+          ),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            indent: 16,
+            endIndent: 16,
+            color: Color(0xFFEDF2EE),
+          ),
+          _buildPreferenceSegmentRow(
+            icon: Icons.straighten_rounded,
+            iconColor: _warm,
+            title: _l10n.metricSystem,
+            subtitle: _l10n.metricSystemSubtitle,
+            control: _InlineSegmentedControl<MeasurementSystemPreference>(
+              accentColor: _warm,
+              selected: localeProvider.measurementPreference,
+              onChanged: localeProvider.setMeasurementPreference,
+              options: [
+                _SegmentOption(
+                  MeasurementSystemPreference.system,
+                  Icons.public_rounded,
+                  _l10n.preferenceSystem,
+                ),
+                _SegmentOption(
+                  MeasurementSystemPreference.metric,
+                  Icons.straighten_rounded,
+                  _l10n.measurementMetric,
+                ),
+                _SegmentOption(
+                  MeasurementSystemPreference.imperial,
+                  Icons.square_foot_rounded,
+                  _l10n.measurementImperial,
+                ),
+              ],
+            ),
+          ),
+          const Divider(
+            height: 1,
+            thickness: 1,
+            indent: 74,
+            color: Color(0xFFEDF2EE),
+          ),
+          _buildSettingsRow(
+            _SettingsRow(
+              icon: Icons.translate_rounded,
+              iconColor: const Color(0xFF2D8BCB),
+              title: _l10n.language,
+              subtitle: _l10n.languageSubtitle,
+              badge: _currentLanguageLabel(localeProvider),
+              onTap: _showLanguageBottomSheet,
+            ),
+          ),
+        ],
       ),
-      _SettingsRow(
-        icon: Icons.straighten_rounded,
-        iconColor: _warm,
-        title: _l10n.metricSystem,
-        subtitle: _l10n.metricSystemSubtitle,
-        badge: _measurementLabel(localeProvider.measurementPreference),
-        onTap: () => _showMeasurementBottomSheet(localeProvider),
+    );
+  }
+
+  Widget _buildPreferenceSegmentRow({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required Widget control,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        color: _ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.inter(
+                        color: _muted,
+                        fontSize: 11,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          control,
+        ],
       ),
-      _SettingsRow(
-        icon: Icons.translate_rounded,
-        iconColor: const Color(0xFF2D8BCB),
-        title: _l10n.language,
-        subtitle: _l10n.languageSubtitle,
-        badge: _currentLanguageLabel(localeProvider),
-        onTap: _showLanguageBottomSheet,
-      ),
-    ]);
+    );
   }
 
   Widget _buildAccountCard() {
@@ -450,105 +727,6 @@ class _SettingsPageState extends State<SettingsPage> {
           offset: const Offset(0, 9),
         ),
       ],
-    );
-  }
-
-  String _themeLabel(AppThemePreference preference) => switch (preference) {
-    AppThemePreference.system => _l10n.preferenceSystem,
-    AppThemePreference.light => _l10n.themeLight,
-    AppThemePreference.dark => _l10n.themeDark,
-  };
-
-  String _measurementLabel(MeasurementSystemPreference preference) =>
-      switch (preference) {
-        MeasurementSystemPreference.system => _l10n.preferenceSystem,
-        MeasurementSystemPreference.metric => _l10n.measurementMetric,
-        MeasurementSystemPreference.imperial => _l10n.measurementImperial,
-      };
-
-  void _showThemeBottomSheet(LocaleProvider provider) {
-    _showPreferenceBottomSheet<AppThemePreference>(
-      title: _l10n.themeSelectionTitle,
-      selected: provider.themePreference,
-      options: [
-        (
-          AppThemePreference.system,
-          Icons.brightness_auto,
-          _l10n.preferenceSystem,
-        ),
-        (AppThemePreference.light, Icons.light_mode_outlined, _l10n.themeLight),
-        (AppThemePreference.dark, Icons.dark_mode_outlined, _l10n.themeDark),
-      ],
-      onSelected: provider.setThemePreference,
-    );
-  }
-
-  void _showMeasurementBottomSheet(LocaleProvider provider) {
-    _showPreferenceBottomSheet<MeasurementSystemPreference>(
-      title: _l10n.measurementSelectionTitle,
-      selected: provider.measurementPreference,
-      options: [
-        (
-          MeasurementSystemPreference.system,
-          Icons.public_rounded,
-          _l10n.preferenceSystem,
-        ),
-        (
-          MeasurementSystemPreference.metric,
-          Icons.straighten_rounded,
-          _l10n.measurementMetric,
-        ),
-        (
-          MeasurementSystemPreference.imperial,
-          Icons.square_foot_rounded,
-          _l10n.measurementImperial,
-        ),
-      ],
-      onSelected: provider.setMeasurementPreference,
-    );
-  }
-
-  void _showPreferenceBottomSheet<T>({
-    required String title,
-    required T selected,
-    required List<(T, IconData, String)> options,
-    required Future<void> Function(T) onSelected,
-  }) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(
-                  sheetContext,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 14),
-              for (final option in options)
-                RadioListTile<T>(
-                  value: option.$1,
-                  groupValue: selected,
-                  secondary: Icon(option.$2),
-                  title: Text(option.$3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  onChanged: (value) async {
-                    if (value == null) return;
-                    Navigator.pop(sheetContext);
-                    await onSelected(value);
-                  },
-                ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -721,4 +899,126 @@ class _SettingsRow {
   final String subtitle;
   final String? badge;
   final VoidCallback? onTap;
+}
+
+class _SegmentOption<T> {
+  const _SegmentOption(this.value, this.icon, this.label);
+
+  final T value;
+  final IconData icon;
+  final String label;
+}
+
+/// İki veya daha fazla seçenek arasında kayan bir gösterge ile geçiş yapan
+/// segment kontrolü — [SubscriptionPanel]'daki plan seçicisiyle aynı
+/// animasyon dilini N seçeneğe genelleştirir. Ayarlar sayfasında artık ayrı
+/// bir pop-up açmadan doğrudan sayfa içinde tercih değiştirmek için kullanılır.
+class _InlineSegmentedControl<T> extends StatelessWidget {
+  const _InlineSegmentedControl({
+    required this.options,
+    required this.selected,
+    required this.onChanged,
+    required this.accentColor,
+  });
+
+  final List<_SegmentOption<T>> options;
+  final T selected;
+  final Future<void> Function(T) onChanged;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final track = Theme.of(context).colorScheme.surfaceContainerHighest;
+    final ink = Theme.of(context).colorScheme.onSurface;
+    final selectedIndex = options.indexWhere(
+      (option) => option.value == selected,
+    );
+    final segmentCount = options.length;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: track.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Stack(
+        children: [
+          if (selectedIndex >= 0)
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment(
+                segmentCount > 1
+                    ? -1 + 2 * selectedIndex / (segmentCount - 1)
+                    : 0,
+                0,
+              ),
+              child: FractionallySizedBox(
+                widthFactor: 1 / segmentCount,
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          Row(
+            children: [
+              for (final option in options)
+                Expanded(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => onChanged(option.value),
+                      borderRadius: BorderRadius.circular(12),
+                      child: SizedBox(
+                        height: 40,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              option.icon,
+                              size: 15,
+                              color: option.value == selected
+                                  ? accentColor
+                                  : ink.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                option.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  color: option.value == selected
+                                      ? ink
+                                      : ink.withValues(alpha: 0.5),
+                                  fontSize: 11.5,
+                                  fontWeight: option.value == selected
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   int _clinicNavigationVersion = 0;
   late final HomeController _homeController;
   late final SubscriptionController _subscriptionController;
+  Timer? _launchPaywallTimer;
 
   @override
   void initState() {
@@ -51,6 +54,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _launchPaywallTimer?.cancel();
     CareNotificationService.instance.destination.removeListener(
       _handleNotificationDestination,
     );
@@ -60,11 +64,26 @@ class _HomePageState extends State<HomePage> {
   }
 
   /// Uygulama açılışında, abonelik ürünleri yüklenip kullanıcının premium
-  /// olmadığı kesinleştiğinde (ve bu süreçte daha önce gösterilmediyse) tam
-  /// ekran ödeme duvarını otomatik olarak açar. Kapatma butonu her zaman
-  /// görünür kalır — kullanıcı istediği an vazgeçebilir.
+  /// olmadığı kesinleştiğinde (ve bu süreçte daha önce gösterilmediyse), 5
+  /// saniyelik bir bekleme sonrası tam ekran ödeme duvarını otomatik olarak
+  /// açar — kullanıcı önce Ana Sayfa'yı görebilsin diye. Kapatma butonu her
+  /// zaman görünür kalır — kullanıcı istediği an vazgeçebilir.
   void _maybeShowLaunchPaywall() {
-    if (!mounted || !_subscriptionController.shouldShowLaunchPaywall) return;
+    if (!mounted || _launchPaywallTimer != null) return;
+    if (!_subscriptionController.shouldShowLaunchPaywall) return;
+    _launchPaywallTimer = Timer(
+      const Duration(seconds: 5),
+      _fireLaunchPaywall,
+    );
+  }
+
+  void _fireLaunchPaywall() {
+    _launchPaywallTimer = null;
+    if (!mounted) return;
+    // 5 saniyelik bekleme sırasında kullanıcı premium olmuş veya paywall
+    // başka bir yoldan zaten gösterilmiş olabilir — ateşleme anında tekrar
+    // kontrol ediyoruz, sadece zamanlama başında değil.
+    if (!_subscriptionController.shouldShowLaunchPaywall) return;
     _subscriptionController.markLaunchPaywallShown();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

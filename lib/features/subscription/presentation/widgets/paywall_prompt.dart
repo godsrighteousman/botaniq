@@ -167,67 +167,106 @@ class _PaywallPrompt extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 22),
-              if (annualPrice != null) ...[
-                Center(
-                  child: Text(
-                    l10n.subscriptionPerYear(annualPrice),
-                    style: GoogleFonts.outfit(
-                      color: ink,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                    ),
+              if (annualPrice != null || (savings != null && savings > 0)) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 18,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _green.withValues(alpha: 0.08),
+                    border: Border.all(color: _green.withValues(alpha: 0.35)),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: Column(
+                    children: [
+                      if (annualPrice != null) ...[
+                        Text(
+                          l10n.subscriptionPerYear(annualPrice),
+                          style: GoogleFonts.outfit(
+                            color: ink,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        if (savings != null && savings > 0)
+                          const SizedBox(height: 10),
+                      ],
+                      if (savings != null && savings > 0)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 26,
+                              height: 26,
+                              decoration: BoxDecoration(
+                                color: _green.withValues(alpha: 0.16),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.local_offer_rounded,
+                                color: _deepGreen,
+                                size: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                l10n.paywallAnnualBadge(savings),
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.outfit(
+                                  color: _deepGreen,
+                                  fontSize: 17.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 18),
               ],
-              if (savings != null && savings > 0) ...[
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _green.withValues(alpha: 0.3),
+                      blurRadius: 22,
+                      offset: const Offset(0, 8),
                     ),
-                    decoration: BoxDecoration(
-                      color: _green.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(100),
+                  ],
+                ),
+                child: SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SubscriptionPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _green,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
                     ),
                     child: Text(
-                      l10n.paywallAnnualBadge(savings),
+                      l10n.paywallCta,
                       style: GoogleFonts.inter(
-                        color: _deepGreen,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
                       ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-              SizedBox(
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SubscriptionPage(),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _green,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                  child: Text(
-                    l10n.paywallCta,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -283,6 +322,11 @@ class _BenefitRow extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
+        ),
+        const Icon(
+          Icons.check_circle_rounded,
+          color: _green,
+          size: 18,
         ),
       ],
     );

@@ -17,7 +17,6 @@ import 'task_list_section.dart';
 import 'weather_card.dart';
 import 'empty_garden_card.dart';
 import 'my_plants_carousel.dart';
-import 'quick_actions_card.dart';
 import 'sick_plants_section.dart';
 
 /// Home tab'ının ana içerik widget'ı.
@@ -170,16 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   sickPlants: _ctrl.sickPlants.value,
                   onRefresh: _ctrl.refresh,
                 ),
-              ),
-            ),
-
-            // Hızlı eylem
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                child: _ctrl.hasPlants
-                    ? const QuickActionsCard()
-                    : const SizedBox.shrink(),
               ),
             ),
 

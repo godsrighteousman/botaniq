@@ -63,16 +63,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Karanlık Mod'));
-    await tester.pumpAndSettle();
+    // Tercihler artık ayrı bir pop-up açmadan sayfa içinde segment olarak
+    // görünüyor — seçenek etiketine doğrudan basmak yeterli.
     await tester.tap(find.text('Koyu'));
     await tester.pumpAndSettle();
 
     var preferences = await SharedPreferences.getInstance();
     expect(preferences.getString('settings_theme_mode'), 'dark');
 
-    await tester.tap(find.text('Metrik Sistem'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('İngiliz birimleri'));
     await tester.pumpAndSettle();
 
