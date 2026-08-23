@@ -318,6 +318,19 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
+  String get settingsPrivacyTitle => 'Privacy';
+
+  @override
+  String get settingsPrivacySubtitle => 'Control what data you share with us';
+
+  @override
+  String get settingsHeatmapTitle => 'Interaction Heatmap';
+
+  @override
+  String get settingsHeatmapSubtitle =>
+      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
+
+  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -2087,6 +2100,19 @@ class AppLocalizationsNlBe extends AppLocalizationsNl {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
+  String get settingsPrivacyTitle => 'Privacy';
+
+  @override
+  String get settingsPrivacySubtitle => 'Control what data you share with us';
+
+  @override
+  String get settingsHeatmapTitle => 'Interaction Heatmap';
+
+  @override
+  String get settingsHeatmapSubtitle =>
+      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
+
+  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -2277,6 +2303,19 @@ class AppLocalizationsNlNl extends AppLocalizationsNl {
 
   @override
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
+
+  @override
+  String get settingsPrivacyTitle => 'Privacy';
+
+  @override
+  String get settingsPrivacySubtitle => 'Control what data you share with us';
+
+  @override
+  String get settingsHeatmapTitle => 'Interaction Heatmap';
+
+  @override
+  String get settingsHeatmapSubtitle =>
+      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
 
   @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';

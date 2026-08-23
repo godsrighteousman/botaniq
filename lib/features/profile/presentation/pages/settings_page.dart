@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/locale/supported_app_locale.dart';
 import '../../../../core/services/care_notification_service.dart';
+import '../../../../core/services/heatmap_service.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
 import '../../../subscription/presentation/controllers/subscription_controller.dart';
 import '../../../subscription/presentation/pages/subscription_page.dart';
@@ -33,6 +34,21 @@ class _SettingsPageState extends State<SettingsPage> {
   Color get _muted => Theme.of(context).colorScheme.onSurfaceVariant;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
+
+  bool _heatmapOptIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    HeatmapService.instance.isOptedIn.then((value) {
+      if (mounted) setState(() => _heatmapOptIn = value);
+    });
+  }
+
+  Future<void> _setHeatmapOptIn(bool value) async {
+    setState(() => _heatmapOptIn = value);
+    await HeatmapService.instance.setOptIn(value);
+  }
 
   String _currentLanguageLabel(LocaleProvider provider) {
     final tag = provider.currentLocaleTag;
@@ -78,6 +94,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const SizedBox(height: 10),
                     _buildAccountCard(),
+                    const SizedBox(height: 26),
+                    _buildSectionHeading(
+                      _l10n.settingsPrivacyTitle,
+                      _l10n.settingsPrivacySubtitle,
+                    ),
+                    const SizedBox(height: 10),
+                    _buildPrivacyCard(),
                     const SizedBox(height: 90),
                   ],
                 ),
@@ -613,6 +636,69 @@ class _SettingsPageState extends State<SettingsPage> {
         onTap: _showPasswordResetConfirmation,
       ),
     ]);
+  }
+
+  /// Gizlilik bölümü — şu an tek bir madde içeriyor: etkileşim ısı
+  /// haritasına katılım. Varsayılan KAPALI; kullanıcı açıkça açmadıkça
+  /// [HeatmapService] hiçbir veri göndermez. Toplanan veri anonimdir
+  /// (kullanıcı kimliği yok) ve asla ekran görüntüsü/içerik içermez —
+  /// yalnızca hangi ekranda, ekrana göre oranlı x/y koordinatı.
+  Widget _buildPrivacyCard() {
+    return Container(
+      decoration: _cardDecoration(),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: _green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(
+                Icons.grid_on_rounded,
+                color: _deepGreen,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _l10n.settingsHeatmapTitle,
+                    style: GoogleFonts.inter(
+                      color: _ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _l10n.settingsHeatmapSubtitle,
+                    style: GoogleFonts.inter(
+                      color: _muted,
+                      fontSize: 11,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Switch.adaptive(
+              value: _heatmapOptIn,
+              activeThumbColor: _green,
+              onChanged: _setHeatmapOptIn,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildGroupCard(List<_SettingsRow> rows) {

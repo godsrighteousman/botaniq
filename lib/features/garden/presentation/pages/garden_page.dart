@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'search_history_page.dart';
 import 'plant_detail_page.dart';
 import '../../../../core/services/watering_schedule_service.dart';
+import '../../../../core/widgets/heatmap_tap_region.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
 class GardenPage extends StatefulWidget {
@@ -74,153 +75,161 @@ class _GardenPageState extends State<GardenPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _lightBg,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 20.0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.gardenTitle,
-                    style: GoogleFonts.outfit(
-                      color: _primaryText,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.5,
+    return HeatmapTapRegion(
+      screenId: 'garden',
+      child: Scaffold(
+        backgroundColor: _lightBg,
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 20.0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.gardenTitle,
+                      style: GoogleFonts.outfit(
+                        color: _primaryText,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: _accentGreen.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: _accentGreen,
-                      shape: const CircleBorder(),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SearchHistoryPage(),
-                            ),
-                          );
-                          _fetchPlants();
-                        },
-                        child: const SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: Icon(
-                            Icons.history_rounded,
-                            color: Colors.white,
-                            size: 24,
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: _accentGreen.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Filter Chips
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Row(
-                children: [
-                  _buildFilterChip(
-                    'all',
-                    AppLocalizations.of(context)!.gardenAllPlants,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildFilterChip(
-                    'needsWater',
-                    AppLocalizations.of(context)!.gardenNeedsWater,
-                  ),
-                  const SizedBox(width: 12),
-                  _buildFilterChip(
-                    'indoor',
-                    AppLocalizations.of(context)!.gardenIndoor,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Plant Grid
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF86D5A6),
-                      ),
-                    )
-                  : _filteredPlants.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.local_florist_outlined,
-                              size: 56,
-                              color: _accentGreen.withValues(alpha: 0.5),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _selectedFilter == 'all'
-                                  ? AppLocalizations.of(context)!.gardenNoPlants
-                                  : AppLocalizations.of(
-                                      context,
-                                    )!.gardenNoPlantsCategory,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
-                                color: _textSecondary,
-                                fontSize: 16,
-                                height: 1.5,
+                      child: Material(
+                        color: _accentGreen,
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SearchHistoryPage(),
                               ),
+                            );
+                            _fetchPlants();
+                          },
+                          child: const SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Icon(
+                              Icons.history_rounded,
+                              color: Colors.white,
+                              size: 24,
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    )
-                  : GridView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                      ).copyWith(bottom: 120),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 0.68,
-                          ),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _filteredPlants.length,
-                      itemBuilder: (context, index) {
-                        return _buildPlantCard(context, _filteredPlants[index]);
-                      },
                     ),
-            ),
-          ],
+                  ],
+                ),
+              ),
+
+              // Filter Chips
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Row(
+                  children: [
+                    _buildFilterChip(
+                      'all',
+                      AppLocalizations.of(context)!.gardenAllPlants,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildFilterChip(
+                      'needsWater',
+                      AppLocalizations.of(context)!.gardenNeedsWater,
+                    ),
+                    const SizedBox(width: 12),
+                    _buildFilterChip(
+                      'indoor',
+                      AppLocalizations.of(context)!.gardenIndoor,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Plant Grid
+              Expanded(
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF86D5A6),
+                        ),
+                      )
+                    : _filteredPlants.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.local_florist_outlined,
+                                size: 56,
+                                color: _accentGreen.withValues(alpha: 0.5),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _selectedFilter == 'all'
+                                    ? AppLocalizations.of(
+                                        context,
+                                      )!.gardenNoPlants
+                                    : AppLocalizations.of(
+                                        context,
+                                      )!.gardenNoPlantsCategory,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.inter(
+                                  color: _textSecondary,
+                                  fontSize: 16,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                        ).copyWith(bottom: 120),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 0.68,
+                            ),
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: _filteredPlants.length,
+                        itemBuilder: (context, index) {
+                          return _buildPlantCard(
+                            context,
+                            _filteredPlants[index],
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -292,138 +301,138 @@ class _GardenPageState extends State<GardenPage> {
           await _fetchPlants();
         },
         child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    imageUrl.isNotEmpty
-                        ? Image.network(
-                            imageUrl,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) =>
-                                const _PlantPlaceholder(),
-                          )
-                        : const _PlantPlaceholder(),
-                    if (isSick)
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEF7C56),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.14),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFCBD5E1).withValues(alpha: 0.16),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      imageUrl.isNotEmpty
+                          ? Image.network(
+                              imageUrl,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) =>
+                                  const _PlantPlaceholder(),
+                            )
+                          : const _PlantPlaceholder(),
+                      if (isSick)
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF7C56),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.14),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              l10n.gardenClinicBadge,
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
                               ),
-                            ],
-                          ),
-                          child: Text(
-                            l10n.gardenClinicBadge,
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.outfit(
+                        color: _primaryText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      species,
+                      style: GoogleFonts.inter(
+                        color: _textSecondary,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${_lastWateredLabel(l10n, watering)} • '
+                      '${l10n.wateringInterval(watering.intervalDays)}',
+                      style: GoogleFonts.inter(
+                        color: _textSecondary,
+                        fontSize: 9,
+                        height: 1.25,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            status,
+                            style: GoogleFonts.inter(
+                              color: statusColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: GoogleFonts.outfit(
-                      color: _primaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    species,
-                    style: GoogleFonts.inter(
-                      color: _textSecondary,
-                      fontSize: 12,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${_lastWateredLabel(l10n, watering)} • '
-                    '${l10n.wateringInterval(watering.intervalDays)}',
-                    style: GoogleFonts.inter(
-                      color: _textSecondary,
-                      fontSize: 9,
-                      height: 1.25,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          status,
-                          style: GoogleFonts.inter(
-                            color: statusColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );

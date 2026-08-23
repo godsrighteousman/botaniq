@@ -659,5 +659,9 @@
   },
   "subscriptionTrustCancel": "Cancel anytime",
   "subscriptionTrustInstant": "Activates instantly",
-  "subscriptionTrustSecure": "Secure payment"
+  "subscriptionTrustSecure": "Secure payment",
+  "settingsHeatmapSubtitle": "Share anonymous tap locations (never screen content) to help us improve the app's layout",
+  "settingsHeatmapTitle": "Interaction Heatmap",
+  "settingsPrivacySubtitle": "Control what data you share with us",
+  "settingsPrivacyTitle": "Privacy"
 }

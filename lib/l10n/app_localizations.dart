@@ -673,6 +673,30 @@ abstract class AppLocalizations {
   /// **'Unlimited scans and AI chat'**
   String get settingsPremiumBannerSubtitle;
 
+  /// No description provided for @settingsPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get settingsPrivacyTitle;
+
+  /// No description provided for @settingsPrivacySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Control what data you share with us'**
+  String get settingsPrivacySubtitle;
+
+  /// No description provided for @settingsHeatmapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interaction Heatmap'**
+  String get settingsHeatmapTitle;
+
+  /// No description provided for @settingsHeatmapSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share anonymous tap locations (never screen content) to help us improve the app\'s layout'**
+  String get settingsHeatmapSubtitle;
+
   /// No description provided for @paywallEyebrow.
   ///
   /// In en, this message translates to:

@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/measurement/measurement_formatter.dart';
+import '../../../../core/widgets/heatmap_tap_region.dart';
 import '../../domain/care_task_planner.dart';
 import '../controllers/home_controller.dart';
 import '../models/home_models.dart';
@@ -79,102 +80,105 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: RefreshIndicator(
-        onRefresh: _ctrl.refresh,
-        color: const Color(0xFF0ED761),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                child: HomeHeader(
-                  userName: _ctrl.userName.value,
-                  onNotificationsTap: () => _openInbox(context),
-                  onSignOutTap: () => _showSignOutDialog(context),
-                  onThemeToggleTap: () => _toggleTheme(context),
-                  isDarkMode: Theme.of(context).brightness == Brightness.dark,
-                ),
-              ),
+    return HeatmapTapRegion(
+      screenId: 'home',
+      child: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _ctrl.refresh,
+          color: const Color(0xFF0ED761),
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
             ),
-
-            // Hava durumu
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                child: WeatherCard(
-                  locationName: _ctrl.locationName.value,
-                  temperature: _ctrl.weatherTemp.value,
-                  condition: _ctrl.weatherCondition.value,
-                  tip: _ctrl.weatherTip.value,
-                ),
-              ),
-            ),
-
-            // Dinamik takvim
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 24),
-                child: HorizontalCalendar(
-                  days: _ctrl.weekDays,
-                  selectedDate: _ctrl.selectedDate.value,
-                  daysWithTasks: _ctrl.daysWithTasks.value,
-                  onDateSelected: _ctrl.selectDate,
-                ),
-              ),
-            ),
-
-            // Görev listesi
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                child: TaskListSection(
-                  sectionTitle: _localizedTaskTitle(
-                    context,
-                    _ctrl.selectedDate.value,
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                  child: HomeHeader(
+                    userName: _ctrl.userName.value,
+                    onNotificationsTap: () => _openInbox(context),
+                    onSignOutTap: () => _showSignOutDialog(context),
+                    onThemeToggleTap: () => _toggleTheme(context),
+                    isDarkMode: Theme.of(context).brightness == Brightness.dark,
                   ),
-                  tasks: _ctrl.filteredTasks.value,
-                  tomorrowTasks: _ctrl.tomorrowTasks.value,
-                  showTomorrow: _isTodaySelected(),
-                  onTaskTap: (task) => _showTaskDetails(context, task),
                 ),
               ),
-            ),
 
-            // Bitki bölümü (empty state veya carousel)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                child: _ctrl.isLoading.value
-                    ? _buildLoadingShimmer()
-                    : _ctrl.hasPlants
-                    ? MyPlantsCarousel(
-                        plants: _ctrl.plants.value,
-                        onViewAllTap: widget.onViewAllPlants,
-                        onPlantChanged: _ctrl.refresh,
-                      )
-                    : const EmptyGardenCard(),
-              ),
-            ),
-
-            // Hasta Bitkiler Bölümü (Sadece hasta bitki olduğunda gözükür)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
-                child: SickPlantsSection(
-                  sickPlants: _ctrl.sickPlants.value,
-                  onRefresh: _ctrl.refresh,
+              // Hava durumu
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                  child: WeatherCard(
+                    locationName: _ctrl.locationName.value,
+                    temperature: _ctrl.weatherTemp.value,
+                    condition: _ctrl.weatherCondition.value,
+                    tip: _ctrl.weatherTip.value,
+                  ),
                 ),
               ),
-            ),
 
-            // Alt boşluk
-            const SliverToBoxAdapter(child: SizedBox(height: 120)),
-          ],
+              // Dinamik takvim
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: HorizontalCalendar(
+                    days: _ctrl.weekDays,
+                    selectedDate: _ctrl.selectedDate.value,
+                    daysWithTasks: _ctrl.daysWithTasks.value,
+                    onDateSelected: _ctrl.selectDate,
+                  ),
+                ),
+              ),
+
+              // Görev listesi
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+                  child: TaskListSection(
+                    sectionTitle: _localizedTaskTitle(
+                      context,
+                      _ctrl.selectedDate.value,
+                    ),
+                    tasks: _ctrl.filteredTasks.value,
+                    tomorrowTasks: _ctrl.tomorrowTasks.value,
+                    showTomorrow: _isTodaySelected(),
+                    onTaskTap: (task) => _showTaskDetails(context, task),
+                  ),
+                ),
+              ),
+
+              // Bitki bölümü (empty state veya carousel)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+                  child: _ctrl.isLoading.value
+                      ? _buildLoadingShimmer()
+                      : _ctrl.hasPlants
+                      ? MyPlantsCarousel(
+                          plants: _ctrl.plants.value,
+                          onViewAllTap: widget.onViewAllPlants,
+                          onPlantChanged: _ctrl.refresh,
+                        )
+                      : const EmptyGardenCard(),
+                ),
+              ),
+
+              // Hasta Bitkiler Bölümü (Sadece hasta bitki olduğunda gözükür)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
+                  child: SickPlantsSection(
+                    sickPlants: _ctrl.sickPlants.value,
+                    onRefresh: _ctrl.refresh,
+                  ),
+                ),
+              ),
+
+              // Alt boşluk
+              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+            ],
+          ),
         ),
       ),
     );
@@ -196,7 +200,9 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
       ),
       child: Column(
         children: [
@@ -331,7 +337,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 72,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       image: task.imageUrl.isNotEmpty
                           ? DecorationImage(
                               image: NetworkImage(task.imageUrl),
@@ -371,7 +379,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0ED761).withValues(alpha: 0.1),
+                                color: const Color(
+                                  0xFF0ED761,
+                                ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -452,9 +462,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -490,7 +506,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),

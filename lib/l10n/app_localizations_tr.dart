@@ -316,6 +316,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsPremiumBannerSubtitle => 'Sınırsız tarama ve AI sohbeti';
 
   @override
+  String get settingsPrivacyTitle => 'Gizlilik';
+
+  @override
+  String get settingsPrivacySubtitle =>
+      'Bizimle hangi verileri paylaştığını yönet';
+
+  @override
+  String get settingsHeatmapTitle => 'Etkileşim Isı Haritası';
+
+  @override
+  String get settingsHeatmapSubtitle =>
+      'Uygulama tasarımını geliştirmemize yardımcı olmak için anonim dokunuş konumlarını paylaş (ekran içeriği asla paylaşılmaz)';
+
+  @override
   String get paywallEyebrow => '2 ücretsiz analizini kullandın 🌱';
 
   @override
