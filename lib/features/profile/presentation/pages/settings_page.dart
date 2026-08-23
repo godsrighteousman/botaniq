@@ -48,6 +48,9 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _setHeatmapOptIn(bool value) async {
     setState(() => _heatmapOptIn = value);
     await HeatmapService.instance.setOptIn(value);
+    // Kullanıcı tercihini burada kendisi belirlediyse, ilk-giriş izin
+    // diyaloğu bir daha ayrıca sorulmasın.
+    await HeatmapService.instance.markConsentAsked();
   }
 
   String _currentLanguageLabel(LocaleProvider provider) {

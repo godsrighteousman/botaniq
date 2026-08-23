@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,6 +48,35 @@ class HeatmapService {
     }
   }
 
+  static const _consentAskedKey = 'heatmap_consent_asked';
+
+  bool? _cachedConsentAsked;
+
+  /// Kullanıcıya, ilk girişte gösterilen tek seferlik izin sorusunun daha
+  /// önce sorulup sorulmadığı. `true` ise bir daha asla otomatik
+  /// sorulmaz — kullanıcı tercihini istediği an Ayarlar'dan değiştirebilir.
+  Future<bool> get hasAskedConsent async {
+    if (_cachedConsentAsked != null) return _cachedConsentAsked!;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _cachedConsentAsked = prefs.getBool(_consentAskedKey) ?? false;
+    } catch (_) {
+      // Kontrol edilemiyorsa kullanıcıyı rahatsız etmemeyi tercih ediyoruz.
+      _cachedConsentAsked = true;
+    }
+    return _cachedConsentAsked!;
+  }
+
+  Future<void> markConsentAsked() async {
+    _cachedConsentAsked = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_consentAskedKey, true);
+    } catch (error) {
+      debugPrint('Isı haritası izin durumu kaydedilemedi: $error');
+    }
+  }
+
   /// Bir dokunuşu kaydeder. Tamamen "fire-and-forget" çalışır — hiçbir
   /// zaman `await` edilmesi gerekmez, hata durumunda UI'a hiçbir şey
   /// yansımaz.
@@ -85,30 +113,6 @@ class HeatmapService {
       // Kasıtlı olarak sessiz — kullanıcıya asla hata/uyarı gösterilmez,
       // akış hiçbir şekilde kesilmez.
       debugPrint('Isı haritası verisi gönderilemedi: $error');
-    }
-  }
-
-  /// Bir ekranın referans düzen görüntüsünü (geliştirici tarafından, tek
-  /// seferlik, gerçek kullanıcı verisi OLMADAN) storage'a yükler. Sadece
-  /// debug derlemelerinde, [HeatmapTapRegion] içindeki gizli yakalama
-  /// butonundan çağrılır — gerçek son kullanıcı akışında hiçbir zaman
-  /// tetiklenmez.
-  Future<void> uploadReferenceImage({
-    required String screenId,
-    required Uint8List pngBytes,
-  }) async {
-    try {
-      await Supabase.instance.client.storage
-          .from('heatmap_reference_screens')
-          .uploadBinary(
-            '$screenId.png',
-            pngBytes,
-            fileOptions: const FileOptions(upsert: true),
-          )
-          .timeout(const Duration(seconds: 15));
-    } catch (error) {
-      debugPrint('Referans ekran görüntüsü yüklenemedi: $error');
-      rethrow;
     }
   }
 }

@@ -330,6 +330,20 @@ class AppLocalizationsTr extends AppLocalizations {
       'Uygulama tasarımını geliştirmemize yardımcı olmak için anonim dokunuş konumlarını paylaş (ekran içeriği asla paylaşılmaz)';
 
   @override
+  String get heatmapConsentTitle =>
+      'Botaniq\'i geliştirmemize yardımcı olur musun?';
+
+  @override
+  String get heatmapConsentBody =>
+      'Uygulamanın hangi bölümlerinin daha çok kullanıldığını görebilmek için anonim dokunuş konumlarını toplamak istiyoruz (fotoğrafların, mesajların veya herhangi bir kişisel içeriğin asla toplanmaz). Bunu istediğin an Ayarlar\'dan kapatabilirsin.';
+
+  @override
+  String get heatmapConsentAllow => 'İzin Ver';
+
+  @override
+  String get heatmapConsentDecline => 'Şimdi Değil';
+
+  @override
   String get paywallEyebrow => '2 ücretsiz analizini kullandın 🌱';
 
   @override

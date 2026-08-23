@@ -697,6 +697,30 @@ abstract class AppLocalizations {
   /// **'Share anonymous tap locations (never screen content) to help us improve the app\'s layout'**
   String get settingsHeatmapSubtitle;
 
+  /// No description provided for @heatmapConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve Botaniq?'**
+  String get heatmapConsentTitle;
+
+  /// No description provided for @heatmapConsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.'**
+  String get heatmapConsentBody;
+
+  /// No description provided for @heatmapConsentAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get heatmapConsentAllow;
+
+  /// No description provided for @heatmapConsentDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get heatmapConsentDecline;
+
   /// No description provided for @paywallEyebrow.
   ///
   /// In en, this message translates to:

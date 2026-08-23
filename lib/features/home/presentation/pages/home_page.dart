@@ -11,6 +11,7 @@ import '../../../healthy/presentation/pages/healthy_page.dart';
 import '../../../subscription/presentation/controllers/subscription_controller.dart';
 import '../../../subscription/presentation/pages/subscription_page.dart';
 import '../../../../core/services/care_notification_service.dart';
+import '../../../../core/widgets/heatmap_consent_dialog.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
 import '../controllers/home_controller.dart';
@@ -49,6 +50,18 @@ class _HomePageState extends State<HomePage> {
       _handleNotificationDestination();
       CareNotificationService.instance.requestPermissionOnceAndRefresh();
       _maybeShowLaunchPaywall();
+      _maybeShowHeatmapConsent();
+    });
+  }
+
+  /// Uygulamaya ilk girişte, yalnızca bir kez, etkileşim ısı haritası veri
+  /// toplamaya izin sorar. Ekran ilk çizildikten hemen sonra donup kalmış
+  /// gibi görünmemesi için kısa bir gecikmeyle gösterilir; daha önce
+  /// sorulduysa [maybeShowHeatmapConsentDialog] hiçbir şey yapmadan döner.
+  void _maybeShowHeatmapConsent() {
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (!mounted) return;
+      maybeShowHeatmapConsentDialog(context);
     });
   }
 
