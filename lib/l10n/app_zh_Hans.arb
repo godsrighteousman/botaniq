@@ -1,6 +1,7 @@
 {
   "@@locale": "zh_Hans",
   "accountCreatedPleaseLogIn": "Account created — please log in with your new email and password.",
+  "emailAlreadyRegistered": "该邮箱已被注册，请改为登录。",
   "profileGlobalRank": "Global Rank #{rank}",
   "@profileGlobalRank": {
     "placeholders": {

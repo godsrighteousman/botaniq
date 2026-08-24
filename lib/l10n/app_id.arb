@@ -447,6 +447,7 @@
   "enterEmailPassword": "Silakan masukkan email dan kata sandi Anda.",
   "fillAllFields": "Silakan isi semua kolom.",
   "authError": "Ada yang tidak beres: {error}",
+  "emailAlreadyRegistered": "Email ini sudah terdaftar. Coba masuk saja.",
   "loginWith": "Atau masuk dengan",
   "signUpWith": "Atau daftar dengan",
   "noAccount": "Belum punya akun?",

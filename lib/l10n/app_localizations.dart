@@ -3127,6 +3127,12 @@ abstract class AppLocalizations {
   /// **'Something went wrong: {error}'**
   String authError(String error);
 
+  /// No description provided for @emailAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered. Try logging in instead.'**
+  String get emailAlreadyRegistered;
+
   /// No description provided for @loginWith.
   ///
   /// In en, this message translates to:

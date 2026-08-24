@@ -1701,6 +1701,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Este correo electrónico ya está registrado. Prueba a iniciar sesión en su lugar.';
+
+  @override
   String get loginWith => 'O inicia sesión con';
 
   @override

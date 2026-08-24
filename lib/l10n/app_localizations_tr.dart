@@ -1688,6 +1688,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Bu e-posta adresi zaten kayıtlı. Bunun yerine giriş yapmayı dene.';
+
+  @override
   String get loginWith => 'Veya şununla giriş yap';
 
   @override

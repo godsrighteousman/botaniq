@@ -1683,6 +1683,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'هذا البريد الإلكتروني مسجل بالفعل. جرّب تسجيل الدخول بدلاً من ذلك.';
+
+  @override
   String get loginWith => 'أو قم بتسجيل الدخول باستخدام';
 
   @override

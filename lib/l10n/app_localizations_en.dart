@@ -1686,6 +1686,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'This email is already registered. Try logging in instead.';
+
+  @override
   String get loginWith => 'Or log in with';
 
   @override

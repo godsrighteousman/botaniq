@@ -1696,6 +1696,10 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Email ini sudah terdaftar. Coba masuk saja.';
+
+  @override
   String get loginWith => 'Atau masuk dengan';
 
   @override

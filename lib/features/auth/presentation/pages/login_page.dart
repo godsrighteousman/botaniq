@@ -14,7 +14,16 @@ class LoginPage extends StatefulWidget {
   /// bildiren kısa bir mesaj gösterir.
   final bool showAccountCreatedMessage;
 
-  const LoginPage({super.key, this.showAccountCreatedMessage = false});
+  /// Kayıt ol ekranından buraya bir e-posta önceden doldurulmuş şekilde
+  /// gelinmesi gerektiğinde (örn. "bu e-posta zaten kayıtlı, giriş yap"
+  /// senaryosu) kullanıcı e-postasını tekrar yazmak zorunda kalmasın diye.
+  final String? initialEmail;
+
+  const LoginPage({
+    super.key,
+    this.showAccountCreatedMessage = false,
+    this.initialEmail,
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -29,13 +38,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialEmail != null) {
+      _emailController.text = widget.initialEmail!;
+    }
     if (widget.showAccountCreatedMessage) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.accountCreatedPleaseLogIn)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.accountCreatedPleaseLogIn)));
       });
     }
   }
@@ -399,7 +411,10 @@ class _LoginPageState extends State<LoginPage> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
       child: TextField(
         controller: controller,
@@ -453,7 +468,10 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.15),
+            width: 1,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

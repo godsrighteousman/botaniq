@@ -1709,6 +1709,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Diese E-Mail-Adresse ist bereits registriert. Versuche es stattdessen mit der Anmeldung.';
+
+  @override
   String get loginWith => 'Oder loggen Sie sich mit ein';
 
   @override

@@ -366,6 +366,7 @@
   "enterEmailPassword": "請輸入您的電子郵件和密碼。",
   "fillAllFields": "請填寫所有欄位。",
   "authError": "出了點問題：{error}",
+  "emailAlreadyRegistered": "該郵箱已被註冊，請改為登入。",
   "loginWith": "或使用以下方式登入",
   "signUpWith": "或註冊",
   "noAccount": "沒有帳戶？",

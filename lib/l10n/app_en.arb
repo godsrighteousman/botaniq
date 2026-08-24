@@ -995,6 +995,7 @@
   "fillAllFields": "Please fill all fields.",
   "accountCreatedPleaseLogIn": "Account created — please log in with your new email and password.",
   "authError": "Something went wrong: {error}",
+  "emailAlreadyRegistered": "This email is already registered. Try logging in instead.",
   "@authError": {
     "placeholders": {
       "error": {

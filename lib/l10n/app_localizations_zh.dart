@@ -1623,6 +1623,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered => '该邮箱已被注册，请改为登录。';
+
+  @override
   String get loginWith => '或者使用以下方式登录';
 
   @override
@@ -2145,6 +2148,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String get accountCreatedPleaseLogIn =>
       'Account created — please log in with your new email and password.';
+
+  @override
+  String get emailAlreadyRegistered => '该邮箱已被注册，请改为登录。';
 
   @override
   String get termsContentTitle => '3. Your Content and License to Us';
@@ -3535,6 +3541,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String authError(String error) {
     return '出了點問題：$error';
   }
+
+  @override
+  String get emailAlreadyRegistered => '該郵箱已被註冊，請改為登入。';
 
   @override
   String get loginWith => '或使用以下方式登入';

@@ -1679,6 +1679,10 @@ class AppLocalizationsTh extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'อีเมลนี้ลงทะเบียนไว้แล้ว ลองเข้าสู่ระบบแทน';
+
+  @override
   String get loginWith => 'หรือเข้าสู่ระบบด้วย';
 
   @override

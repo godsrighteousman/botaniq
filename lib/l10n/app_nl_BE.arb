@@ -1,6 +1,7 @@
 {
   "@@locale": "nl_BE",
   "accountCreatedPleaseLogIn": "Account created — please log in with your new email and password.",
+  "emailAlreadyRegistered": "Dit e-mailadres is al geregistreerd. Probeer in plaats daarvan in te loggen.",
   "profileGlobalRank": "Global Rank #{rank}",
   "@profileGlobalRank": {
     "placeholders": {

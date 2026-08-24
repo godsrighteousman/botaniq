@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
@@ -148,7 +150,10 @@ class _SignUpPageState extends State<SignUpPage> {
                         final firstName = _firstNameController.text.trim();
                         final lastName = _lastNameController.text.trim();
 
-                        if (email.isEmpty || password.isEmpty) {
+                        if (firstName.isEmpty ||
+                            lastName.isEmpty ||
+                            email.isEmpty ||
+                            password.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(l10n.fillAllFields)),
                           );
@@ -158,6 +163,12 @@ class _SignUpPageState extends State<SignUpPage> {
                         setState(() => _isLoading = true);
 
                         try {
+                          // Ağ yavaş/aralıklıysa (mobil veri, zayıf wifi)
+                          // 10 sn bazen isteği tamamlanmadan kesip yanlışlıkla
+                          // hata gösteriyordu — hesap sunucuda oluşmuş
+                          // olmasına rağmen kullanıcı "kayıt olamadım"
+                          // sanıyor, tekrar denediğinde de "zaten kayıtlı"
+                          // hatasıyla karşılaşıyordu. Süreyi gevşetiyoruz.
                           final AuthResponse res = await Supabase
                               .instance
                               .client
@@ -167,45 +178,100 @@ class _SignUpPageState extends State<SignUpPage> {
                                 password: password,
                                 data: {'full_name': '$firstName $lastName'},
                               )
-                              .timeout(const Duration(seconds: 10));
+                              .timeout(const Duration(seconds: 20));
 
-                          if (res.user != null) {
-                            // Profil satırı (public.users/public.profiles)
-                            // artık auth.users üzerindeki on_auth_user_created
-                            // trigger'ı tarafından sunucu tarafında
-                            // oluşturuluyor (bkz.
-                            // supabase/migrations/20260817130000_fix_missing_signup_trigger.sql).
-                            // Burada istemciden ayrıca upsert denemiyoruz:
-                            // e-posta onayı açıkken signUp() henüz oturum
-                            // döndürmez, bu durumda yetkisiz bir istemci
-                            // upsert'i sadece kullanıcıya gereksiz bir hata
-                            // gösterirdi — hesap sunucu tarafında zaten
-                            // doğru şekilde oluşmuş olur.
+                          // Profil satırı (public.users/public.profiles)
+                          // auth.users üzerindeki on_auth_user_created
+                          // trigger'ı tarafından sunucu tarafında oluşturulur
+                          // (bkz.
+                          // supabase/migrations/20260817130000_fix_missing_signup_trigger.sql).
+                          // Burada istemciden ayrıca upsert denemiyoruz.
 
-                            // Hesap oluşturuldu ama kullanıcıyı otomatik
-                            // içeri almıyoruz — yalnızca yerel oturumu
-                            // kapatıyoruz (auth.users/public.users'daki
-                            // hesap kaydına dokunulmaz). Kullanıcı az
-                            // önce belirlediği e-posta/şifreyle giriş
-                            // ekranından kendi giriş yapar.
-                            await Supabase.instance.client.auth.signOut(
-                              scope: SignOutScope.local,
-                            );
+                          if (res.session != null) {
+                            // Bu projede "e-posta onayı" kapalı olduğu
+                            // sürece signUp() zaten geçerli bir oturum
+                            // döndürür — kullanıcıyı az önce yazdığı
+                            // bilgilerle tekrar giriş yapmaya zorlamadan
+                            // doğrudan uygulamaya alıyoruz.
+                            _finishAuthentication();
+                          } else if (res.user != null) {
+                            // E-posta onayı ileride Supabase tarafında
+                            // etkinleştirilirse buraya düşer: hesap oluşur
+                            // ama oturum dönmez. Bu durumda kullanıcıyı
+                            // bilgilendirip giriş ekranına yönlendiriyoruz
+                            // (e-postası önceden dolu gelsin diye taşıyoruz).
+                            // signUp() ile aynı nedenle bu çağrıya da bir
+                            // zaman aşımı koyuyoruz — yoksa ağ o an
+                            // koparsa buton sonsuza dek "yükleniyor"da
+                            // takılı kalabilir.
+                            try {
+                              await Supabase.instance.client.auth
+                                  .signOut(scope: SignOutScope.local)
+                                  .timeout(const Duration(seconds: 10));
+                            } catch (_) {
+                              // Yerel oturumu kapatma bir ağ hatasına takılsa
+                              // bile hesap zaten oluşturuldu — kullanıcıyı
+                              // giriş ekranına yönlendirmeye devam ediyoruz.
+                            }
 
                             if (mounted) {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const LoginPage(
+                                  builder: (context) => LoginPage(
                                     showAccountCreatedMessage: true,
+                                    initialEmail: email,
                                   ),
                                 ),
                               );
                             }
+                          } else if (mounted) {
+                            // Ne oturum ne kullanıcı döndü — gotrue bu
+                            // durumda normalde bir AuthException fırlatır,
+                            // ama tip sisteminde ikisi de null olabildiği
+                            // için sessizce hiçbir şey olmamış gibi
+                            // görünmemesi adına yine de bir geri bildirim
+                            // gösteriyoruz.
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.subscriptionErrorGeneric),
+                              ),
+                            );
                           }
                         } catch (error) {
                           debugPrint('Email sign-up failed: $error');
-                          if (mounted) {
+                          if (!mounted) return;
+
+                          if (error is AuthException &&
+                              error.code == 'user_already_exists') {
+                            // Bu e-posta zaten kayıtlı — kullanıcıyı jenerik
+                            // bir hatayla baş başa bırakmak yerine doğrudan
+                            // giriş ekranına yönlendiren bir eylem sunuyoruz.
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.emailAlreadyRegistered),
+                                action: SnackBarAction(
+                                  label: l10n.login,
+                                  onPressed: () {
+                                    if (!mounted) return;
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            LoginPage(initialEmail: email),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          } else if (error is TimeoutException) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.subscriptionErrorNetwork),
+                              ),
+                            );
+                          } else {
                             final message = error is AuthException
                                 ? error.message
                                 : error.toString();
@@ -358,6 +424,18 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  /// Oturum başarıyla kurulduğunda (e-posta/şifre kaydı doğrudan oturum
+  /// döndürdüğünde ya da sosyal girişte) kök yönlendiriciye kadar geri
+  /// dönülür — `main.dart`'taki oturum durumuna duyarlı `StreamBuilder`
+  /// bunu algılayıp otomatik olarak Ana Sayfa'yı gösterir.
+  void _finishAuthentication() {
+    if (!mounted) return;
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).popUntil((route) => route.isFirst);
+  }
+
   Future<void> _nativeGoogleSignIn() {
     return _runSocialSignIn(AuthService.instance.signInWithGoogle);
   }
@@ -371,11 +449,8 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() => _isLoading = true);
     try {
       final didSignIn = await signIn();
-      if (didSignIn && mounted) {
-        Navigator.of(
-          context,
-          rootNavigator: true,
-        ).popUntil((route) => route.isFirst);
+      if (didSignIn) {
+        _finishAuthentication();
       }
     } catch (error) {
       debugPrint('Social sign-up failed: $error');
@@ -405,7 +480,10 @@ class _SignUpPageState extends State<SignUpPage> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
       child: TextField(
         controller: controller,
@@ -459,7 +537,10 @@ class _SignUpPageState extends State<SignUpPage> {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.15),
+            width: 1,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

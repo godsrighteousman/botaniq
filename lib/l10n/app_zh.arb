@@ -447,6 +447,7 @@
   "enterEmailPassword": "请输入您的电子邮件和密码。",
   "fillAllFields": "请填写所有字段。",
   "authError": "出了点问题：{error}",
+  "emailAlreadyRegistered": "该邮箱已被注册，请改为登录。",
   "loginWith": "或者使用以下方式登录",
   "signUpWith": "或者注册",
   "noAccount": "没有帐户？",

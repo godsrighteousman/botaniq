@@ -594,6 +594,7 @@
   "fillAllFields": "Lütfen tüm alanları doldur.",
   "accountCreatedPleaseLogIn": "Hesabın oluşturuldu — yeni e-posta ve şifrenle giriş yapabilirsin.",
   "authError": "Bir hata oluştu: {error}",
+  "emailAlreadyRegistered": "Bu e-posta adresi zaten kayıtlı. Bunun yerine giriş yapmayı dene.",
   "loginWith": "Veya şununla giriş yap",
   "signUpWith": "Veya şununla kayıt ol",
   "noAccount": "Hesabın yok mu? ",

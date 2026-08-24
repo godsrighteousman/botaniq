@@ -1702,6 +1702,10 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Dit e-mailadres is al geregistreerd. Probeer in plaats daarvan in te loggen.';
+
+  @override
   String get loginWith => 'Of log in met';
 
   @override
@@ -2253,6 +2257,10 @@ class AppLocalizationsNlBe extends AppLocalizationsNl {
       'Account created — please log in with your new email and password.';
 
   @override
+  String get emailAlreadyRegistered =>
+      'Dit e-mailadres is al geregistreerd. Probeer in plaats daarvan in te loggen.';
+
+  @override
   String get termsContentTitle => '3. Your Content and License to Us';
 
   @override
@@ -2469,6 +2477,10 @@ class AppLocalizationsNlNl extends AppLocalizationsNl {
   @override
   String get accountCreatedPleaseLogIn =>
       'Account created — please log in with your new email and password.';
+
+  @override
+  String get emailAlreadyRegistered =>
+      'Dit e-mailadres is al geregistreerd. Probeer in plaats daarvan in te loggen.';
 
   @override
   String get termsContentTitle => '3. Your Content and License to Us';

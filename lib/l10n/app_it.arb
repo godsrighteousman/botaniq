@@ -447,6 +447,7 @@
   "enterEmailPassword": "Inserisci la tua email e la password.",
   "fillAllFields": "Si prega di compilare tutti i campi.",
   "authError": "Qualcosa è andato storto: {error}",
+  "emailAlreadyRegistered": "Questa email è già registrata. Prova invece ad accedere.",
   "loginWith": "Oppure accedi con",
   "signUpWith": "Oppure registrati con",
   "noAccount": "Non hai un account?",

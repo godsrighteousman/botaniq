@@ -447,6 +447,7 @@
   "enterEmailPassword": "Voer uw e-mailadres en wachtwoord in.",
   "fillAllFields": "Vul alle velden in.",
   "authError": "Er is iets misgegaan: {error}",
+  "emailAlreadyRegistered": "Dit e-mailadres is al geregistreerd. Probeer in plaats daarvan in te loggen.",
   "loginWith": "Of log in met",
   "signUpWith": "Of meld je aan bij",
   "noAccount": "Heeft u geen account?",

@@ -1707,6 +1707,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Этот адрес электронной почты уже зарегистрирован. Попробуйте войти вместо этого.';
+
+  @override
   String get loginWith => 'Или войдите через';
 
   @override

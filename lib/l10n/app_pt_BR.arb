@@ -123,6 +123,7 @@
   "forgotPassword": "Esqueceu a senha?",
   "enterEmailPassword": "Por favor insira seu e-mail e senha.",
   "authError": "Algo deu errado: {error}",
+  "emailAlreadyRegistered": "Este e-mail já está cadastrado. Tente fazer login em vez disso.",
   "signUpWith": "Ou cadastre-se com",
   "noAccount": "Não tem uma conta?",
   "alreadyAccount": "Já tem uma conta?",

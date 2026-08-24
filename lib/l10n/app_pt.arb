@@ -447,6 +447,7 @@
   "enterEmailPassword": "Por favor insira o seu e-mail e palavra-passe.",
   "fillAllFields": "Por favor preencha todos os campos.",
   "authError": "Algo correu mal: {error}",
+  "emailAlreadyRegistered": "Este e-mail já está registado. Tente iniciar sessão em vez disso.",
   "loginWith": "Ou faça login com",
   "signUpWith": "Ou registe-se com",
   "noAccount": "Não tem conta?",

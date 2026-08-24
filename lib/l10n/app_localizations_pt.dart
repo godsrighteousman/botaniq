@@ -1704,6 +1704,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Este e-mail já está registado. Tente iniciar sessão em vez disso.';
+
+  @override
   String get loginWith => 'Ou faça login com';
 
   @override
@@ -2692,6 +2696,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String authError(String error) {
     return 'Algo deu errado: $error';
   }
+
+  @override
+  String get emailAlreadyRegistered =>
+      'Este e-mail já está cadastrado. Tente fazer login em vez disso.';
 
   @override
   String get signUpWith => 'Ou cadastre-se com';

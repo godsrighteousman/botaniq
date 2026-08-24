@@ -1713,6 +1713,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get emailAlreadyRegistered =>
+      'Cette adresse e-mail est déjà enregistrée. Essayez plutôt de vous connecter.';
+
+  @override
   String get loginWith => 'Ou connectez-vous avec';
 
   @override
