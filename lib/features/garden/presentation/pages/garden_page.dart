@@ -5,7 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'search_history_page.dart';
 import 'plant_detail_page.dart';
 import '../../../../core/services/watering_schedule_service.dart';
-import '../../../../core/widgets/heatmap_tap_region.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
 class GardenPage extends StatefulWidget {
@@ -75,161 +74,153 @@ class _GardenPageState extends State<GardenPage> {
 
   @override
   Widget build(BuildContext context) {
-    return HeatmapTapRegion(
-      screenId: 'garden',
-      child: Scaffold(
-        backgroundColor: _lightBg,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 20.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.gardenTitle,
-                      style: GoogleFonts.outfit(
-                        color: _primaryText,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: _accentGreen.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: _accentGreen,
-                        shape: const CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SearchHistoryPage(),
-                              ),
-                            );
-                            _fetchPlants();
-                          },
-                          child: const SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: Icon(
-                              Icons.history_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+    return Scaffold(
+      backgroundColor: _lightBg,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 20.0,
               ),
-
-              // Filter Chips
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Row(
-                  children: [
-                    _buildFilterChip(
-                      'all',
-                      AppLocalizations.of(context)!.gardenAllPlants,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.gardenTitle,
+                    style: GoogleFonts.outfit(
+                      color: _primaryText,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.5,
                     ),
-                    const SizedBox(width: 12),
-                    _buildFilterChip(
-                      'needsWater',
-                      AppLocalizations.of(context)!.gardenNeedsWater,
-                    ),
-                    const SizedBox(width: 12),
-                    _buildFilterChip(
-                      'indoor',
-                      AppLocalizations.of(context)!.gardenIndoor,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Plant Grid
-              Expanded(
-                child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF86D5A6),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: _accentGreen.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
-                      )
-                    : _filteredPlants.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.local_florist_outlined,
-                                size: 56,
-                                color: _accentGreen.withValues(alpha: 0.5),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _selectedFilter == 'all'
-                                    ? AppLocalizations.of(
-                                        context,
-                                      )!.gardenNoPlants
-                                    : AppLocalizations.of(
-                                        context,
-                                      )!.gardenNoPlantsCategory,
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.inter(
-                                  color: _textSecondary,
-                                  fontSize: 16,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : GridView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24.0,
-                        ).copyWith(bottom: 120),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 0.68,
-                            ),
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: _filteredPlants.length,
-                        itemBuilder: (context, index) {
-                          return _buildPlantCard(
+                      ],
+                    ),
+                    child: Material(
+                      color: _accentGreen,
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () async {
+                          await Navigator.push(
                             context,
-                            _filteredPlants[index],
+                            MaterialPageRoute(
+                              builder: (context) => const SearchHistoryPage(),
+                            ),
                           );
+                          _fetchPlants();
                         },
+                        child: const SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Icon(
+                            Icons.history_rounded,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
                       ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+
+            // Filter Chips
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                children: [
+                  _buildFilterChip(
+                    'all',
+                    AppLocalizations.of(context)!.gardenAllPlants,
+                  ),
+                  const SizedBox(width: 12),
+                  _buildFilterChip(
+                    'needsWater',
+                    AppLocalizations.of(context)!.gardenNeedsWater,
+                  ),
+                  const SizedBox(width: 12),
+                  _buildFilterChip(
+                    'indoor',
+                    AppLocalizations.of(context)!.gardenIndoor,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Plant Grid
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF86D5A6),
+                      ),
+                    )
+                  : _filteredPlants.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_florist_outlined,
+                              size: 56,
+                              color: _accentGreen.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _selectedFilter == 'all'
+                                  ? AppLocalizations.of(context)!.gardenNoPlants
+                                  : AppLocalizations.of(
+                                      context,
+                                    )!.gardenNoPlantsCategory,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                color: _textSecondary,
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                      ).copyWith(bottom: 120),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.68,
+                          ),
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: _filteredPlants.length,
+                      itemBuilder: (context, index) {
+                        return _buildPlantCard(context, _filteredPlants[index]);
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );

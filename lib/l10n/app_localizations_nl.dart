@@ -318,32 +318,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
-  String get settingsPrivacyTitle => 'Privacy';
-
-  @override
-  String get settingsPrivacySubtitle => 'Control what data you share with us';
-
-  @override
-  String get settingsHeatmapTitle => 'Interaction Heatmap';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
-
-  @override
-  String get heatmapConsentTitle => 'Help us improve Botaniq?';
-
-  @override
-  String get heatmapConsentBody =>
-      'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.';
-
-  @override
-  String get heatmapConsentAllow => 'Allow';
-
-  @override
-  String get heatmapConsentDecline => 'Not now';
-
-  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -581,7 +555,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get profileDeleteAccountWarning =>
-      'Voor het verwijderen van een account is een veilige bevestiging aan de serverzijde vereist. Uw gegevens zijn niet gewijzigd.';
+      'Je account en al je gegevens — planten, verzorgingsgeschiedenis, kliniekgegevens en foto\'s — worden permanent verwijderd. Dit kan niet ongedaan worden gemaakt.';
 
   @override
   String get cancel => 'Annuleer';
@@ -2117,32 +2091,6 @@ class AppLocalizationsNlBe extends AppLocalizationsNl {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
-  String get settingsPrivacyTitle => 'Privacy';
-
-  @override
-  String get settingsPrivacySubtitle => 'Control what data you share with us';
-
-  @override
-  String get settingsHeatmapTitle => 'Interaction Heatmap';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
-
-  @override
-  String get heatmapConsentTitle => 'Help us improve Botaniq?';
-
-  @override
-  String get heatmapConsentBody =>
-      'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.';
-
-  @override
-  String get heatmapConsentAllow => 'Allow';
-
-  @override
-  String get heatmapConsentDecline => 'Not now';
-
-  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -2337,32 +2285,6 @@ class AppLocalizationsNlNl extends AppLocalizationsNl {
 
   @override
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
-
-  @override
-  String get settingsPrivacyTitle => 'Privacy';
-
-  @override
-  String get settingsPrivacySubtitle => 'Control what data you share with us';
-
-  @override
-  String get settingsHeatmapTitle => 'Interaction Heatmap';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
-
-  @override
-  String get heatmapConsentTitle => 'Help us improve Botaniq?';
-
-  @override
-  String get heatmapConsentBody =>
-      'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.';
-
-  @override
-  String get heatmapConsentAllow => 'Allow';
-
-  @override
-  String get heatmapConsentDecline => 'Not now';
 
   @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';

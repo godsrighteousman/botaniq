@@ -673,54 +673,6 @@ abstract class AppLocalizations {
   /// **'Unlimited scans and AI chat'**
   String get settingsPremiumBannerSubtitle;
 
-  /// No description provided for @settingsPrivacyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy'**
-  String get settingsPrivacyTitle;
-
-  /// No description provided for @settingsPrivacySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Control what data you share with us'**
-  String get settingsPrivacySubtitle;
-
-  /// No description provided for @settingsHeatmapTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Interaction Heatmap'**
-  String get settingsHeatmapTitle;
-
-  /// No description provided for @settingsHeatmapSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Share anonymous tap locations (never screen content) to help us improve the app\'s layout'**
-  String get settingsHeatmapSubtitle;
-
-  /// No description provided for @heatmapConsentTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Help us improve Botaniq?'**
-  String get heatmapConsentTitle;
-
-  /// No description provided for @heatmapConsentBody.
-  ///
-  /// In en, this message translates to:
-  /// **'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.'**
-  String get heatmapConsentBody;
-
-  /// No description provided for @heatmapConsentAllow.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow'**
-  String get heatmapConsentAllow;
-
-  /// No description provided for @heatmapConsentDecline.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get heatmapConsentDecline;
-
   /// No description provided for @paywallEyebrow.
   ///
   /// In en, this message translates to:
@@ -1156,7 +1108,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileDeleteAccountWarning.
   ///
   /// In en, this message translates to:
-  /// **'Your account will be deleted: your personal information (name, email, profile photo) is permanently removed and your account is anonymized. This cannot be undone.'**
+  /// **'Your account and all your data — plants, care history, clinic records, and photos — will be permanently deleted. This cannot be undone.'**
   String get profileDeleteAccountWarning;
 
   /// No description provided for @cancel.

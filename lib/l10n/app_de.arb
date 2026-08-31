@@ -130,7 +130,7 @@
   "profileTermsSubtitle": "Datenschutz, Bedingungen und Richtlinien",
   "profileAccountActions": "Kontoaktionen",
   "profileSignOutQuestion": "Sind Sie sicher, dass Sie sich abmelden möchten?",
-  "profileDeleteAccountWarning": "Das Löschen des Kontos erfordert eine sichere serverseitige Bestätigung. Ihre Daten wurden nicht geändert.",
+  "profileDeleteAccountWarning": "Dein Konto und alle deine Daten — Pflanzen, Pflegeverlauf, Klinikeinträge und Fotos — werden dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
   "cancel": "Abbrechen",
   "continueAction": "Weiter",
   "profileTitleNew": "Neuer Gärtner 🌱",
@@ -660,13 +660,5 @@
   },
   "subscriptionTrustCancel": "Cancel anytime",
   "subscriptionTrustInstant": "Activates instantly",
-  "subscriptionTrustSecure": "Secure payment",
-  "settingsHeatmapSubtitle": "Share anonymous tap locations (never screen content) to help us improve the app's layout",
-  "settingsHeatmapTitle": "Interaction Heatmap",
-  "settingsPrivacySubtitle": "Control what data you share with us",
-  "settingsPrivacyTitle": "Privacy",
-  "heatmapConsentAllow": "Allow",
-  "heatmapConsentBody": "We'd like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.",
-  "heatmapConsentDecline": "Not now",
-  "heatmapConsentTitle": "Help us improve Botaniq?"
+  "subscriptionTrustSecure": "Secure payment"
 }

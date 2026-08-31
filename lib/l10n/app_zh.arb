@@ -130,7 +130,7 @@
   "profileTermsSubtitle": "隐私、条款和政策",
   "profileAccountActions": "账户操作",
   "profileSignOutQuestion": "您确定要退出吗？",
-  "profileDeleteAccountWarning": "帐户删除需要安全的服务器端确认。您的数据尚未更改。",
+  "profileDeleteAccountWarning": "你的账号及所有数据——植物、养护记录、诊疗记录和照片——将被永久删除。此操作无法撤销。",
   "cancel": "取消",
   "continueAction": "继续",
   "profileTitleNew": "新园丁🌱",
@@ -660,13 +660,5 @@
   },
   "subscriptionTrustCancel": "Cancel anytime",
   "subscriptionTrustInstant": "Activates instantly",
-  "subscriptionTrustSecure": "Secure payment",
-  "settingsHeatmapSubtitle": "Share anonymous tap locations (never screen content) to help us improve the app's layout",
-  "settingsHeatmapTitle": "Interaction Heatmap",
-  "settingsPrivacySubtitle": "Control what data you share with us",
-  "settingsPrivacyTitle": "Privacy",
-  "heatmapConsentAllow": "Allow",
-  "heatmapConsentBody": "We'd like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.",
-  "heatmapConsentDecline": "Not now",
-  "heatmapConsentTitle": "Help us improve Botaniq?"
+  "subscriptionTrustSecure": "Secure payment"
 }

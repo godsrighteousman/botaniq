@@ -1373,10 +1373,10 @@ class _ProfilePageState extends State<ProfilePage> {
               Navigator.pop(dialogContext);
               try {
                 // Sunucu tarafında (service-role) kullanıcının kendi
-                // JWT'sinden doğruladığı kimliği anonimleştirir:
-                // isim/e-posta/avatar temizlenir, Auth hesabı ve mevcut
-                // verileri (bitkiler vb.) olduğu gibi kalır — aynı kişi
-                // tekrar giriş yaptığında aynı hesabı anonim olarak bulur.
+                // JWT'sinden doğruladığı kimliği ve ona ait TÜM verileri
+                // (bitkiler, bakım geçmişi, klinik kayıtları, yüklediği
+                // fotoğraflar) kalıcı olarak siler — Auth hesabı dahil.
+                // Bu işlem geri alınamaz.
                 final response = await Supabase.instance.client.functions
                     .invoke('delete-account');
                 if (response.status != 200) {

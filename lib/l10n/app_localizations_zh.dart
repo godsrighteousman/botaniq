@@ -297,32 +297,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
-  String get settingsPrivacyTitle => 'Privacy';
-
-  @override
-  String get settingsPrivacySubtitle => 'Control what data you share with us';
-
-  @override
-  String get settingsHeatmapTitle => 'Interaction Heatmap';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
-
-  @override
-  String get heatmapConsentTitle => 'Help us improve Botaniq?';
-
-  @override
-  String get heatmapConsentBody =>
-      'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.';
-
-  @override
-  String get heatmapConsentAllow => 'Allow';
-
-  @override
-  String get heatmapConsentDecline => 'Not now';
-
-  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -553,7 +527,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileSignOutQuestion => '您确定要退出吗？';
 
   @override
-  String get profileDeleteAccountWarning => '帐户删除需要安全的服务器端确认。您的数据尚未更改。';
+  String get profileDeleteAccountWarning =>
+      '你的账号及所有数据——植物、养护记录、诊疗记录和照片——将被永久删除。此操作无法撤销。';
 
   @override
   String get cancel => '取消';
@@ -2010,32 +1985,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
-  String get settingsPrivacyTitle => 'Privacy';
-
-  @override
-  String get settingsPrivacySubtitle => 'Control what data you share with us';
-
-  @override
-  String get settingsHeatmapTitle => 'Interaction Heatmap';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
-
-  @override
-  String get heatmapConsentTitle => 'Help us improve Botaniq?';
-
-  @override
-  String get heatmapConsentBody =>
-      'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.';
-
-  @override
-  String get heatmapConsentAllow => 'Allow';
-
-  @override
-  String get heatmapConsentDecline => 'Not now';
-
-  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -2437,32 +2386,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
-  String get settingsPrivacyTitle => 'Privacy';
-
-  @override
-  String get settingsPrivacySubtitle => 'Control what data you share with us';
-
-  @override
-  String get settingsHeatmapTitle => 'Interaction Heatmap';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
-
-  @override
-  String get heatmapConsentTitle => 'Help us improve Botaniq?';
-
-  @override
-  String get heatmapConsentBody =>
-      'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.';
-
-  @override
-  String get heatmapConsentAllow => 'Allow';
-
-  @override
-  String get heatmapConsentDecline => 'Not now';
-
-  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -2661,7 +2584,8 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get profileSignOutQuestion => '您確定要退出嗎？';
 
   @override
-  String get profileDeleteAccountWarning => '帳戶刪除需要安全的伺服器端確認。您的資料尚未更改。';
+  String get profileDeleteAccountWarning =>
+      '你的帳號及所有資料——植物、養護記錄、診療記錄和照片——將被永久刪除。此操作無法復原。';
 
   @override
   String get continueAction => '繼續';

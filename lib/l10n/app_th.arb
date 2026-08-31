@@ -130,7 +130,7 @@
   "profileTermsSubtitle": "ความเป็นส่วนตัว ข้อกำหนด และนโยบาย",
   "profileAccountActions": "การดำเนินการของบัญชี",
   "profileSignOutQuestion": "คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?",
-  "profileDeleteAccountWarning": "การลบบัญชีจำเป็นต้องได้รับการยืนยันจากฝั่งเซิร์ฟเวอร์ที่ปลอดภัย ข้อมูลของคุณไม่มีการเปลี่ยนแปลง",
+  "profileDeleteAccountWarning": "บัญชีของคุณและข้อมูลทั้งหมด ทั้งต้นไม้ ประวัติการดูแล บันทึกคลินิก และรูปภาพ จะถูกลบอย่างถาวร การกระทำนี้ไม่สามารถย้อนกลับได้",
   "cancel": "ยกเลิก",
   "continueAction": "ดำเนินการต่อ",
   "profileTitleNew": "ชาวสวนคนใหม่ 🌱",
@@ -660,13 +660,5 @@
   },
   "subscriptionTrustCancel": "Cancel anytime",
   "subscriptionTrustInstant": "Activates instantly",
-  "subscriptionTrustSecure": "Secure payment",
-  "settingsHeatmapSubtitle": "Share anonymous tap locations (never screen content) to help us improve the app's layout",
-  "settingsHeatmapTitle": "Interaction Heatmap",
-  "settingsPrivacySubtitle": "Control what data you share with us",
-  "settingsPrivacyTitle": "Privacy",
-  "heatmapConsentAllow": "Allow",
-  "heatmapConsentBody": "We'd like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.",
-  "heatmapConsentDecline": "Not now",
-  "heatmapConsentTitle": "Help us improve Botaniq?"
+  "subscriptionTrustSecure": "Secure payment"
 }

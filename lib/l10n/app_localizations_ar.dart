@@ -313,32 +313,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsPremiumBannerSubtitle => 'Unlimited scans and AI chat';
 
   @override
-  String get settingsPrivacyTitle => 'Privacy';
-
-  @override
-  String get settingsPrivacySubtitle => 'Control what data you share with us';
-
-  @override
-  String get settingsHeatmapTitle => 'Interaction Heatmap';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Share anonymous tap locations (never screen content) to help us improve the app\'s layout';
-
-  @override
-  String get heatmapConsentTitle => 'Help us improve Botaniq?';
-
-  @override
-  String get heatmapConsentBody =>
-      'We\'d like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.';
-
-  @override
-  String get heatmapConsentAllow => 'Allow';
-
-  @override
-  String get heatmapConsentDecline => 'Not now';
-
-  @override
   String get paywallEyebrow => 'You\'ve used your 2 free analyses 🌱';
 
   @override
@@ -574,7 +548,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get profileDeleteAccountWarning =>
-      'يحتاج حذف الحساب إلى تأكيد آمن من جانب الخادم. لم يتم تغيير البيانات الخاصة بك.';
+      'سيتم حذف حسابك وجميع بياناتك — نباتاتك وسجل الرعاية وسجلات العيادة والصور — بشكل نهائي. لا يمكن التراجع عن هذا الإجراء.';
 
   @override
   String get cancel => 'إلغاء';

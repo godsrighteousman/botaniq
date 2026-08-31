@@ -316,34 +316,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsPremiumBannerSubtitle => 'Sınırsız tarama ve AI sohbeti';
 
   @override
-  String get settingsPrivacyTitle => 'Gizlilik';
-
-  @override
-  String get settingsPrivacySubtitle =>
-      'Bizimle hangi verileri paylaştığını yönet';
-
-  @override
-  String get settingsHeatmapTitle => 'Etkileşim Isı Haritası';
-
-  @override
-  String get settingsHeatmapSubtitle =>
-      'Uygulama tasarımını geliştirmemize yardımcı olmak için anonim dokunuş konumlarını paylaş (ekran içeriği asla paylaşılmaz)';
-
-  @override
-  String get heatmapConsentTitle =>
-      'Botaniq\'i geliştirmemize yardımcı olur musun?';
-
-  @override
-  String get heatmapConsentBody =>
-      'Uygulamanın hangi bölümlerinin daha çok kullanıldığını görebilmek için anonim dokunuş konumlarını toplamak istiyoruz (fotoğrafların, mesajların veya herhangi bir kişisel içeriğin asla toplanmaz). Bunu istediğin an Ayarlar\'dan kapatabilirsin.';
-
-  @override
-  String get heatmapConsentAllow => 'İzin Ver';
-
-  @override
-  String get heatmapConsentDecline => 'Şimdi Değil';
-
-  @override
   String get paywallEyebrow => '2 ücretsiz analizini kullandın 🌱';
 
   @override
@@ -581,7 +553,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profileDeleteAccountWarning =>
-      'Hesabın silinir; kişisel bilgilerin (ad, e-posta, profil fotoğrafı) kalıcı olarak kaldırılır ve hesabın anonim hâle getirilir. Bu işlem geri alınamaz.';
+      'Hesabın ve tüm verilerin — bitkilerin, bakım geçmişin, klinik kayıtların ve fotoğrafların — kalıcı olarak silinecek. Bu işlem geri alınamaz.';
 
   @override
   String get cancel => 'İptal';

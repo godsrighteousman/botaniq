@@ -130,7 +130,7 @@
   "profileTermsSubtitle": "Privasi, syarat dan kebijakan",
   "profileAccountActions": "Tindakan akun",
   "profileSignOutQuestion": "Apakah Anda yakin ingin keluar?",
-  "profileDeleteAccountWarning": "Penghapusan akun memerlukan konfirmasi sisi server yang aman. Data Anda belum diubah.",
+  "profileDeleteAccountWarning": "Akun dan semua datamu — tanaman, riwayat perawatan, catatan klinik, dan foto — akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
   "cancel": "Batalkan",
   "continueAction": "Lanjutkan",
   "profileTitleNew": "Tukang Kebun Baru 🌱",
@@ -660,13 +660,5 @@
   },
   "subscriptionTrustCancel": "Cancel anytime",
   "subscriptionTrustInstant": "Activates instantly",
-  "subscriptionTrustSecure": "Secure payment",
-  "settingsHeatmapSubtitle": "Share anonymous tap locations (never screen content) to help us improve the app's layout",
-  "settingsHeatmapTitle": "Interaction Heatmap",
-  "settingsPrivacySubtitle": "Control what data you share with us",
-  "settingsPrivacyTitle": "Privacy",
-  "heatmapConsentAllow": "Allow",
-  "heatmapConsentBody": "We'd like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.",
-  "heatmapConsentDecline": "Not now",
-  "heatmapConsentTitle": "Help us improve Botaniq?"
+  "subscriptionTrustSecure": "Secure payment"
 }

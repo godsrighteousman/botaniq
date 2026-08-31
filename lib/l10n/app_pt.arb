@@ -130,7 +130,7 @@
   "profileTermsSubtitle": "Privacidade, termos e políticas",
   "profileAccountActions": "Ações da conta",
   "profileSignOutQuestion": "Tem a certeza de que quer sair?",
-  "profileDeleteAccountWarning": "A eliminação da conta necessita de uma confirmação segura do servidor. Os seus dados não foram alterados.",
+  "profileDeleteAccountWarning": "A tua conta e todos os teus dados — plantas, histórico de cuidados, registos da clínica e fotografias — serão eliminados permanentemente. Esta ação não pode ser anulada.",
   "cancel": "Cancelar",
   "continueAction": "Continuar",
   "profileTitleNew": "Novo Jardineiro 🌱",
@@ -660,13 +660,5 @@
   },
   "subscriptionTrustCancel": "Cancel anytime",
   "subscriptionTrustInstant": "Activates instantly",
-  "subscriptionTrustSecure": "Secure payment",
-  "settingsHeatmapSubtitle": "Share anonymous tap locations (never screen content) to help us improve the app's layout",
-  "settingsHeatmapTitle": "Interaction Heatmap",
-  "settingsPrivacySubtitle": "Control what data you share with us",
-  "settingsPrivacyTitle": "Privacy",
-  "heatmapConsentAllow": "Allow",
-  "heatmapConsentBody": "We'd like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.",
-  "heatmapConsentDecline": "Not now",
-  "heatmapConsentTitle": "Help us improve Botaniq?"
+  "subscriptionTrustSecure": "Secure payment"
 }

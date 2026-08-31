@@ -43,7 +43,7 @@
   "profileAppSettingsSubtitle": "Idioma, unidades e conexão AI",
   "profileNotificationPrefsSubtitle": "Escolha quais momentos de cuidado chegam até você",
   "profileSignOutQuestion": "Tem certeza de que deseja sair?",
-  "profileDeleteAccountWarning": "A exclusão da conta precisa de uma confirmação segura do servidor. Seus dados não foram alterados.",
+  "profileDeleteAccountWarning": "Sua conta e todos os seus dados — plantas, histórico de cuidados, registros da clínica e fotos — serão excluídos permanentemente. Esta ação não pode ser desfeita.",
   "profileNextLevelStart": "Adicione sua primeira planta e comece sua aventura de jardinagem!",
   "profileNextLevelSkilled": "Restam apenas {count} plantas para se tornar Jardineiro Habilidoso.",
   "profileNextLevelMax": "Você está no topo do seu jardim, parabéns!",
@@ -275,13 +275,5 @@
   },
   "subscriptionTrustCancel": "Cancel anytime",
   "subscriptionTrustInstant": "Activates instantly",
-  "subscriptionTrustSecure": "Secure payment",
-  "settingsHeatmapSubtitle": "Share anonymous tap locations (never screen content) to help us improve the app's layout",
-  "settingsHeatmapTitle": "Interaction Heatmap",
-  "settingsPrivacySubtitle": "Control what data you share with us",
-  "settingsPrivacyTitle": "Privacy",
-  "heatmapConsentAllow": "Allow",
-  "heatmapConsentBody": "We'd like to collect anonymous tap locations (never your photos, messages, or any personal content) to see which parts of the app people use most. You can turn this off anytime in Settings.",
-  "heatmapConsentDecline": "Not now",
-  "heatmapConsentTitle": "Help us improve Botaniq?"
+  "subscriptionTrustSecure": "Secure payment"
 }
