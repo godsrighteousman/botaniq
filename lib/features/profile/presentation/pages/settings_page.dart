@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/config/auth_redirect.dart';
 import '../../../../core/locale/locale_provider.dart';
 import '../../../../core/locale/supported_app_locale.dart';
 import '../../../../core/services/care_notification_service.dart';
@@ -856,7 +857,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _sendPasswordReset(String email) async {
     try {
-      await Supabase.instance.client.auth.resetPasswordForEmail(email);
+      await Supabase.instance.client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: kAuthCallbackUrl,
+      );
       if (mounted) {
         _showSnack(_l10n.settingsPasswordResetSent);
       }

@@ -3070,7 +3070,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountCreatedPleaseLogIn.
   ///
   /// In en, this message translates to:
-  /// **'Account created — please log in with your new email and password.'**
+  /// **'Account created — check your inbox and tap the confirmation link, then log in.'**
   String get accountCreatedPleaseLogIn;
 
   /// No description provided for @authError.
@@ -3084,6 +3084,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This email is already registered. Try logging in instead.'**
   String get emailAlreadyRegistered;
+
+  /// No description provided for @emailNotConfirmedError.
+  ///
+  /// In en, this message translates to:
+  /// **'This account\'s email hasn\'t been confirmed yet. Please check your inbox.'**
+  String get emailNotConfirmedError;
+
+  /// No description provided for @resendConfirmationEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get resendConfirmationEmail;
+
+  /// No description provided for @confirmationEmailResent.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation email resent — please check your inbox.'**
+  String get confirmationEmailResent;
+
+  /// No description provided for @confirmationEmailResendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t resend the confirmation email. Please try again.'**
+  String get confirmationEmailResendFailed;
+
+  /// No description provided for @enterEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email address.'**
+  String get enterEmailAddress;
+
+  /// No description provided for @forgotPasswordSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get forgotPasswordSheetTitle;
+
+  /// No description provided for @forgotPasswordSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we\'ll send you a link to reset your password.'**
+  String get forgotPasswordSheetBody;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Reset Link'**
+  String get sendResetLink;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords don\'t match.'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been updated.'**
+  String get passwordUpdatedSuccess;
+
+  /// No description provided for @resetPasswordPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set New Password'**
+  String get resetPasswordPageTitle;
+
+  /// No description provided for @resetPasswordPageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password to get back into your account.'**
+  String get resetPasswordPageSubtitle;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get updatePassword;
 
   /// No description provided for @loginWith.
   ///

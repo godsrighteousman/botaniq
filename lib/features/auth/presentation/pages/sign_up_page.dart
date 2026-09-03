@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
+import '../../../../core/config/auth_redirect.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
@@ -177,6 +178,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 email: email,
                                 password: password,
                                 data: {'full_name': '$firstName $lastName'},
+                                emailRedirectTo: kAuthCallbackUrl,
                               )
                               .timeout(const Duration(seconds: 20));
 
@@ -188,21 +190,26 @@ class _SignUpPageState extends State<SignUpPage> {
                           // Burada istemciden ayrıca upsert denemiyoruz.
 
                           if (res.session != null) {
-                            // Bu projede "e-posta onayı" kapalı olduğu
-                            // sürece signUp() zaten geçerli bir oturum
-                            // döndürür — kullanıcıyı az önce yazdığı
-                            // bilgilerle tekrar giriş yapmaya zorlamadan
-                            // doğrudan uygulamaya alıyoruz.
+                            // Supabase Dashboard'da "Confirm email" kapalıysa
+                            // signUp() geçerli bir oturum döndürür — bu
+                            // durumda kullanıcıyı az önce yazdığı bilgilerle
+                            // tekrar giriş yapmaya zorlamadan doğrudan
+                            // uygulamaya alıyoruz. "Confirm email" açıkken bu
+                            // dal artık düşmüyor (bkz. else if altı) — başka
+                            // birinin e-postasıyla, o e-postanın sahibi
+                            // olduğunu kanıtlamadan hesap açılamasın diye
+                            // proje ayarında onayı zorunlu tutuyoruz.
                             _finishAuthentication();
                           } else if (res.user != null) {
-                            // E-posta onayı ileride Supabase tarafında
-                            // etkinleştirilirse buraya düşer: hesap oluşur
-                            // ama oturum dönmez. Bu durumda kullanıcıyı
-                            // bilgilendirip giriş ekranına yönlendiriyoruz
-                            // (e-postası önceden dolu gelsin diye taşıyoruz).
-                            // signUp() ile aynı nedenle bu çağrıya da bir
-                            // zaman aşımı koyuyoruz — yoksa ağ o an
-                            // koparsa buton sonsuza dek "yükleniyor"da
+                            // "Confirm email" açıkken normal yol budur: hesap
+                            // oluşur ama oturum dönmez, kullanıcı e-postasına
+                            // gelen onay bağlantısına tıklamadan giriş
+                            // yapamaz (bkz. login_page.dart — 'email_not_confirmed').
+                            // Burada kullanıcıyı bilgilendirip giriş ekranına
+                            // yönlendiriyoruz (e-postası önceden dolu gelsin
+                            // diye taşıyoruz). signUp() ile aynı nedenle bu
+                            // çağrıya da bir zaman aşımı koyuyoruz — yoksa ağ
+                            // o an koparsa buton sonsuza dek "yükleniyor"da
                             // takılı kalabilir.
                             try {
                               await Supabase.instance.client.auth

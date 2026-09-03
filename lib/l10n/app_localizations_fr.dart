@@ -1691,6 +1691,56 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette adresse e-mail est déjà enregistrée. Essayez plutôt de vous connecter.';
 
   @override
+  String get emailNotConfirmedError =>
+      'L\'e-mail de ce compte n\'a pas encore été confirmé. Vérifiez votre boîte de réception.';
+
+  @override
+  String get resendConfirmationEmail => 'Renvoyer';
+
+  @override
+  String get confirmationEmailResent =>
+      'E-mail de confirmation renvoyé — vérifiez votre boîte de réception.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Impossible de renvoyer l\'e-mail de confirmation. Veuillez réessayer.';
+
+  @override
+  String get enterEmailAddress => 'Veuillez saisir votre adresse e-mail.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Mot de passe oublié ?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Saisissez votre e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.';
+
+  @override
+  String get sendResetLink => 'Envoyer le lien';
+
+  @override
+  String get passwordsDoNotMatch => 'Les mots de passe ne correspondent pas.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Votre mot de passe a été mis à jour.';
+
+  @override
+  String get resetPasswordPageTitle => 'Définir un nouveau mot de passe';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Choisissez un nouveau mot de passe pour retrouver l\'accès à votre compte.';
+
+  @override
+  String get newPassword => 'Nouveau mot de passe';
+
+  @override
+  String get confirmNewPassword => 'Confirmer le nouveau mot de passe';
+
+  @override
+  String get updatePassword => 'Mettre à jour le mot de passe';
+
+  @override
   String get loginWith => 'Ou connectez-vous avec';
 
   @override

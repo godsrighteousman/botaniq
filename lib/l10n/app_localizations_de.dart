@@ -1687,6 +1687,56 @@ class AppLocalizationsDe extends AppLocalizations {
       'Diese E-Mail-Adresse ist bereits registriert. Versuche es stattdessen mit der Anmeldung.';
 
   @override
+  String get emailNotConfirmedError =>
+      'Die E-Mail-Adresse dieses Kontos wurde noch nicht bestätigt. Bitte überprüfe dein Postfach.';
+
+  @override
+  String get resendConfirmationEmail => 'Erneut senden';
+
+  @override
+  String get confirmationEmailResent =>
+      'Bestätigungs-E-Mail erneut gesendet — bitte überprüfe dein Postfach.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Die Bestätigungs-E-Mail konnte nicht erneut gesendet werden. Bitte versuche es noch einmal.';
+
+  @override
+  String get enterEmailAddress => 'Bitte gib deine E-Mail-Adresse ein.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Passwort vergessen?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.';
+
+  @override
+  String get sendResetLink => 'Link senden';
+
+  @override
+  String get passwordsDoNotMatch => 'Die Passwörter stimmen nicht überein.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Dein Passwort wurde aktualisiert.';
+
+  @override
+  String get resetPasswordPageTitle => 'Neues Passwort festlegen';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Wähle ein neues Passwort, um wieder auf dein Konto zugreifen zu können.';
+
+  @override
+  String get newPassword => 'Neues Passwort';
+
+  @override
+  String get confirmNewPassword => 'Neues Passwort bestätigen';
+
+  @override
+  String get updatePassword => 'Passwort aktualisieren';
+
+  @override
   String get loginWith => 'Oder loggen Sie sich mit ein';
 
   @override

@@ -1682,6 +1682,56 @@ class AppLocalizationsPt extends AppLocalizations {
       'Este e-mail já está registado. Tente iniciar sessão em vez disso.';
 
   @override
+  String get emailNotConfirmedError =>
+      'O e-mail desta conta ainda não foi confirmado. Verifica a tua caixa de entrada.';
+
+  @override
+  String get resendConfirmationEmail => 'Reenviar';
+
+  @override
+  String get confirmationEmailResent =>
+      'E-mail de confirmação reenviado — verifica a tua caixa de entrada.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Não foi possível reenviar o e-mail de confirmação. Tenta novamente.';
+
+  @override
+  String get enterEmailAddress => 'Introduz o teu endereço de e-mail.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Esqueceste-te da palavra-passe?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Introduz o teu e-mail e enviamos-te uma ligação para redefinires a palavra-passe.';
+
+  @override
+  String get sendResetLink => 'Enviar ligação';
+
+  @override
+  String get passwordsDoNotMatch => 'As palavras-passe não coincidem.';
+
+  @override
+  String get passwordUpdatedSuccess => 'A tua palavra-passe foi atualizada.';
+
+  @override
+  String get resetPasswordPageTitle => 'Definir nova palavra-passe';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Escolhe uma nova palavra-passe para voltares a aceder à tua conta.';
+
+  @override
+  String get newPassword => 'Nova palavra-passe';
+
+  @override
+  String get confirmNewPassword => 'Confirmar nova palavra-passe';
+
+  @override
+  String get updatePassword => 'Atualizar palavra-passe';
+
+  @override
   String get loginWith => 'Ou faça login com';
 
   @override
@@ -2648,6 +2698,56 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get emailAlreadyRegistered =>
       'Este e-mail já está cadastrado. Tente fazer login em vez disso.';
+
+  @override
+  String get emailNotConfirmedError =>
+      'O e-mail desta conta ainda não foi confirmado. Verifique sua caixa de entrada.';
+
+  @override
+  String get resendConfirmationEmail => 'Reenviar';
+
+  @override
+  String get confirmationEmailResent =>
+      'E-mail de confirmação reenviado — verifique sua caixa de entrada.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Não foi possível reenviar o e-mail de confirmação. Tente novamente.';
+
+  @override
+  String get enterEmailAddress => 'Digite seu endereço de e-mail.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Esqueceu sua senha?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Digite seu e-mail e enviaremos um link para redefinir sua senha.';
+
+  @override
+  String get sendResetLink => 'Enviar link';
+
+  @override
+  String get passwordsDoNotMatch => 'As senhas não coincidem.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Sua senha foi atualizada.';
+
+  @override
+  String get resetPasswordPageTitle => 'Definir nova senha';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Escolha uma nova senha para voltar a acessar sua conta.';
+
+  @override
+  String get newPassword => 'Nova senha';
+
+  @override
+  String get confirmNewPassword => 'Confirmar nova senha';
+
+  @override
+  String get updatePassword => 'Atualizar senha';
 
   @override
   String get signUpWith => 'Ou cadastre-se com';

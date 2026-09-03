@@ -1657,6 +1657,56 @@ class AppLocalizationsTh extends AppLocalizations {
       'อีเมลนี้ลงทะเบียนไว้แล้ว ลองเข้าสู่ระบบแทน';
 
   @override
+  String get emailNotConfirmedError =>
+      'อีเมลของบัญชีนี้ยังไม่ได้รับการยืนยัน กรุณาตรวจสอบกล่องจดหมายของคุณ';
+
+  @override
+  String get resendConfirmationEmail => 'ส่งอีกครั้ง';
+
+  @override
+  String get confirmationEmailResent =>
+      'ส่งอีเมลยืนยันอีกครั้งแล้ว — กรุณาตรวจสอบกล่องจดหมายของคุณ';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'ไม่สามารถส่งอีเมลยืนยันอีกครั้งได้ กรุณาลองอีกครั้ง';
+
+  @override
+  String get enterEmailAddress => 'กรุณากรอกอีเมลของคุณ';
+
+  @override
+  String get forgotPasswordSheetTitle => 'ลืมรหัสผ่านใช่ไหม?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'กรอกอีเมลของคุณ แล้วเราจะส่งลิงก์สำหรับรีเซ็ตรหัสผ่านให้คุณ';
+
+  @override
+  String get sendResetLink => 'ส่งลิงก์รีเซ็ต';
+
+  @override
+  String get passwordsDoNotMatch => 'รหัสผ่านไม่ตรงกัน';
+
+  @override
+  String get passwordUpdatedSuccess => 'อัปเดตรหัสผ่านของคุณแล้ว';
+
+  @override
+  String get resetPasswordPageTitle => 'ตั้งรหัสผ่านใหม่';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'เลือกรหัสผ่านใหม่เพื่อกลับเข้าสู่บัญชีของคุณ';
+
+  @override
+  String get newPassword => 'รหัสผ่านใหม่';
+
+  @override
+  String get confirmNewPassword => 'ยืนยันรหัสผ่านใหม่';
+
+  @override
+  String get updatePassword => 'อัปเดตรหัสผ่าน';
+
+  @override
   String get loginWith => 'หรือเข้าสู่ระบบด้วย';
 
   @override

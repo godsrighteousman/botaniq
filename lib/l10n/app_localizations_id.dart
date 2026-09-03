@@ -1674,6 +1674,56 @@ class AppLocalizationsId extends AppLocalizations {
       'Email ini sudah terdaftar. Coba masuk saja.';
 
   @override
+  String get emailNotConfirmedError =>
+      'Email akun ini belum dikonfirmasi. Silakan periksa kotak masukmu.';
+
+  @override
+  String get resendConfirmationEmail => 'Kirim ulang';
+
+  @override
+  String get confirmationEmailResent =>
+      'Email konfirmasi dikirim ulang — silakan periksa kotak masukmu.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Gagal mengirim ulang email konfirmasi. Silakan coba lagi.';
+
+  @override
+  String get enterEmailAddress => 'Silakan masukkan alamat emailmu.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Lupa kata sandi?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Masukkan emailmu dan kami akan mengirimkan tautan untuk mengatur ulang kata sandimu.';
+
+  @override
+  String get sendResetLink => 'Kirim Tautan Reset';
+
+  @override
+  String get passwordsDoNotMatch => 'Kata sandi tidak cocok.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Kata sandimu telah diperbarui.';
+
+  @override
+  String get resetPasswordPageTitle => 'Atur Kata Sandi Baru';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Pilih kata sandi baru untuk kembali mengakses akunmu.';
+
+  @override
+  String get newPassword => 'Kata Sandi Baru';
+
+  @override
+  String get confirmNewPassword => 'Konfirmasi Kata Sandi Baru';
+
+  @override
+  String get updatePassword => 'Perbarui Kata Sandi';
+
+  @override
   String get loginWith => 'Atau masuk dengan';
 
   @override

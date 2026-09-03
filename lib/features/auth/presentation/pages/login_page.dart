@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
+import '../../../../core/config/auth_redirect.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
@@ -144,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
               Align(
                 alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: _showForgotPasswordSheet,
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
@@ -192,8 +193,30 @@ class _LoginPageState extends State<LoginPage> {
                         } catch (error) {
                           debugPrint('Email sign-in failed: $error');
                           if (mounted) {
-                            // Jenerik bir mesaj yerine gerçek nedeni göster
-                            // (yanlış şifre, onaylanmamış hesap, ağ hatası
+                            if (error is AuthException &&
+                                error.code == 'email_not_confirmed') {
+                              // Hesap var ama e-posta henüz onaylanmamış —
+                              // başkasının e-postasıyla kayıt olunmasını
+                              // engellemek için Supabase tarafında zorunlu
+                              // kıldığımız onay adımı. Kullanıcıya jenerik
+                              // İngilizce gotrue mesajı yerine anlaşılır bir
+                              // metin ve onay e-postasını tekrar gönderme
+                              // seçeneği sunuyoruz.
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.emailNotConfirmedError),
+                                  action: SnackBarAction(
+                                    label: l10n.resendConfirmationEmail,
+                                    onPressed: () =>
+                                        _resendConfirmationEmail(email),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Diğer durumlarda jenerik bir mesaj yerine
+                            // gerçek nedeni göster (yanlış şifre, ağ hatası
                             // vb.) — kullanıcının kendi kendine teşhis
                             // koyabilmesi için.
                             final message = error is AuthException
@@ -385,6 +408,174 @@ class _LoginPageState extends State<LoginPage> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _resendConfirmationEmail(String email) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await Supabase.instance.client.auth
+          .resend(type: OtpType.signup, email: email)
+          .timeout(const Duration(seconds: 10));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.confirmationEmailResent)));
+      }
+    } catch (error) {
+      debugPrint('Resend confirmation email failed: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.confirmationEmailResendFailed)),
+        );
+      }
+    }
+  }
+
+  /// "Şifremi Unuttum" — e-posta adresini sorup Supabase'in şifre sıfırlama
+  /// bağlantısını göndermesini tetikler. Bağlantı [kAuthCallbackUrl]'e
+  /// yönlendirilir; kullanıcı ona tıklayınca uygulama tekrar açılır ve
+  /// main.dart'taki `passwordRecovery` dinleyicisi onu [ResetPasswordPage]'e
+  /// yönlendirir.
+  void _showForgotPasswordSheet() {
+    final l10n = AppLocalizations.of(context)!;
+    final emailController = TextEditingController(text: _emailController.text);
+    bool isSending = false;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            Future<void> submit() async {
+              final email = emailController.text.trim();
+              if (email.isEmpty) {
+                ScaffoldMessenger.of(
+                  sheetContext,
+                ).showSnackBar(SnackBar(content: Text(l10n.enterEmailAddress)));
+                return;
+              }
+              setSheetState(() => isSending = true);
+              try {
+                await Supabase.instance.client.auth
+                    .resetPasswordForEmail(email, redirectTo: kAuthCallbackUrl)
+                    .timeout(const Duration(seconds: 10));
+                if (sheetContext.mounted) Navigator.pop(sheetContext);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.settingsPasswordResetSent)),
+                  );
+                }
+              } catch (error) {
+                debugPrint('Password reset request failed: $error');
+                final message = error is AuthException
+                    ? error.message
+                    : error.toString();
+                if (sheetContext.mounted) {
+                  ScaffoldMessenger.of(sheetContext).showSnackBar(
+                    SnackBar(content: Text(l10n.authError(message))),
+                  );
+                  setSheetState(() => isSending = false);
+                }
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+                decoration: const BoxDecoration(
+                  color: AppColors.darkBackground,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 42,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.forgotPasswordSheetTitle,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.forgotPasswordSheetBody,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildTextField(
+                        controller: emailController,
+                        hintText: l10n.emailAddress,
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                        forceLtr: true,
+                      ),
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: isSending ? null : submit,
+                        child: Container(
+                          height: 56,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [AppColors.primary, Color(0xFF4FA976)],
+                              begin: AlignmentDirectional.topStart,
+                              end: AlignmentDirectional.bottomEnd,
+                            ),
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                          child: Center(
+                            child: isSending
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    l10n.sendResetLink,
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(emailController.dispose);
   }
 
   void _finishAuthentication() {

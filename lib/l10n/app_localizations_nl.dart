@@ -1680,6 +1680,56 @@ class AppLocalizationsNl extends AppLocalizations {
       'Dit e-mailadres is al geregistreerd. Probeer in plaats daarvan in te loggen.';
 
   @override
+  String get emailNotConfirmedError =>
+      'De e-mail van dit account is nog niet bevestigd. Controleer je inbox.';
+
+  @override
+  String get resendConfirmationEmail => 'Opnieuw versturen';
+
+  @override
+  String get confirmationEmailResent =>
+      'Bevestigingsmail opnieuw verstuurd — controleer je inbox.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'De bevestigingsmail kon niet opnieuw worden verstuurd. Probeer het nogmaals.';
+
+  @override
+  String get enterEmailAddress => 'Vul je e-mailadres in.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Wachtwoord vergeten?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Vul je e-mailadres in en we sturen je een link om je wachtwoord opnieuw in te stellen.';
+
+  @override
+  String get sendResetLink => 'Link versturen';
+
+  @override
+  String get passwordsDoNotMatch => 'Wachtwoorden komen niet overeen.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Je wachtwoord is bijgewerkt.';
+
+  @override
+  String get resetPasswordPageTitle => 'Nieuw wachtwoord instellen';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Kies een nieuw wachtwoord om weer toegang te krijgen tot je account.';
+
+  @override
+  String get newPassword => 'Nieuw wachtwoord';
+
+  @override
+  String get confirmNewPassword => 'Bevestig nieuw wachtwoord';
+
+  @override
+  String get updatePassword => 'Wachtwoord bijwerken';
+
+  @override
   String get loginWith => 'Of log in met';
 
   @override

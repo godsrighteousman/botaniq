@@ -1685,6 +1685,56 @@ class AppLocalizationsRu extends AppLocalizations {
       'Этот адрес электронной почты уже зарегистрирован. Попробуйте войти вместо этого.';
 
   @override
+  String get emailNotConfirmedError =>
+      'Электронная почта этого аккаунта ещё не подтверждена. Проверьте свою почту.';
+
+  @override
+  String get resendConfirmationEmail => 'Отправить снова';
+
+  @override
+  String get confirmationEmailResent =>
+      'Письмо с подтверждением отправлено снова — проверьте свою почту.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Не удалось повторно отправить письмо с подтверждением. Попробуйте ещё раз.';
+
+  @override
+  String get enterEmailAddress => 'Введите свой адрес электронной почты.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Забыли пароль?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Введите свою почту, и мы отправим вам ссылку для сброса пароля.';
+
+  @override
+  String get sendResetLink => 'Отправить ссылку';
+
+  @override
+  String get passwordsDoNotMatch => 'Пароли не совпадают.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Ваш пароль обновлён.';
+
+  @override
+  String get resetPasswordPageTitle => 'Установить новый пароль';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Выберите новый пароль, чтобы снова получить доступ к своему аккаунту.';
+
+  @override
+  String get newPassword => 'Новый пароль';
+
+  @override
+  String get confirmNewPassword => 'Подтвердите новый пароль';
+
+  @override
+  String get updatePassword => 'Обновить пароль';
+
+  @override
   String get loginWith => 'Или войдите через';
 
   @override

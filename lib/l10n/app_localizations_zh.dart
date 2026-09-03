@@ -1601,6 +1601,51 @@ class AppLocalizationsZh extends AppLocalizations {
   String get emailAlreadyRegistered => '该邮箱已被注册，请改为登录。';
 
   @override
+  String get emailNotConfirmedError => '此账号的邮箱尚未验证，请查看你的收件箱。';
+
+  @override
+  String get resendConfirmationEmail => '重新发送';
+
+  @override
+  String get confirmationEmailResent => '验证邮件已重新发送——请查看你的收件箱。';
+
+  @override
+  String get confirmationEmailResendFailed => '无法重新发送验证邮件，请重试。';
+
+  @override
+  String get enterEmailAddress => '请输入你的邮箱地址。';
+
+  @override
+  String get forgotPasswordSheetTitle => '忘记密码了吗？';
+
+  @override
+  String get forgotPasswordSheetBody => '输入你的邮箱，我们会给你发送一个重置密码的链接。';
+
+  @override
+  String get sendResetLink => '发送重置链接';
+
+  @override
+  String get passwordsDoNotMatch => '两次输入的密码不一致。';
+
+  @override
+  String get passwordUpdatedSuccess => '你的密码已更新。';
+
+  @override
+  String get resetPasswordPageTitle => '设置新密码';
+
+  @override
+  String get resetPasswordPageSubtitle => '选择一个新密码以重新访问你的账号。';
+
+  @override
+  String get newPassword => '新密码';
+
+  @override
+  String get confirmNewPassword => '确认新密码';
+
+  @override
+  String get updatePassword => '更新密码';
+
+  @override
   String get loginWith => '或者使用以下方式登录';
 
   @override
@@ -3468,6 +3513,51 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get emailAlreadyRegistered => '該郵箱已被註冊，請改為登入。';
+
+  @override
+  String get emailNotConfirmedError => '此帳號的電子郵件尚未驗證，請查看你的收件匣。';
+
+  @override
+  String get resendConfirmationEmail => '重新傳送';
+
+  @override
+  String get confirmationEmailResent => '驗證郵件已重新傳送——請查看你的收件匣。';
+
+  @override
+  String get confirmationEmailResendFailed => '無法重新傳送驗證郵件，請再試一次。';
+
+  @override
+  String get enterEmailAddress => '請輸入你的電子郵件地址。';
+
+  @override
+  String get forgotPasswordSheetTitle => '忘記密碼了嗎？';
+
+  @override
+  String get forgotPasswordSheetBody => '輸入你的電子郵件，我們會傳送重設密碼的連結給你。';
+
+  @override
+  String get sendResetLink => '傳送重設連結';
+
+  @override
+  String get passwordsDoNotMatch => '兩次輸入的密碼不一致。';
+
+  @override
+  String get passwordUpdatedSuccess => '你的密碼已更新。';
+
+  @override
+  String get resetPasswordPageTitle => '設定新密碼';
+
+  @override
+  String get resetPasswordPageSubtitle => '選擇一個新密碼以重新存取你的帳號。';
+
+  @override
+  String get newPassword => '新密碼';
+
+  @override
+  String get confirmNewPassword => '確認新密碼';
+
+  @override
+  String get updatePassword => '更新密碼';
 
   @override
   String get loginWith => '或使用以下方式登入';

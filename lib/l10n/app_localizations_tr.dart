@@ -1652,7 +1652,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get accountCreatedPleaseLogIn =>
-      'Hesabın oluşturuldu — yeni e-posta ve şifrenle giriş yapabilirsin.';
+      'Hesabın oluşturuldu — e-postana gelen onay bağlantısına tıkla, ardından giriş yap.';
 
   @override
   String authError(String error) {
@@ -1662,6 +1662,56 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get emailAlreadyRegistered =>
       'Bu e-posta adresi zaten kayıtlı. Bunun yerine giriş yapmayı dene.';
+
+  @override
+  String get emailNotConfirmedError =>
+      'Bu hesabın e-postası henüz onaylanmamış. Lütfen gelen kutunu kontrol et.';
+
+  @override
+  String get resendConfirmationEmail => 'Tekrar gönder';
+
+  @override
+  String get confirmationEmailResent =>
+      'Onay e-postası tekrar gönderildi — gelen kutunu kontrol et.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Onay e-postası tekrar gönderilemedi. Lütfen tekrar dene.';
+
+  @override
+  String get enterEmailAddress => 'Lütfen e-posta adresini gir.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Şifreni mi unuttun?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'E-postanı gir, şifreni sıfırlaman için bir bağlantı gönderelim.';
+
+  @override
+  String get sendResetLink => 'Bağlantı Gönder';
+
+  @override
+  String get passwordsDoNotMatch => 'Şifreler eşleşmiyor.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Şifren güncellendi.';
+
+  @override
+  String get resetPasswordPageTitle => 'Yeni Şifre Belirle';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Hesabına tekrar erişebilmek için yeni bir şifre belirle.';
+
+  @override
+  String get newPassword => 'Yeni Şifre';
+
+  @override
+  String get confirmNewPassword => 'Yeni Şifreyi Onayla';
+
+  @override
+  String get updatePassword => 'Şifreyi Güncelle';
 
   @override
   String get loginWith => 'Veya şununla giriş yap';

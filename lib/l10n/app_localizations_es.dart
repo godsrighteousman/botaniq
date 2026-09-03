@@ -1679,6 +1679,57 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este correo electrónico ya está registrado. Prueba a iniciar sesión en su lugar.';
 
   @override
+  String get emailNotConfirmedError =>
+      'El correo de esta cuenta aún no se ha confirmado. Revisa tu bandeja de entrada.';
+
+  @override
+  String get resendConfirmationEmail => 'Reenviar';
+
+  @override
+  String get confirmationEmailResent =>
+      'Correo de confirmación reenviado — revisa tu bandeja de entrada.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'No se pudo reenviar el correo de confirmación. Inténtalo de nuevo.';
+
+  @override
+  String get enterEmailAddress =>
+      'Introduce tu dirección de correo electrónico.';
+
+  @override
+  String get forgotPasswordSheetTitle => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.';
+
+  @override
+  String get sendResetLink => 'Enviar enlace';
+
+  @override
+  String get passwordsDoNotMatch => 'Las contraseñas no coinciden.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Tu contraseña se ha actualizado.';
+
+  @override
+  String get resetPasswordPageTitle => 'Establecer nueva contraseña';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Elige una nueva contraseña para volver a acceder a tu cuenta.';
+
+  @override
+  String get newPassword => 'Nueva contraseña';
+
+  @override
+  String get confirmNewPassword => 'Confirmar nueva contraseña';
+
+  @override
+  String get updatePassword => 'Actualizar contraseña';
+
+  @override
   String get loginWith => 'O inicia sesión con';
 
   @override

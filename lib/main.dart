@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'features/auth/presentation/pages/reset_password_page.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
@@ -53,6 +56,10 @@ void main() async {
   localeProvider.syncFromSupabase();
 }
 
+/// Uygulama genelinde kök `Navigator`a, bir `BuildContext`e ihtiyaç
+/// duymadan (ör. şifre kurtarma deep link dinleyicisinden) erişebilmek için.
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 class BotaniqApp extends StatelessWidget {
   const BotaniqApp({super.key});
 
@@ -61,6 +68,7 @@ class BotaniqApp extends StatelessWidget {
     final preferences = context.watch<LocaleProvider>();
 
     return MaterialApp(
+      navigatorKey: rootNavigatorKey,
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
       locale: preferences.locale,
@@ -98,6 +106,7 @@ class _SplashGate extends StatefulWidget {
 
 class _SplashGateState extends State<_SplashGate> {
   bool _showSplash = true;
+  StreamSubscription<AuthState>? _passwordRecoverySub;
 
   @override
   void initState() {
@@ -105,6 +114,31 @@ class _SplashGateState extends State<_SplashGate> {
     Future.delayed(const Duration(milliseconds: 1600), () {
       if (mounted) setState(() => _showSplash = false);
     });
+
+    // Kullanıcı e-postasındaki şifre sıfırlama bağlantısına tıklayıp
+    // uygulamaya geri döndüğünde (bkz. kAuthCallbackUrl) supabase_flutter
+    // bu deep link'i otomatik yakalar ve geçici bir "recovery" oturumu
+    // kurup bu olayı fırlatır. Aşağıdaki StreamBuilder oturumu görüp
+    // doğrudan Ana Sayfa'yı göstereceği için, kullanıcının yeni şifresini
+    // hiç belirlemeden içeri düşmemesi adına burada ayrıca dinleyip
+    // ResetPasswordPage'i üstüne açıyoruz.
+    _passwordRecoverySub = Supabase.instance.client.auth.onAuthStateChange
+        .listen((data) {
+          if (data.event == AuthChangeEvent.passwordRecovery) {
+            rootNavigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (_) => const ResetPasswordPage(),
+                fullscreenDialog: true,
+              ),
+            );
+          }
+        });
+  }
+
+  @override
+  void dispose() {
+    _passwordRecoverySub?.cancel();
+    super.dispose();
   }
 
   @override

@@ -1661,6 +1661,56 @@ class AppLocalizationsAr extends AppLocalizations {
       'هذا البريد الإلكتروني مسجل بالفعل. جرّب تسجيل الدخول بدلاً من ذلك.';
 
   @override
+  String get emailNotConfirmedError =>
+      'لم يتم تأكيد البريد الإلكتروني لهذا الحساب بعد. يرجى التحقق من بريدك الوارد.';
+
+  @override
+  String get resendConfirmationEmail => 'إعادة الإرسال';
+
+  @override
+  String get confirmationEmailResent =>
+      'تم إعادة إرسال بريد التأكيد — يرجى التحقق من بريدك الوارد.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'تعذّرت إعادة إرسال بريد التأكيد. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get enterEmailAddress => 'يرجى إدخال بريدك الإلكتروني.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'هل نسيت كلمة المرور؟';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.';
+
+  @override
+  String get sendResetLink => 'إرسال رابط إعادة التعيين';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين.';
+
+  @override
+  String get passwordUpdatedSuccess => 'تم تحديث كلمة المرور الخاصة بك.';
+
+  @override
+  String get resetPasswordPageTitle => 'تعيين كلمة مرور جديدة';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'اختر كلمة مرور جديدة للعودة إلى حسابك.';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get updatePassword => 'تحديث كلمة المرور';
+
+  @override
   String get loginWith => 'أو قم بتسجيل الدخول باستخدام';
 
   @override

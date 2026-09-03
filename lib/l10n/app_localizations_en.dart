@@ -1652,7 +1652,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountCreatedPleaseLogIn =>
-      'Account created — please log in with your new email and password.';
+      'Account created — check your inbox and tap the confirmation link, then log in.';
 
   @override
   String authError(String error) {
@@ -1662,6 +1662,56 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get emailAlreadyRegistered =>
       'This email is already registered. Try logging in instead.';
+
+  @override
+  String get emailNotConfirmedError =>
+      'This account\'s email hasn\'t been confirmed yet. Please check your inbox.';
+
+  @override
+  String get resendConfirmationEmail => 'Resend';
+
+  @override
+  String get confirmationEmailResent =>
+      'Confirmation email resent — please check your inbox.';
+
+  @override
+  String get confirmationEmailResendFailed =>
+      'Couldn\'t resend the confirmation email. Please try again.';
+
+  @override
+  String get enterEmailAddress => 'Please enter your email address.';
+
+  @override
+  String get forgotPasswordSheetTitle => 'Forgot your password?';
+
+  @override
+  String get forgotPasswordSheetBody =>
+      'Enter your email and we\'ll send you a link to reset your password.';
+
+  @override
+  String get sendResetLink => 'Send Reset Link';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords don\'t match.';
+
+  @override
+  String get passwordUpdatedSuccess => 'Your password has been updated.';
+
+  @override
+  String get resetPasswordPageTitle => 'Set New Password';
+
+  @override
+  String get resetPasswordPageSubtitle =>
+      'Choose a new password to get back into your account.';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get updatePassword => 'Update Password';
 
   @override
   String get loginWith => 'Or log in with';
