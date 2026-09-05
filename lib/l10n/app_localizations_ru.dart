@@ -1700,6 +1700,35 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось повторно отправить письмо с подтверждением. Попробуйте ещё раз.';
 
   @override
+  String get verifyEmailTitle => 'Подтвердите почту';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'Мы отправили 6-значный код на $email. Введите его ниже, чтобы активировать аккаунт.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Подтвердить и продолжить';
+
+  @override
+  String get verifyEmailResend => 'Отправить код снова';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Повтор через $seconds с';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'Код неверен или истёк. Попробуйте ещё раз.';
+
+  @override
+  String get verifyEmailEnterCode => 'Введите 6-значный код.';
+
+  @override
+  String get verifyEmailSuccess => 'Ваша почта подтверждена!';
+
+  @override
   String get enterEmailAddress => 'Введите свой адрес электронной почты.';
 
   @override

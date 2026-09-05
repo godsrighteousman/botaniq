@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Botaniq — Privacy Policy</title>
+<style>
+  :root {
+    --bg: #f4f7f3;
+    --card: #ffffff;
+    --text: #1c2a1e;
+    --muted: #5a6b5c;
+    --accent: #1f7a4d;
+    --border: #e1e8e1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+  }
+  h1 { font-size: 28px; margin: 0; }
+  .updated { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  h2 { font-size: 18px; margin-top: 0; }
+  p, li { color: var(--muted); }
+  a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .nav { margin-bottom: 32px; }
+  .nav a { margin-right: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+  th { color: var(--text); }
+  .langs { margin-left: auto; display: flex; gap: 6px; }
+  .langs button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .langs button:hover { border-color: var(--accent); color: var(--accent); }
+  .langs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🌱</div>
+      <h1>Botaniq</h1>
+      <div class="langs">
+        <button type="button" data-lang-btn="tr">TR</button>
+        <button type="button" data-lang-btn="en">EN</button>
+      </div>
+    </header>
+
+    <div class="nav">
+      <a href="index.html" data-i18n="nav.support">Support</a>
+      <a href="privacy.html" data-i18n="nav.privacy">Privacy Policy</a>
+    </div>
+
+    <p class="updated" data-i18n="privacy.updated">Last updated: September 2, 2026</p>
+
+    <div class="card">
+      <h2 data-i18n="privacy.overview">Overview</h2>
+      <p data-i18n="privacy.overviewBody">This Privacy Policy explains what information Botaniq ("we", "us") collects when you use the Botaniq mobile app, how we use it, and the choices you have. Botaniq is a plant care app that helps you identify plants, get AI-assisted health diagnoses, and follow personalized care reminders.</p>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="privacy.collect">Information we collect</h2>
+      <table>
+        <tr><th data-i18n="privacy.thCategory">Category</th><th data-i18n="privacy.thUse">What it's used for</th></tr>
+        <tr><td data-i18n="privacy.rowAccount">Account info (email, name)</td><td data-i18n="privacy.rowAccountUse">Creating and securing your account, sign-in via email, Google, or Apple</td></tr>
+        <tr><td data-i18n="privacy.rowPhotos">Photos you take or upload</td><td data-i18n="privacy.rowPhotosUse">Identifying plants and diagnosing health issues via AI analysis</td></tr>
+        <tr><td data-i18n="privacy.rowLocation">Location (while app is in use)</td><td data-i18n="privacy.rowLocationUse">Providing weather-aware, local care recommendations — only with your permission</td></tr>
+        <tr><td data-i18n="privacy.rowCamera">Camera &amp; microphone</td><td data-i18n="privacy.rowCameraUse">Only used when you actively scan a plant or record a video within the app</td></tr>
+        <tr><td data-i18n="privacy.rowSub">Subscription &amp; purchase data</td><td data-i18n="privacy.rowSubUse">Processing and managing your Botaniq Premium subscription</td></tr>
+        <tr><td data-i18n="privacy.rowUsage">Usage data</td><td data-i18n="privacy.rowUsageUse">Understanding app performance and improving features</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="privacy.third">Third-party services we use</h2>
+      <p data-i18n="privacy.thirdBody">We rely on trusted third-party providers to operate Botaniq. Data may be shared with them strictly to provide the service:</p>
+      <ul>
+        <li data-i18n-html="privacy.thirdSupabase"><strong>Supabase</strong> — backend infrastructure, authentication, and data storage</li>
+        <li data-i18n-html="privacy.thirdOpenAI"><strong>OpenAI</strong> — analyzing plant photos and powering the AI Plant Doctor chat</li>
+        <li data-i18n-html="privacy.thirdRC"><strong>RevenueCat</strong> — managing subscriptions and in-app purchases</li>
+        <li data-i18n-html="privacy.thirdAuth"><strong>Google Sign-In / Sign in with Apple</strong> — optional authentication methods</li>
+      </ul>
+      <p data-i18n="privacy.thirdNote">These providers process data on our behalf and are not permitted to use it for their own purposes.</p>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="privacy.retention">Data retention &amp; deletion</h2>
+      <p data-i18n="privacy.retentionBody">We retain your data for as long as your account is active. You can permanently delete your account and associated data at any time from Botaniq's Settings screen inside the app.</p>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="privacy.choices">Your choices</h2>
+      <ul>
+        <li data-i18n="privacy.choice1">Camera, photo library, location, and microphone permissions can be managed anytime in your device's Settings.</li>
+        <li data-i18n="privacy.choice2">You can cancel your subscription anytime via Settings → [Your Name] → Subscriptions on your device.</li>
+        <li data-i18n="privacy.choice3">You can permanently delete your account and its data directly within the app.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="privacy.contact">Contact us</h2>
+      <p><span data-i18n="privacy.contactBody">If you have questions about this Privacy Policy or how your data is handled, contact us at</span> <a href="mailto:m.ertasfaruk@gmail.com">m.ertasfaruk@gmail.com</a>.</p>
+    </div>
+
+    <footer>
+      © 2026 Muhammed Faruk Ertaş — Botaniq
+    </footer>
+  </div>
+  <script src="i18n.js"></script>
+</body>
+</html>

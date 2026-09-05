@@ -1676,6 +1676,35 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّرت إعادة إرسال بريد التأكيد. يرجى المحاولة مرة أخرى.';
 
   @override
+  String get verifyEmailTitle => 'تأكيد بريدك الإلكتروني';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'أرسلنا رمزًا من 6 أرقام إلى $email. أدخله أدناه لتفعيل حسابك.';
+  }
+
+  @override
+  String get verifyEmailButton => 'تأكيد ومتابعة';
+
+  @override
+  String get verifyEmailResend => 'إعادة إرسال الرمز';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'إعادة الإرسال خلال $seconds ثانية';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'الرمز غير صحيح أو انتهت صلاحيته. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get verifyEmailEnterCode => 'يرجى إدخال الرمز المكوّن من 6 أرقام.';
+
+  @override
+  String get verifyEmailSuccess => 'تم تأكيد بريدك الإلكتروني!';
+
+  @override
   String get enterEmailAddress => 'يرجى إدخال بريدك الإلكتروني.';
 
   @override

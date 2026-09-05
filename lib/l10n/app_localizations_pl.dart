@@ -1699,6 +1699,35 @@ class AppLocalizationsPl extends AppLocalizations {
       'Nie udało się ponownie wysłać wiadomości potwierdzającej. Spróbuj ponownie.';
 
   @override
+  String get verifyEmailTitle => 'Potwierdź swój e-mail';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'Wysłaliśmy 6-cyfrowy kod na $email. Wpisz go poniżej, aby aktywować konto.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Potwierdź i kontynuuj';
+
+  @override
+  String get verifyEmailResend => 'Wyślij kod ponownie';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Wyślij ponownie za ${seconds}s';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'Kod jest nieprawidłowy lub wygasł. Spróbuj ponownie.';
+
+  @override
+  String get verifyEmailEnterCode => 'Wpisz 6-cyfrowy kod.';
+
+  @override
+  String get verifyEmailSuccess => 'Twój e-mail został potwierdzony!';
+
+  @override
   String get enterEmailAddress => 'Podaj swój adres e-mail.';
 
   @override

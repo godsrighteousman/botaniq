@@ -1679,6 +1679,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t resend the confirmation email. Please try again.';
 
   @override
+  String get verifyEmailTitle => 'Verify your email';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'We sent a 6-digit code to $email. Enter it below to activate your account.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Verify and continue';
+
+  @override
+  String get verifyEmailResend => 'Resend code';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'That code is incorrect or has expired. Please try again.';
+
+  @override
+  String get verifyEmailEnterCode => 'Please enter the 6-digit code.';
+
+  @override
+  String get verifyEmailSuccess => 'Your email is verified!';
+
+  @override
   String get enterEmailAddress => 'Please enter your email address.';
 
   @override

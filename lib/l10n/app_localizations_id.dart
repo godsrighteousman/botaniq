@@ -1689,6 +1689,35 @@ class AppLocalizationsId extends AppLocalizations {
       'Gagal mengirim ulang email konfirmasi. Silakan coba lagi.';
 
   @override
+  String get verifyEmailTitle => 'Verifikasi emailmu';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'Kami mengirim kode 6 digit ke $email. Masukkan di bawah untuk mengaktifkan akunmu.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Verifikasi dan lanjutkan';
+
+  @override
+  String get verifyEmailResend => 'Kirim ulang kode';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Kirim ulang dalam ${seconds}d';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'Kode salah atau sudah kedaluwarsa. Silakan coba lagi.';
+
+  @override
+  String get verifyEmailEnterCode => 'Silakan masukkan kode 6 digit.';
+
+  @override
+  String get verifyEmailSuccess => 'Emailmu terverifikasi!';
+
+  @override
   String get enterEmailAddress => 'Silakan masukkan alamat emailmu.';
 
   @override

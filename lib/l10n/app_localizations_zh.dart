@@ -1613,6 +1613,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmationEmailResendFailed => '无法重新发送验证邮件，请重试。';
 
   @override
+  String get verifyEmailTitle => '验证你的邮箱';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return '我们已向 $email 发送了 6 位验证码。在下方输入以激活你的账号。';
+  }
+
+  @override
+  String get verifyEmailButton => '验证并继续';
+
+  @override
+  String get verifyEmailResend => '重新发送验证码';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return '$seconds 秒后可重发';
+  }
+
+  @override
+  String get verifyEmailInvalidCode => '验证码错误或已过期，请重试。';
+
+  @override
+  String get verifyEmailEnterCode => '请输入 6 位验证码。';
+
+  @override
+  String get verifyEmailSuccess => '你的邮箱已验证！';
+
+  @override
   String get enterEmailAddress => '请输入你的邮箱地址。';
 
   @override
@@ -3525,6 +3553,34 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get confirmationEmailResendFailed => '無法重新傳送驗證郵件，請再試一次。';
+
+  @override
+  String get verifyEmailTitle => '驗證你的電子郵件';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return '我們已向 $email 傳送 6 位數驗證碼。請在下方輸入以啟用你的帳號。';
+  }
+
+  @override
+  String get verifyEmailButton => '驗證並繼續';
+
+  @override
+  String get verifyEmailResend => '重新傳送驗證碼';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return '$seconds 秒後可重寄';
+  }
+
+  @override
+  String get verifyEmailInvalidCode => '驗證碼錯誤或已過期，請再試一次。';
+
+  @override
+  String get verifyEmailEnterCode => '請輸入 6 位數驗證碼。';
+
+  @override
+  String get verifyEmailSuccess => '你的電子郵件已驗證！';
 
   @override
   String get enterEmailAddress => '請輸入你的電子郵件地址。';

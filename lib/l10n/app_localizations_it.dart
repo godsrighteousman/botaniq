@@ -1699,6 +1699,34 @@ class AppLocalizationsIt extends AppLocalizations {
       'Impossibile inviare di nuovo l\'email di conferma. Riprova.';
 
   @override
+  String get verifyEmailTitle => 'Verifica la tua email';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'Abbiamo inviato un codice di 6 cifre a $email. Inseriscilo qui sotto per attivare il tuo account.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Verifica e continua';
+
+  @override
+  String get verifyEmailResend => 'Invia di nuovo il codice';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Invia di nuovo tra ${seconds}s';
+  }
+
+  @override
+  String get verifyEmailInvalidCode => 'Codice errato o scaduto. Riprova.';
+
+  @override
+  String get verifyEmailEnterCode => 'Inserisci il codice di 6 cifre.';
+
+  @override
+  String get verifyEmailSuccess => 'La tua email è verificata!';
+
+  @override
   String get enterEmailAddress => 'Inserisci il tuo indirizzo email.';
 
   @override

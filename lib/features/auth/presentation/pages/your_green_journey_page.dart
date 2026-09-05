@@ -265,7 +265,10 @@ class _YourGreenJourneyPageState extends State<YourGreenJourneyPage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
                 gradient: LinearGradient(
-                  colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
+                  colors: [
+                    Colors.black.withValues(alpha: 0.8),
+                    Colors.transparent,
+                  ],
                   begin: AlignmentDirectional.centerStart,
                   end: AlignmentDirectional.centerEnd,
                   stops: const [0.0, 0.8],

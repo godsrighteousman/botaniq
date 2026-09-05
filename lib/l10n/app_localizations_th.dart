@@ -1672,6 +1672,35 @@ class AppLocalizationsTh extends AppLocalizations {
       'ไม่สามารถส่งอีเมลยืนยันอีกครั้งได้ กรุณาลองอีกครั้ง';
 
   @override
+  String get verifyEmailTitle => 'ยืนยันอีเมลของคุณ';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'เราส่งรหัส 6 หลักไปที่ $email กรอกรหัสด้านล่างเพื่อเปิดใช้งานบัญชีของคุณ';
+  }
+
+  @override
+  String get verifyEmailButton => 'ยืนยันและดำเนินการต่อ';
+
+  @override
+  String get verifyEmailResend => 'ส่งรหัสอีกครั้ง';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'ส่งอีกครั้งใน $seconds วินาที';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'รหัสไม่ถูกต้องหรือหมดอายุแล้ว กรุณาลองใหม่';
+
+  @override
+  String get verifyEmailEnterCode => 'กรุณากรอกรหัส 6 หลัก';
+
+  @override
+  String get verifyEmailSuccess => 'ยืนยันอีเมลของคุณแล้ว!';
+
+  @override
   String get enterEmailAddress => 'กรุณากรอกอีเมลของคุณ';
 
   @override

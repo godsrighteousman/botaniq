@@ -1695,6 +1695,35 @@ class AppLocalizationsNl extends AppLocalizations {
       'De bevestigingsmail kon niet opnieuw worden verstuurd. Probeer het nogmaals.';
 
   @override
+  String get verifyEmailTitle => 'Bevestig je e-mail';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'We hebben een 6-cijferige code naar $email gestuurd. Voer die hieronder in om je account te activeren.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Bevestigen en doorgaan';
+
+  @override
+  String get verifyEmailResend => 'Code opnieuw versturen';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Opnieuw versturen over ${seconds}s';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'Deze code is onjuist of verlopen. Probeer het opnieuw.';
+
+  @override
+  String get verifyEmailEnterCode => 'Voer de 6-cijferige code in.';
+
+  @override
+  String get verifyEmailSuccess => 'Je e-mail is bevestigd!';
+
+  @override
   String get enterEmailAddress => 'Vul je e-mailadres in.';
 
   @override

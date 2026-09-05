@@ -7,7 +7,9 @@ import '../../../../core/services/auth_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'reset_password_page.dart';
 import 'sign_up_page.dart';
+import 'verify_email_page.dart';
 
 class LoginPage extends StatefulWidget {
   /// Kayıt ol akışından geldiğimizde, kullanıcıya hesabının oluşturulduğunu
@@ -195,21 +197,16 @@ class _LoginPageState extends State<LoginPage> {
                           if (mounted) {
                             if (error is AuthException &&
                                 error.code == 'email_not_confirmed') {
-                              // Hesap var ama e-posta henüz onaylanmamış —
-                              // başkasının e-postasıyla kayıt olunmasını
-                              // engellemek için Supabase tarafında zorunlu
-                              // kıldığımız onay adımı. Kullanıcıya jenerik
-                              // İngilizce gotrue mesajı yerine anlaşılır bir
-                              // metin ve onay e-postasını tekrar gönderme
-                              // seçeneği sunuyoruz.
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.emailNotConfirmedError),
-                                  action: SnackBarAction(
-                                    label: l10n.resendConfirmationEmail,
-                                    onPressed: () =>
-                                        _resendConfirmationEmail(email),
-                                  ),
+                              // Hesap var ama e-posta henüz onaylanmamış.
+                              // Kullanıcıyı bir uyarı mesajıyla baş başa
+                              // bırakmak yerine doğrudan kod girme ekranına
+                              // alıyoruz; kodu yoksa orada tekrar
+                              // isteyebiliyor.
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      VerifyEmailPage(email: email),
                                 ),
                               );
                               return;
@@ -410,27 +407,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _resendConfirmationEmail(String email) async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      await Supabase.instance.client.auth
-          .resend(type: OtpType.signup, email: email)
-          .timeout(const Duration(seconds: 10));
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.confirmationEmailResent)));
-      }
-    } catch (error) {
-      debugPrint('Resend confirmation email failed: $error');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.confirmationEmailResendFailed)),
-        );
-      }
-    }
-  }
-
   /// "Şifremi Unuttum" — e-posta adresini sorup Supabase'in şifre sıfırlama
   /// bağlantısını göndermesini tetikler. Bağlantı [kAuthCallbackUrl]'e
   /// yönlendirilir; kullanıcı ona tıklayınca uygulama tekrar açılır ve
@@ -465,6 +441,14 @@ class _LoginPageState extends State<LoginPage> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(l10n.settingsPasswordResetSent)),
+                  );
+                  // Kodu girip yeni şifreyi belirleyeceği ekrana geçiyoruz;
+                  // e-postadaki bağlantıya tıklamak zorunda değil.
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ResetPasswordPage(email: email),
+                    ),
                   );
                 }
               } catch (error) {

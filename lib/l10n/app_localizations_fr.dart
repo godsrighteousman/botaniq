@@ -1706,6 +1706,35 @@ class AppLocalizationsFr extends AppLocalizations {
       'Impossible de renvoyer l\'e-mail de confirmation. Veuillez réessayer.';
 
   @override
+  String get verifyEmailTitle => 'Vérifiez votre e-mail';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'Nous avons envoyé un code à 6 chiffres à $email. Saisissez-le ci-dessous pour activer votre compte.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Vérifier et continuer';
+
+  @override
+  String get verifyEmailResend => 'Renvoyer le code';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Renvoyer dans ${seconds}s';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'Ce code est incorrect ou a expiré. Veuillez réessayer.';
+
+  @override
+  String get verifyEmailEnterCode => 'Veuillez saisir le code à 6 chiffres.';
+
+  @override
+  String get verifyEmailSuccess => 'Votre e-mail est vérifié !';
+
+  @override
   String get enterEmailAddress => 'Veuillez saisir votre adresse e-mail.';
 
   @override

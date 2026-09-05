@@ -3109,6 +3109,54 @@ abstract class AppLocalizations {
   /// **'Couldn\'t resend the confirmation email. Please try again.'**
   String get confirmationEmailResendFailed;
 
+  /// No description provided for @verifyEmailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyEmailTitle;
+
+  /// No description provided for @verifyEmailSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {email}. Enter it below to activate your account.'**
+  String verifyEmailSubtitle(String email);
+
+  /// No description provided for @verifyEmailButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify and continue'**
+  String get verifyEmailButton;
+
+  /// No description provided for @verifyEmailResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get verifyEmailResend;
+
+  /// No description provided for @verifyEmailResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String verifyEmailResendIn(int seconds);
+
+  /// No description provided for @verifyEmailInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is incorrect or has expired. Please try again.'**
+  String get verifyEmailInvalidCode;
+
+  /// No description provided for @verifyEmailEnterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the 6-digit code.'**
+  String get verifyEmailEnterCode;
+
+  /// No description provided for @verifyEmailSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your email is verified!'**
+  String get verifyEmailSuccess;
+
   /// No description provided for @enterEmailAddress.
   ///
   /// In en, this message translates to:

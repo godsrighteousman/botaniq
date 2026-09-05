@@ -1697,6 +1697,35 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível reenviar o e-mail de confirmação. Tenta novamente.';
 
   @override
+  String get verifyEmailTitle => 'Confirma o teu e-mail';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'Enviámos um código de 6 dígitos para $email. Introdu-lo abaixo para ativar a tua conta.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Confirmar e continuar';
+
+  @override
+  String get verifyEmailResend => 'Reenviar código';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Reenviar em ${seconds}s';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'O código está incorreto ou expirou. Tenta novamente.';
+
+  @override
+  String get verifyEmailEnterCode => 'Introduz o código de 6 dígitos.';
+
+  @override
+  String get verifyEmailSuccess => 'O teu e-mail foi confirmado!';
+
+  @override
   String get enterEmailAddress => 'Introduz o teu endereço de e-mail.';
 
   @override
@@ -2713,6 +2742,35 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get confirmationEmailResendFailed =>
       'Não foi possível reenviar o e-mail de confirmação. Tente novamente.';
+
+  @override
+  String get verifyEmailTitle => 'Confirme seu e-mail';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return 'Enviamos um código de 6 dígitos para $email. Digite-o abaixo para ativar sua conta.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Confirmar e continuar';
+
+  @override
+  String get verifyEmailResend => 'Reenviar código';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return 'Reenviar em ${seconds}s';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'O código está incorreto ou expirou. Tente novamente.';
+
+  @override
+  String get verifyEmailEnterCode => 'Digite o código de 6 dígitos.';
+
+  @override
+  String get verifyEmailSuccess => 'Seu e-mail foi confirmado!';
 
   @override
   String get enterEmailAddress => 'Digite seu endereço de e-mail.';

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Botaniq — Support</title>
+<style>
+  :root {
+    --bg: #f4f7f3;
+    --card: #ffffff;
+    --text: #1c2a1e;
+    --muted: #5a6b5c;
+    --accent: #1f7a4d;
+    --border: #e1e8e1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+  }
+  h1 { font-size: 28px; margin: 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  h2 { font-size: 19px; margin-top: 0; }
+  p { color: var(--muted); }
+  a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .nav { margin-bottom: 32px; }
+  .nav a { margin-right: 20px; }
+  .langs { margin-left: auto; display: flex; gap: 6px; }
+  .langs button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .langs button:hover { border-color: var(--accent); color: var(--accent); }
+  .langs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🌱</div>
+      <h1>Botaniq</h1>
+      <div class="langs">
+        <button type="button" data-lang-btn="tr">TR</button>
+        <button type="button" data-lang-btn="en">EN</button>
+      </div>
+    </header>
+
+    <div class="nav">
+      <a href="index.html" data-i18n="nav.support">Support</a>
+      <a href="privacy.html" data-i18n="nav.privacy">Privacy Policy</a>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="support.title">Need help with Botaniq?</h2>
+      <p data-i18n="support.p1">Botaniq is your smart plant care companion — identify plants, get AI-powered health diagnoses, and follow personalized care schedules.</p>
+      <p data-i18n="support.p2">If you're running into an issue, have feedback, or need help with your account or subscription, reach out and we'll get back to you as soon as we can.</p>
+      <p>📧 <a href="mailto:m.ertasfaruk@gmail.com">m.ertasfaruk@gmail.com</a></p>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="support.topics">Common topics</h2>
+      <p data-i18n-html="support.billing"><strong>Subscription &amp; billing</strong> — Manage or cancel your Botaniq Premium subscription anytime from your device's Settings → [Your Name] → Subscriptions.</p>
+      <p data-i18n-html="support.deletion"><strong>Account deletion</strong> — You can permanently delete your account, and everything stored with it, from Botaniq's Settings screen inside the app.</p>
+      <p data-i18n-html="support.accuracy"><strong>Plant identification accuracy</strong> — For best results, photograph the whole plant in good lighting, following the in-app guidance.</p>
+    </div>
+
+    <footer>
+      © 2026 Muhammed Faruk Ertaş — Botaniq
+    </footer>
+  </div>
+  <script src="i18n.js"></script>
+</body>
+</html>

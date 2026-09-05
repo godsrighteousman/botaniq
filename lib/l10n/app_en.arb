@@ -992,6 +992,28 @@
   "resendConfirmationEmail": "Resend",
   "confirmationEmailResent": "Confirmation email resent — please check your inbox.",
   "confirmationEmailResendFailed": "Couldn't resend the confirmation email. Please try again.",
+  "verifyEmailTitle": "Verify your email",
+  "verifyEmailSubtitle": "We sent a 6-digit code to {email}. Enter it below to activate your account.",
+  "@verifyEmailSubtitle": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyEmailButton": "Verify and continue",
+  "verifyEmailResend": "Resend code",
+  "verifyEmailResendIn": "Resend in {seconds}s",
+  "@verifyEmailResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "verifyEmailInvalidCode": "That code is incorrect or has expired. Please try again.",
+  "verifyEmailEnterCode": "Please enter the 6-digit code.",
+  "verifyEmailSuccess": "Your email is verified!",
   "enterEmailAddress": "Please enter your email address.",
   "forgotPasswordSheetTitle": "Forgot your password?",
   "forgotPasswordSheetBody": "Enter your email and we'll send you a link to reset your password.",

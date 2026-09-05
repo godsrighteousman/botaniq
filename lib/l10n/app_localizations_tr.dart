@@ -1679,6 +1679,35 @@ class AppLocalizationsTr extends AppLocalizations {
       'Onay e-postası tekrar gönderilemedi. Lütfen tekrar dene.';
 
   @override
+  String get verifyEmailTitle => 'E-postanı doğrula';
+
+  @override
+  String verifyEmailSubtitle(String email) {
+    return '$email adresine 6 haneli bir kod gönderdik. Hesabını etkinleştirmek için kodu aşağıya gir.';
+  }
+
+  @override
+  String get verifyEmailButton => 'Doğrula ve devam et';
+
+  @override
+  String get verifyEmailResend => 'Kodu tekrar gönder';
+
+  @override
+  String verifyEmailResendIn(int seconds) {
+    return '$seconds sn sonra tekrar gönder';
+  }
+
+  @override
+  String get verifyEmailInvalidCode =>
+      'Kod hatalı ya da süresi dolmuş. Lütfen tekrar dene.';
+
+  @override
+  String get verifyEmailEnterCode => 'Lütfen 6 haneli kodu gir.';
+
+  @override
+  String get verifyEmailSuccess => 'E-postan doğrulandı!';
+
+  @override
   String get enterEmailAddress => 'Lütfen e-posta adresini gir.';
 
   @override

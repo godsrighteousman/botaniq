@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_page.dart';
+import 'verify_email_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -202,33 +203,18 @@ class _SignUpPageState extends State<SignUpPage> {
                             _finishAuthentication();
                           } else if (res.user != null) {
                             // "Confirm email" açıkken normal yol budur: hesap
-                            // oluşur ama oturum dönmez, kullanıcı e-postasına
-                            // gelen onay bağlantısına tıklamadan giriş
-                            // yapamaz (bkz. login_page.dart — 'email_not_confirmed').
-                            // Burada kullanıcıyı bilgilendirip giriş ekranına
-                            // yönlendiriyoruz (e-postası önceden dolu gelsin
-                            // diye taşıyoruz). signUp() ile aynı nedenle bu
-                            // çağrıya da bir zaman aşımı koyuyoruz — yoksa ağ
-                            // o an koparsa buton sonsuza dek "yükleniyor"da
-                            // takılı kalabilir.
-                            try {
-                              await Supabase.instance.client.auth
-                                  .signOut(scope: SignOutScope.local)
-                                  .timeout(const Duration(seconds: 10));
-                            } catch (_) {
-                              // Yerel oturumu kapatma bir ağ hatasına takılsa
-                              // bile hesap zaten oluşturuldu — kullanıcıyı
-                              // giriş ekranına yönlendirmeye devam ediyoruz.
-                            }
-
+                            // oluşur ama oturum dönmez. Kullanıcıyı giriş
+                            // ekranına geri atıp "e-postanı kontrol et" demek
+                            // yerine, doğrudan kod girme ekranına alıyoruz —
+                            // akış kesintisiz devam ediyor ve e-postadaki
+                            // bağlantının mobilde uygulamaya dönüp dönmemesine
+                            // hiç bağlı kalmıyoruz.
                             if (mounted) {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LoginPage(
-                                    showAccountCreatedMessage: true,
-                                    initialEmail: email,
-                                  ),
+                                  builder: (context) =>
+                                      VerifyEmailPage(email: email),
                                 ),
                               );
                             }
