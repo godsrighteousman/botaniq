@@ -412,12 +412,16 @@ class _LoginPageState extends State<LoginPage> {
   /// yönlendirilir; kullanıcı ona tıklayınca uygulama tekrar açılır ve
   /// main.dart'taki `passwordRecovery` dinleyicisi onu [ResetPasswordPage]'e
   /// yönlendirir.
-  void _showForgotPasswordSheet() {
+  Future<void> _showForgotPasswordSheet() async {
     final l10n = AppLocalizations.of(context)!;
     final emailController = TextEditingController(text: _emailController.text);
     bool isSending = false;
 
-    showModalBottomSheet<void>(
+    // Sheet kapanana kadar BEKLİYORUZ, sonra yönlendiriyoruz. Sheet'i
+    // kapatıp aynı karede yeni sayfa açmak, kapanma animasyonuyla açılma
+    // animasyonunu çakıştırıyor ve modal perdesi ekranda asılı kalarak
+    // dokunuşları yutuyordu — uygulama donmuş gibi görünüyordu.
+    final sentEmail = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -425,6 +429,7 @@ class _LoginPageState extends State<LoginPage> {
         return StatefulBuilder(
           builder: (sheetContext, setSheetState) {
             Future<void> submit() async {
+              FocusScope.of(sheetContext).unfocus();
               final email = emailController.text.trim();
               if (email.isEmpty) {
                 ScaffoldMessenger.of(
@@ -437,19 +442,8 @@ class _LoginPageState extends State<LoginPage> {
                 await Supabase.instance.client.auth
                     .resetPasswordForEmail(email, redirectTo: kAuthCallbackUrl)
                     .timeout(const Duration(seconds: 10));
-                if (sheetContext.mounted) Navigator.pop(sheetContext);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.settingsPasswordResetSent)),
-                  );
-                  // Kodu girip yeni şifreyi belirleyeceği ekrana geçiyoruz;
-                  // e-postadaki bağlantıya tıklamak zorunda değil.
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ResetPasswordPage(email: email),
-                    ),
-                  );
+                if (sheetContext.mounted) {
+                  Navigator.pop(sheetContext, email);
                 }
               } catch (error) {
                 debugPrint('Password reset request failed: $error');
@@ -460,8 +454,11 @@ class _LoginPageState extends State<LoginPage> {
                   ScaffoldMessenger.of(sheetContext).showSnackBar(
                     SnackBar(content: Text(l10n.authError(message))),
                   );
-                  setSheetState(() => isSending = false);
                 }
+                // Hata hangi koşulda olursa olsun düğme yeniden
+                // denenebilir hale gelmeli; aksi halde dönen gösterge
+                // ekranda takılı kalıyor.
+                setSheetState(() => isSending = false);
               }
             }
 
@@ -559,7 +556,22 @@ class _LoginPageState extends State<LoginPage> {
           },
         );
       },
-    ).whenComplete(emailController.dispose);
+    );
+
+    emailController.dispose();
+    if (!mounted || sentEmail == null) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.settingsPasswordResetSent)));
+    // Kodu girip yeni şifreyi belirleyeceği ekrana geçiyoruz; e-postadaki
+    // bağlantıya tıklamak zorunda değil.
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResetPasswordPage(email: sentEmail),
+      ),
+    );
   }
 
   void _finishAuthentication() {

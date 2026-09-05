@@ -62,7 +62,16 @@ class _OtpCodeFieldState extends State<OtpCodeField> {
     // bir hane silip yeniden yazdığında yeniden tetiklenir.
     if (value.length == widget.length && value != _lastCompleted) {
       _lastCompleted = value;
-      widget.onCompleted?.call(value);
+      // Bir kare sonraya bırakıyoruz: bu geri çağrı metin değişikliği
+      // bildirimi içinden geliyor ve çağıran ekran doğrulamaya başlarken
+      // setState çağırıyor. Aynı karede yapılırsa "build sırasında
+      // setState" istisnası oluşabiliyor.
+      final callback = widget.onCompleted;
+      if (callback != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) callback(value);
+        });
+      }
     } else if (value.length < widget.length) {
       _lastCompleted = '';
     }
