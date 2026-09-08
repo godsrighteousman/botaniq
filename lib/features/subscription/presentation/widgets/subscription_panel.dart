@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/config/legal_config.dart';
 import '../../../profile/presentation/pages/terms_page.dart';
 import '../controllers/subscription_controller.dart';
 
@@ -938,14 +939,20 @@ class _RestoreAndLegal extends StatelessWidget {
           alignment: WrapAlignment.center,
           spacing: 8,
           children: [
-            _LegalLink(label: l10n.subscriptionTermsLink),
+            _LegalLink(
+              label: l10n.subscriptionTermsLink,
+              destination: _LegalDestination.terms,
+            ),
             Text(
               '•',
               style: GoogleFonts.inter(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            _LegalLink(label: l10n.subscriptionPrivacyLink),
+            _LegalLink(
+              label: l10n.subscriptionPrivacyLink,
+              destination: _LegalDestination.privacy,
+            ),
           ],
         ),
       ],
@@ -953,18 +960,38 @@ class _RestoreAndLegal extends StatelessWidget {
   }
 }
 
+enum _LegalDestination { terms, privacy }
+
 class _LegalLink extends StatelessWidget {
-  const _LegalLink({required this.label});
+  const _LegalLink({required this.label, required this.destination});
 
   final String label;
+  final _LegalDestination destination;
+
+  Future<void> _open(BuildContext context) async {
+    if (destination == _LegalDestination.terms) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const TermsPage()),
+      );
+      return;
+    }
+
+    final uri = Uri.parse(LegalConfig.privacyUrl);
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    // Tarayıcı açılamazsa kullanıcı yine de metne erişebilsin.
+    if (!opened && context.mounted) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const TermsPage()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const TermsPage()),
-      ),
+      onTap: () => _open(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Text(

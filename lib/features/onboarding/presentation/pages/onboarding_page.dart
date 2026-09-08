@@ -5,6 +5,7 @@ import 'package:botaniq/l10n/app_localizations.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/pages/login_options_page.dart';
 import '../../../localization/presentation/widgets/language_picker_sheet.dart';
+import '../../../profile/presentation/pages/terms_page.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -322,14 +323,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ],
                       ),
                     ] else ...[
-                      Text(
-                        l10n.onboardingAgreement,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          color: AppColors.textSecondary.withValues(alpha: 0.6),
-                          fontSize: 10,
-                          height: 1.5,
-                          letterSpacing: 0.5,
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TermsPage(),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Text(
+                            l10n.onboardingAgreement,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              color: AppColors.textSecondary.withValues(
+                                alpha: 0.6,
+                              ),
+                              fontSize: 10,
+                              height: 1.5,
+                              letterSpacing: 0.5,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
                         ),
                       ),
                     ],
