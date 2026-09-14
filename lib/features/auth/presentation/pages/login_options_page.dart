@@ -110,6 +110,7 @@ class _LoginOptionsPageState extends State<LoginOptionsPage> {
                                   'assets/images/botaniq_app_icon_v2.png',
                                   fit: BoxFit.cover,
                                   matchTextDirection: false,
+                                  cacheWidth: 256,
                                 ),
                               ),
                             ),

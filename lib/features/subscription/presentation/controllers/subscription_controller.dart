@@ -49,6 +49,14 @@ class SubscriptionController extends ChangeNotifier
   String? _lastErrorDetail;
   bool _isPurchasing = false;
   bool _isRestoring = false;
+  bool _isDisposed = false;
+  int _autoRetryCount = 0;
+
+  /// İlk yükleme başarısız olduğunda kaç kez sessizce tekrar deneneceği.
+  /// Mağaza/backend dalgalanmaları çoğunlukla saniyeler içinde düzelir; bu
+  /// yüzden kullanıcıyı "Tekrar dene" butonuna mahkûm etmek yerine kendimiz
+  /// deneriz.
+  static const int _maxAutoRetries = 3;
 
   SubscriptionStatus get status => _status;
   PurchasesErrorCode? get lastErrorCode => _lastErrorCode;
@@ -65,6 +73,28 @@ class SubscriptionController extends ChangeNotifier
   Package? get annualPackage => _offering?.annual;
   Package? get selectedPackage => _selectedPackage;
   CustomerInfo? get customerInfo => _customerInfo;
+
+  /// Elde gösterilebilir, eksiksiz bir teklif (hem aylık hem yıllık) var mı.
+  ///
+  /// Bu doğruyken geçici bir ağ/backend hatası yüzünden ödeme duvarını yıkmak
+  /// kullanıcıyı çıkmaz sokakta bırakır; zaten yüklenmiş paketleri göstermeye
+  /// devam etmek her zaman daha doğrudur.
+  bool get hasCompleteOffering =>
+      monthlyPackage != null && annualPackage != null;
+
+  /// Hata ekranında gösterilen kısa tanı kodu (örn. `configuration_error`).
+  /// Kullanıcıya teknik metin değil, yalnızca destek için okunabilir bir kod
+  /// verir; App Review gibi durumlarda kör kalmamızı engeller.
+  String? get errorCodeLabel {
+    final code = _lastErrorCode;
+    if (code == null) return null;
+    return code.name
+        .replaceAll(RegExp(r'Error$'), '')
+        .replaceAllMapped(
+          RegExp(r'[A-Z]'),
+          (match) => '_${match[0]!.toLowerCase()}',
+        );
+  }
 
   EntitlementInfo? get premiumEntitlement =>
       _customerInfo?.entitlements.all[_service.entitlementId];
@@ -235,6 +265,7 @@ class SubscriptionController extends ChangeNotifier
       _lastErrorDetail = error.toString();
       _status = SubscriptionStatus.failed;
       notifyListeners();
+      _scheduleAutoRetry();
     }
   }
 
@@ -242,8 +273,15 @@ class SubscriptionController extends ChangeNotifier
     final userId = _currentUserId;
     if (userId == null || isLoading) return;
 
+    // Ekranda çalışan bir ödeme duvarı varsa onu yükleme göstergesiyle ya da
+    // hata kartıyla değiştirmeyiz: yenileme sessizce denenir, başarısız olursa
+    // kullanıcı zaten geçerli olan paketleri görmeye devam eder.
+    final keepCurrentPaywall = hasCompleteOffering;
+
     final generation = ++_syncGeneration;
-    _status = SubscriptionStatus.loading;
+    if (!keepCurrentPaywall) {
+      _status = SubscriptionStatus.loading;
+    }
     _lastErrorCode = null;
     _lastErrorDetail = null;
     notifyListeners();
@@ -264,35 +302,54 @@ class SubscriptionController extends ChangeNotifier
       notifyListeners();
     } on PlatformException catch (error) {
       if (generation != _syncGeneration) return;
-      _setPlatformFailure(error);
+      _setPlatformFailure(error, keepCurrentPaywall: keepCurrentPaywall);
     } catch (error) {
       debugPrint('Abonelik bilgileri yenilenemedi: $error');
       if (generation != _syncGeneration) return;
       _lastErrorDetail = error.toString();
-      _status = SubscriptionStatus.failed;
+      _status = keepCurrentPaywall
+          ? SubscriptionStatus.ready
+          : SubscriptionStatus.failed;
       notifyListeners();
+      if (!keepCurrentPaywall) _scheduleAutoRetry();
     }
   }
 
   Future<void> _loadOfferings(int generation) async {
+    final previousOffering = _offering;
+    final hadCompleteOffering = hasCompleteOffering;
+
     final offerings = await _service.getOfferings();
     if (generation != _syncGeneration) return;
 
     _offering = offerings.current;
     final hasBothPlans = monthlyPackage != null && annualPackage != null;
+    if (!hasBothPlans && hadCompleteOffering) {
+      // Mağaza bu sefer ürünleri eksik döndürdü (geçici backend/sandbox
+      // dalgalanması). Çalışan teklifi çöpe atıp kullanıcıyı ürünsüz bir
+      // ekranda bırakmak yerine elimizdekini korumaya devam ederiz.
+      _offering = previousOffering;
+      _status = SubscriptionStatus.ready;
+      notifyListeners();
+      return;
+    }
     if (!hasBothPlans) {
       _selectedPackage = annualPackage ?? monthlyPackage;
       _status = SubscriptionStatus.productsUnavailable;
-    } else {
-      final selectedIdentifier = _selectedPackage?.identifier;
-      _selectedPackage = [annualPackage, monthlyPackage]
-          .whereType<Package>()
-          .firstWhere(
-            (package) => package.identifier == selectedIdentifier,
-            orElse: () => annualPackage!,
-          );
-      _status = SubscriptionStatus.ready;
+      notifyListeners();
+      _scheduleAutoRetry();
+      return;
     }
+
+    final selectedIdentifier = _selectedPackage?.identifier;
+    _selectedPackage = [annualPackage, monthlyPackage]
+        .whereType<Package>()
+        .firstWhere(
+          (package) => package.identifier == selectedIdentifier,
+          orElse: () => annualPackage!,
+        );
+    _status = SubscriptionStatus.ready;
+    _autoRetryCount = 0;
     notifyListeners();
   }
 
@@ -419,15 +476,38 @@ class SubscriptionController extends ChangeNotifier
     }
   }
 
-  void _setPlatformFailure(PlatformException error) {
+  void _setPlatformFailure(
+    PlatformException error, {
+    bool keepCurrentPaywall = false,
+  }) {
     _lastErrorCode = PurchasesErrorHelper.getErrorCode(error);
     _lastErrorDetail = '${error.code}: ${error.message}';
-    _status = SubscriptionStatus.failed;
+    _status = keepCurrentPaywall
+        ? SubscriptionStatus.ready
+        : SubscriptionStatus.failed;
     notifyListeners();
+    if (!keepCurrentPaywall) _scheduleAutoRetry();
+  }
+
+  /// Geçici bir hatadan sonra artan gecikmelerle kendiliğinden yeniden dener.
+  /// Kullanıcı bu sırada hata kartını görür ama elini sürmeden düzelme şansı
+  /// olur — App Review gibi tek denemelik senaryolarda kritik.
+  void _scheduleAutoRetry() {
+    if (_autoRetryCount >= _maxAutoRetries) return;
+    final attempt = ++_autoRetryCount;
+    Future<void>.delayed(Duration(seconds: 2 * attempt), () {
+      if (_isDisposed || _currentUserId == null) return;
+      if (_status != SubscriptionStatus.failed &&
+          _status != SubscriptionStatus.productsUnavailable) {
+        return;
+      }
+      unawaited(refresh());
+    });
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();
     _removeCustomerInfoListener();

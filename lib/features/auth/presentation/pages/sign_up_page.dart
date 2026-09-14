@@ -209,7 +209,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             // akış kesintisiz devam ediyor ve e-postadaki
                             // bağlantının mobilde uygulamaya dönüp dönmemesine
                             // hiç bağlı kalmıyoruz.
-                            if (mounted) {
+                            if (context.mounted) {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
@@ -218,7 +218,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ),
                               );
                             }
-                          } else if (mounted) {
+                          } else if (context.mounted) {
                             // Ne oturum ne kullanıcı döndü — gotrue bu
                             // durumda normalde bir AuthException fırlatır,
                             // ama tip sisteminde ikisi de null olabildiği
@@ -233,7 +233,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           }
                         } catch (error) {
                           debugPrint('Email sign-up failed: $error');
-                          if (!mounted) return;
+                          if (!context.mounted) return;
 
                           if (error is AuthException &&
                               error.code == 'user_already_exists') {

@@ -389,6 +389,9 @@ class _AiChatPageState extends State<AiChatPage> {
   }
 
   Future<void> _pickAndSendImage() async {
+    // Kamera açıkken kullanıcı sayfadan çıkabilir; metni await'ten önce
+    // alıyoruz ki kapanmış bir context'e dokunup çökmesin.
+    final analyzePhotoPrompt = AppLocalizations.of(context)!.chatAnalyzePhoto;
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
@@ -400,8 +403,9 @@ class _AiChatPageState extends State<AiChatPage> {
       if (image != null) {
         final bytes = await File(image.path).readAsBytes();
         final base64Image = base64Encode(bytes);
+        if (!mounted) return;
         await _sendMessage(
-          AppLocalizations.of(context)!.chatAnalyzePhoto,
+          analyzePhotoPrompt,
           imageBase64: base64Image,
         );
       }
@@ -411,6 +415,7 @@ class _AiChatPageState extends State<AiChatPage> {
   }
 
   Future<void> _pickFromGallery() async {
+    final analyzePhotoPrompt = AppLocalizations.of(context)!.chatAnalyzePhoto;
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -422,8 +427,9 @@ class _AiChatPageState extends State<AiChatPage> {
       if (image != null) {
         final bytes = await File(image.path).readAsBytes();
         final base64Image = base64Encode(bytes);
+        if (!mounted) return;
         await _sendMessage(
-          AppLocalizations.of(context)!.chatAnalyzePhoto,
+          analyzePhotoPrompt,
           imageBase64: base64Image,
         );
       }

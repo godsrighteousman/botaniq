@@ -194,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                           _finishAuthentication();
                         } catch (error) {
                           debugPrint('Email sign-in failed: $error');
-                          if (mounted) {
+                          if (context.mounted) {
                             if (error is AuthException &&
                                 error.code == 'email_not_confirmed') {
                               // Hesap var ama e-posta henüz onaylanmamış.

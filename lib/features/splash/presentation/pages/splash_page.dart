@@ -142,6 +142,9 @@ class _SplashPageState extends State<SplashPage>
                             child: Image.asset(
                               'assets/images/botaniq_app_icon_v2.png',
                               fit: BoxFit.contain,
+                              // 1024px kaynağı ~76pt kutu için tam boyutta
+                              // çözmek açılışta gereksiz ~4 MB bellek demek.
+                              cacheWidth: 240,
                             ),
                           ),
                         ),

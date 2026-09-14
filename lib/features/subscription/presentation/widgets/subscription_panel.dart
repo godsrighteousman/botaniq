@@ -112,6 +112,7 @@ class _SubscriptionPanelState extends State<SubscriptionPanel>
         return _StatusCard(
           icon: Icons.cloud_off_rounded,
           message: _errorMessage(l10n, controller.lastErrorCode),
+          diagnosticCode: controller.errorCodeLabel,
           debugDetail: kDebugMode ? controller.lastErrorDetail : null,
           actionLabel: l10n.subscriptionRetry,
           onAction: controller.refresh,
@@ -1123,6 +1124,7 @@ class _StatusCard extends StatelessWidget {
   const _StatusCard({
     required this.icon,
     required this.message,
+    this.diagnosticCode,
     this.debugDetail,
     this.actionLabel,
     this.onAction,
@@ -1130,6 +1132,11 @@ class _StatusCard extends StatelessWidget {
 
   final IconData icon;
   final String message;
+
+  /// Üretimde de gösterilen kısa tanı kodu. Kullanıcıyı korkutmayacak kadar
+  /// sönük durur ama bir hata bildirildiğinde (App Review dahil) nedenin ne
+  /// olduğunu tahmin etmek yerine okumamızı sağlar.
+  final String? diagnosticCode;
   final String? debugDetail;
   final String? actionLabel;
   final VoidCallback? onAction;
@@ -1155,6 +1162,20 @@ class _StatusCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          if (diagnosticCode != null && diagnosticCode!.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              diagnosticCode!,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.38),
+                fontSize: 10,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ],
           if (debugDetail != null && debugDetail!.trim().isNotEmpty) ...[
             const SizedBox(height: 14),
             Container(

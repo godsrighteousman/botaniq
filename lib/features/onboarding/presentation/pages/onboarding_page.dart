@@ -147,6 +147,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             'assets/images/botaniq_app_icon_v2.png',
                             width: 38,
                             height: 38,
+                            cacheWidth: 120,
                             fit: BoxFit.cover,
                           ),
                         ),
