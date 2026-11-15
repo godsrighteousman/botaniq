@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
@@ -117,29 +118,42 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 48),
 
-              // Email Field
-              _buildTextField(
-                controller: _emailController,
-                hintText: l10n.emailAddress,
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                forceLtr: true,
-              ),
-              const SizedBox(height: 24),
+              // E-posta + şifre alanları tek AutofillGroup içinde: Android'in
+              // kayıtlı parolaları öneriden çıkarabilmesi için gerekli —
+              // grup ve doğru autofillHints olmadan klavye üstünde hiç
+              // öneri çıkmıyor.
+              AutofillGroup(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Email Field
+                    _buildTextField(
+                      controller: _emailController,
+                      hintText: l10n.emailAddress,
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      forceLtr: true,
+                      autofillHints: const [AutofillHints.email],
+                    ),
+                    const SizedBox(height: 24),
 
-              // Password Field
-              _buildTextField(
-                controller: _passwordController,
-                hintText: l10n.password,
-                icon: Icons.lock_outline,
-                obscureText: _obscurePassword,
-                isPassword: true,
-                forceLtr: true,
-                onToggleVisibility: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
+                    // Password Field
+                    _buildTextField(
+                      controller: _passwordController,
+                      hintText: l10n.password,
+                      icon: Icons.lock_outline,
+                      obscureText: _obscurePassword,
+                      isPassword: true,
+                      forceLtr: true,
+                      autofillHints: const [AutofillHints.password],
+                      onToggleVisibility: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
 
@@ -191,6 +205,10 @@ class _LoginPageState extends State<LoginPage> {
                               )
                               .timeout(const Duration(seconds: 10));
 
+                          // Doğru giriş yapıldı — Android'in parola
+                          // yöneticisine "bu bilgiyi kaydet?" isteğini
+                          // burada tetikliyoruz.
+                          TextInput.finishAutofillContext();
                           _finishAuthentication();
                         } catch (error) {
                           debugPrint('Email sign-in failed: $error');
@@ -593,6 +611,7 @@ class _LoginPageState extends State<LoginPage> {
     VoidCallback? onToggleVisibility,
     TextInputType keyboardType = TextInputType.text,
     bool forceLtr = false,
+    List<String>? autofillHints,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -608,6 +627,7 @@ class _LoginPageState extends State<LoginPage> {
         obscureText: obscureText,
         keyboardType: keyboardType,
         textDirection: forceLtr ? TextDirection.ltr : null,
+        autofillHints: autofillHints,
         style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           hintText: hintText,

@@ -61,6 +61,17 @@ class AuthService {
 
   /// Returns false when the user closes the Google account picker.
   Future<bool> signInWithGoogle() async {
+    // google_sign_in son seçilen hesabı kendi içinde saklıyor ve bir
+    // dahaki signIn() çağrısında seçiciyi hiç göstermeden aynı hesapla
+    // sessizce oturum açıyor. Kullanıcı her seferinde hesap seçebilsin diye
+    // önce yerel önbelleği temizliyoruz — bu bir ağ isteği atmıyor,
+    // yalnızca "hatırlanan hesap" durumunu sıfırlıyor.
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // Önbellekte zaten hesap yoksa bu no-op'tur; yok sayıyoruz.
+    }
+
     debugPrint('[Auth][Google] Native account picker starting.');
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) {

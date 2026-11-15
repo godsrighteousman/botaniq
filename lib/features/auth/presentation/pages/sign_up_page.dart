@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:botaniq/l10n/app_localizations.dart';
 
@@ -92,51 +93,68 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               const SizedBox(height: 48),
 
-              // Name Row
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _firstNameController,
-                      hintText: l10n.firstName,
-                      icon: Icons.person_outline,
+              // Ad/soyad/e-posta/şifre — tek bir AutofillGroup içinde:
+              // Android'de parola yöneticisinin (Google Şifre Yöneticisi vb.)
+              // "güçlü şifre öner" ve kayıt sonrası "şifreyi kaydet" akışlarını
+              // tetiklemesi için alanların aynı gruba ait olması ve doğru
+              // autofillHints'e sahip olması gerekiyor — bunlar olmadan
+              // klavye üstünde hiçbir öneri çıkmıyordu.
+              AutofillGroup(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Name Row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _firstNameController,
+                            hintText: l10n.firstName,
+                            icon: Icons.person_outline,
+                            autofillHints: const [AutofillHints.givenName],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildTextField(
+                            controller: _lastNameController,
+                            hintText: l10n.lastName,
+                            icon: Icons.person_outline,
+                            autofillHints: const [AutofillHints.familyName],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _lastNameController,
-                      hintText: l10n.lastName,
-                      icon: Icons.person_outline,
+                    const SizedBox(height: 20),
+
+                    // Email Field
+                    _buildTextField(
+                      controller: _emailController,
+                      hintText: l10n.emailAddress,
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      forceLtr: true,
+                      autofillHints: const [AutofillHints.email],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-              // Email Field
-              _buildTextField(
-                controller: _emailController,
-                hintText: l10n.emailAddress,
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-                forceLtr: true,
-              ),
-              const SizedBox(height: 20),
-
-              // Password Field
-              _buildTextField(
-                controller: _passwordController,
-                hintText: l10n.password,
-                icon: Icons.lock_outline,
-                obscureText: _obscurePassword,
-                isPassword: true,
-                forceLtr: true,
-                onToggleVisibility: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
+                    // Password Field
+                    _buildTextField(
+                      controller: _passwordController,
+                      hintText: l10n.password,
+                      icon: Icons.lock_outline,
+                      obscureText: _obscurePassword,
+                      isPassword: true,
+                      forceLtr: true,
+                      autofillHints: const [AutofillHints.newPassword],
+                      onToggleVisibility: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 48),
@@ -189,6 +207,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           // (bkz.
                           // supabase/migrations/20260817130000_fix_missing_signup_trigger.sql).
                           // Burada istemciden ayrıca upsert denemiyoruz.
+
+                          // Hesap sunucuda başarıyla oluştu — Android'in
+                          // parola yöneticisine "bu şifreyi kaydet?" isteği
+                          // burada gönderilmezse hiç tetiklenmiyor (form
+                          // sayfadan ayrılınca kendiliğinden olmuyor).
+                          TextInput.finishAutofillContext();
 
                           if (res.session != null) {
                             // Supabase Dashboard'da "Confirm email" kapalıysa
@@ -468,6 +492,7 @@ class _SignUpPageState extends State<SignUpPage> {
     VoidCallback? onToggleVisibility,
     TextInputType keyboardType = TextInputType.text,
     bool forceLtr = false,
+    List<String>? autofillHints,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -483,6 +508,7 @@ class _SignUpPageState extends State<SignUpPage> {
         obscureText: obscureText,
         keyboardType: keyboardType,
         textDirection: forceLtr ? TextDirection.ltr : null,
+        autofillHints: autofillHints,
         style: GoogleFonts.inter(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           hintText: hintText,
